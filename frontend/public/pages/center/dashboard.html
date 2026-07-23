@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Center Dashboard - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/design-system.css">
+  <style>
+    .main-content {
+      padding: clamp(2rem, 5vw, 4rem);
+      max-width: 1600px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 2rem;
+      margin-bottom: clamp(2rem, 5vw, 4rem);
+      flex-wrap: wrap;
+    }
+
+    .dashboard-header-content h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .dashboard-header-content p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+      max-width: 600px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+    }
+
+    .stat-card {
+      padding: 2.5rem 2rem;
+      text-align: center;
+      border-radius: var(--radius-xl);
+      background: var(--bg-glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 160px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-primary);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-card:hover::before {
+      opacity: 1;
+    }
+
+    .stat-value {
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: 900;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 2rem;
+    }
+
+    .project-card {
+      padding: 2.5rem;
+      border-radius: var(--radius-xl);
+      background: var(--bg-glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .project-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-6px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .project-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+      flex: 1;
+      line-height: 1.3;
+    }
+
+    .project-meta {
+      font-size: 1rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .project-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin: 1rem 0;
+    }
+
+    .project-stat {
+      text-align: center;
+      padding: 1.25rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-lg);
+    }
+
+    .project-stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .project-stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .project-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: auto;
+    }
+
+    .status-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .status-active { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+    .status-pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+
+    .center-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      background: var(--bg-glass);
+      padding: 0.5rem;
+      border-radius: 1.5rem;
+      border: 1px solid var(--glass-border);
+      width: fit-content;
+    }
+
+    .center-nav-link {
+      padding: 0.8rem 2rem;
+      border-radius: 1rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .center-nav-link:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .center-nav-link.active {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1.5rem;
+      }
+
+      .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-actions {
+        width: 100%;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .project-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .project-header {
+        flex-direction: column;
+      }
+
+      .project-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stat-card {
+      animation: slideUp 0.5s ease-out forwards;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .stat-card:nth-child(2) { animation-delay: 0.1s; }
+    .stat-card:nth-child(3) { animation-delay: 0.15s; }
+    .stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+    .project-card {
+      animation: slideUp 0.5s ease-out forwards;
+    }
+
+    .project-card:nth-child(1) { animation-delay: 0.25s; }
+    .project-card:nth-child(2) { animation-delay: 0.3s; }
+    .project-card:nth-child(3) { animation-delay: 0.35s; }
+
+    /* Aurora Background Styles */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    /* Enhanced Card Styles */
+    .stat-card {
+      padding: 2.5rem 2rem;
+      text-align: center;
+      border-radius: var(--radius-xl);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 180px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.05),
+        transparent
+      );
+      transition: 0.5s;
+    }
+
+    .stat-card:hover::after {
+      left: 100%;
+    }
+
+    .stat-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-10px);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+    }
+
+    .project-card {
+      padding: 2.5rem;
+      border-radius: var(--radius-xl);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .project-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-8px);
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Button Shimmer Effect */
+    .btn-primary {
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      transform: rotate(45deg);
+      transition: 0.6s;
+      z-index: -1;
+    }
+
+    .btn-primary:hover::before {
+      left: 120%;
+    }
+  </style>
+</head>
+<body>
+  <!-- Aurora Background -->
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <main class="main-content">
+    <header class="dashboard-header">
+      <div class="dashboard-header-content">
+        <h1 class="gradient-text" id="welcome-title">Center Dashboard</h1>
+        <p>Manage your center's innovation ecosystem, track project progress, and coordinate with mentors.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="newProjectBtn" style="padding: 1rem 2rem; font-weight: 700;">
+          <i class="fas fa-plus"></i> Create Project
+        </button>
+        <button class="btn btn-glass" id="manageMentorsBtn" style="padding: 1rem 2rem; font-weight: 700;">
+          <i class="fas fa-users"></i> Mentors
+        </button>
+        <button class="btn btn-glass" id="manageProjectsBtn" style="padding: 1rem 2rem; font-weight: 700;">
+          <i class="fas fa-folder-open"></i> Projects
+        </button>
+        <button class="btn btn-glass" onclick="window.location.href='/pages/center/analytics.html'" style="padding: 1rem 2rem; font-weight: 700;" title="View detailed analytics">
+          <i class="fas fa-chart-line"></i> Analytics
+        </button>
+      </div>
+    </header>
+
+    <nav class="center-nav">
+      <a href="/pages/center/dashboard.html" class="center-nav-link active">Dashboard</a>
+      <a href="/pages/center/mentor-manager.html" class="center-nav-link">Mentors</a>
+      <a href="/pages/center/project-management.html" class="center-nav-link">Projects</a>
+    </nav>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.8;">🚀</div>
+        <div class="stat-value" id="activeProjects">0</div>
+        <div class="stat-label">Active Projects</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.8;">🎓</div>
+        <div class="stat-value" id="totalStudents">0</div>
+        <div class="stat-label">Total Students</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.8;">👥</div>
+        <div class="stat-value" id="totalMentors">0</div>
+        <div class="stat-label">Total Mentors</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.8;">✅</div>
+        <div class="stat-value" id="totalRevenue">₹0</div>
+        <div class="stat-label">Total Revenue</div>
+      </div>
+    </div>
+
+    <!-- Pending Enrollments Section -->
+    <div class="section-header" style="margin-top: 3rem;">
+      <h2 class="section-title">
+        ⏳ Pending Mentor Assignments
+        <span id="pending-count-badge" style="display: inline-block; background: var(--primary); color: white; font-size: 0.9rem; padding: 0.25rem 0.75rem; border-radius: 2rem; margin-left: 0.5rem;">0</span>
+      </h2>
+      <p style="color: var(--text-muted); margin-top: 0.5rem;">Students waiting for mentor assignment</p>
+    </div>
+    
+    <div id="pending-enrollments" class="project-grid" style="margin-bottom: 3rem;">
+      <!-- Pending enrollments will be loaded here -->
+    </div>
+
+    <div class="section-header">
+      <h2 class="section-title">Current Projects</h2>
+    </div>
+    
+    <div class="project-grid" id="projects-grid">
+      <!-- Projects will be loaded here -->
+    </div>
+  </main>
+
+  <!-- Mentor Assignment Modal -->
+  <div id="mentorModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(5px);">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #0f0f1e; border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; padding: 2rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.5rem; margin: 0;">Assign Mentor</h2>
+        <button id="closeModalX" style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">✕</button>
+      </div>
+
+      <div id="modalProjectInfo" style="background: rgba(99,102,241,0.1); padding: 1rem; border-radius: 1rem; margin-bottom: 1.5rem;"></div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Select Mentor</label>
+        <select id="mentorSelect" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main); font-family: inherit;">
+          <option value="">-- Choose a mentor --</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 1rem;">
+        <button id="closeModalBtn" class="btn btn-glass" style="flex: 1;">Cancel</button>
+        <button id="confirmAssignBtn" class="btn btn-primary" style="flex: 1;">Assign Mentor</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/data-service.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    let currentProjectId = null;
+    let currentProgressId = null;
+    let mentorsList = [];
+
+    async function loadPendingEnrollments() {
+      try {
+        const pending = await window.api.getPendingMentorAssignments();
+        const container = document.getElementById('pending-enrollments');
+        const badge = document.getElementById('pending-count-badge');
+        
+        if (!container) return;
+        
+        badge.textContent = pending.length;
+        
+        if (pending.length === 0) {
+          container.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: var(--radius-lg);">
+              <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">✅</div>
+              <h3 style="color: var(--text-muted); font-size: 1.2rem;">All caught up!</h3>
+              <p style="color: var(--text-dim); margin-top: 0.5rem;">No pending mentor assignments at the moment.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        container.innerHTML = pending.map(prog => {
+          const studentName = prog.studentId?.firstName 
+            ? `${prog.studentId.firstName} ${prog.studentId.lastName || ''}` 
+            : 'Student';
+          const projectTitle = prog.projectId?.title || 'Project';
+          const enrolledDate = prog.enrolled_at ? new Date(prog.enrolled_at).toLocaleDateString() : 'Recently';
+          
+          return `
+            <div class="project-card" style="border-left: 4px solid var(--primary);">
+              <div class="project-header">
+                <h4 class="project-title">${projectTitle}</h4>
+                <span class="status-badge" style="background: rgba(249,115,22,0.2); color: #f97316;">Pending</span>
+              </div>
+              <div class="project-meta">
+                <div>👤 Student: <strong>${studentName}</strong></div>
+                <div>📧 ${prog.studentId?.email || 'N/A'}</div>
+                <div>📅 Enrolled: ${enrolledDate}</div>
+              </div>
+              <div class="project-actions">
+                <button class="btn btn-primary btn-sm assign-mentor-enrollment-btn" 
+                        data-progress-id="${prog._id}" 
+                        data-project-name="${projectTitle}"
+                        data-student-name="${studentName}"
+                        style="flex: 1;">
+                  ✅ Assign Mentor
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        // Add event listeners for assign buttons
+        document.querySelectorAll('.assign-mentor-enrollment-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const progressId = btn.getAttribute('data-progress-id');
+            const projectName = btn.getAttribute('data-project-name');
+            const studentName = btn.getAttribute('data-student-name');
+            openMentorAssignmentModal(progressId, projectName, studentName);
+          });
+        });
+        
+      } catch (error) {
+        console.error('Error loading pending enrollments:', error);
+        const container = document.getElementById('pending-enrollments');
+        if (container) {
+          container.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #ef4444;">
+              Error loading pending enrollments: ${error.message}
+            </div>
+          `;
+        }
+      }
+    }
+
+    function openMentorAssignmentModal(progressId, projectName, studentName) {
+      currentProgressId = progressId;
+      document.getElementById('modalProjectInfo').innerHTML = `
+        <div style="background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.1); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem;">
+          <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.25rem;">PROJECT</div>
+          <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem; margin-bottom: 0.75rem;">${projectName}</div>
+          <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.25rem;">STUDENT</div>
+          <div style="font-weight: 600; color: var(--primary);">${studentName}</div>
+        </div>
+      `;
+      
+      const select = document.getElementById('mentorSelect');
+      select.innerHTML = '<option value="">-- Choose an Available Mentor --</option>';
+      
+      mentorsList.forEach(mentor => {
+        const load = mentor.mentor_load || 0;
+        const capacity = mentor.mentor_capacity || 5;
+        const isFull = load >= capacity;
+        const loadPerc = Math.round((load / capacity) * 100);
+        
+        const option = document.createElement('option');
+        option.value = mentor._id;
+        option.disabled = isFull;
+        option.textContent = `${mentor.firstName} ${mentor.lastName} (Load: ${load}/${capacity}) ${isFull ? '[FULL - LOAD BALANCED]' : ''}`;
+        
+        if (isFull) {
+          option.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+          option.style.color = '#ef4444';
+        }
+        
+        select.appendChild(option);
+      });
+      
+      document.getElementById('mentorModal').style.display = 'block';
+    }
+
+    async function initDashboard() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user || !user.roles.includes('center_admin')) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      const welcomeTitle = document.getElementById('welcome-title');
+      if (welcomeTitle) {
+        welcomeTitle.textContent = `Welcome back, ${user.firstName}!`;
+      }
+
+      try {
+        // Check center status
+        const center = await window.api.getMyCenter();
+        
+        // Handle case where no center exists (center returned as null)
+        if (!center) {
+          document.querySelector('.main-content').innerHTML = `
+            <div style="text-align: center; padding: 4rem 2rem; background: rgba(255,255,255,0.05); border-radius: 2rem; border: 1px solid var(--glass-border); max-width: 600px; margin: 4rem auto;">
+              <div style="font-size: 4rem; margin-bottom: 1.5rem;">🏢</div>
+              <h2 class="gradient-text" style="margin-bottom: 1rem;">No Center Found</h2>
+              <p style="color: var(--text-muted); margin-bottom: 2rem;">You don't have a registered center yet. Please register your center to get started with managing projects and mentors.</p>
+              <a href="/pages/center-registration.html" class="btn btn-primary">Register Your Center</a>
+              <button id="refreshStatusBtn" class="btn btn-glass" style="margin-top: 1rem; margin-left: 1rem;" onclick="window.location.reload()">Refresh</button>
+            </div>
+          `;
+          return;
+        }
+        
+        // Store centerId for other pages
+        if (center._id) {
+          localStorage.setItem('centerId', center._id);
+        }
+        
+        if (center.status !== 'approved') {
+          document.querySelector('.main-content').innerHTML = `
+            <div style="text-align: center; padding: 4rem 2rem; background: rgba(255,255,255,0.05); border-radius: 2rem; border: 1px solid var(--glass-border); max-width: 600px; margin: 4rem auto;">
+              <div style="font-size: 4rem; margin-bottom: 1.5rem;">⏳</div>
+              <h2 class="gradient-text" style="margin-bottom: 1rem;">Registration Pending</h2>
+              <p style="color: var(--text-muted); margin-bottom: 2rem;">Your center <strong>${center.name}</strong> is currently awaiting administrator approval. You will be able to manage projects and mentors once approved.</p>
+              <div style="padding: 1rem; background: rgba(99,102,241,0.1); border-radius: 1rem; color: var(--primary); font-weight: 600;">
+                Status: ${center.status.toUpperCase()}
+              </div>
+              <button id="refreshStatusBtn" class="btn btn-glass" style="margin-top: 2rem;">Refresh Status</button>
+            </div>
+          `;
+          
+          const refreshBtn = document.getElementById('refreshStatusBtn');
+          if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => window.location.reload());
+          }
+          return;
+        }
+
+        // Fetch all projects and filter by center (fetch all with limit: -1)
+        const response = await window.api.getProjects({ limit: -1 });
+        const allProjects = Array.isArray(response.projects) ? response.projects : (Array.isArray(response) ? response : []);
+        
+        // Filter projects for this center with robust ID comparison
+        const projects = allProjects.filter(p => {
+          if (!p) return false;
+          
+          // Extract centerId from various possible formats
+          let projectCenterId = null;
+          if (p.centerId) {
+            projectCenterId = p.centerId._id || p.centerId;
+          }
+          
+          if (!projectCenterId) return false;
+          
+          // Convert both to strings for comparison
+          const centerIdStr = center._id.toString();
+          const projectCenterIdStr = projectCenterId.toString();
+          
+          return centerIdStr === projectCenterIdStr;
+        });
+        
+        // Get mentors count for this center
+        mentorsList = await window.api.getMentors({ centerId: center._id });
+        const mentorCount = mentorsList.length;
+        
+        // Calculate stats
+        const totalStudents = projects.reduce((sum, p) => sum + (p.current_students || 0), 0);
+        const totalRevenue = projects.reduce((sum, p) => sum + ((p.price || 0) * (p.current_students || 0)), 0);
+        
+        // Update stats
+        document.getElementById('activeProjects').textContent = projects.length;
+        document.getElementById('totalStudents').textContent = totalStudents;
+        document.getElementById('totalMentors').textContent = mentorCount;
+        document.getElementById('totalRevenue').textContent = '₹' + totalRevenue.toLocaleString();
+        
+        // Load pending enrollments
+        await loadPendingEnrollments();
+        
+        const container = document.getElementById('projects-grid');
+        if (projects.length === 0) {
+          container.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1; padding: 4rem;">No projects found. Create your first project to get started!</p>';
+        } else {
+          container.innerHTML = projects.map(p => {
+            const mentorName = p.mentor_id?.firstName 
+              ? `${p.mentor_id.firstName} ${p.mentor_id.lastName || ''}` 
+              : 'Not assigned';
+            
+            return `
+              <div class="project-card">
+                <div class="project-header">
+                  <h4 class="project-title">${p.title}</h4>
+                  <span class="status-badge status-active">${p.status}</span>
+                </div>
+                <div class="project-meta">
+                  <div>👨‍🏫 Mentor: ${mentorName}</div>
+                  <div>📅 Duration: ${p.duration_weeks || 0} Weeks</div>
+                </div>
+                <div class="project-stats">
+                  <div class="project-stat">
+                    <div class="project-stat-value">${p.current_students || 0}/${p.max_students}</div>
+                    <div class="project-stat-label">Students</div>
+                  </div>
+                  <div class="project-stat">
+                    <div class="project-stat-value">₹${p.price || 0}</div>
+                    <div class="project-stat-label">Price</div>
+                  </div>
+                </div>
+                <div class="project-actions">
+                  <button class="btn btn-glass btn-sm manage-project-btn" data-project-id="${p._id}" style="flex: 1;">Manage</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          // Add event listeners
+          document.querySelectorAll('.manage-project-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const projectId = btn.getAttribute('data-project-id');
+              window.location.href = `/pages/center/project-management.html?id=${projectId}`;
+            });
+          });
+        }
+      } catch (error) {
+        console.error('Dashboard error:', error);
+        document.getElementById('projects-grid').innerHTML = `
+          <p style="color: #ef4444; text-align: center; grid-column: 1/-1; padding: 4rem;">Error loading projects: ${error.message}</p>
+        `;
+      }
+    }
+
+    function openMentorModal(projectId, projectName) {
+      currentProjectId = projectId;
+      document.getElementById('modalProjectInfo').innerHTML = `<strong>Project:</strong> ${projectName}`;
+      
+      const select = document.getElementById('mentorSelect');
+      select.innerHTML = '<option value="">-- Choose a mentor --</option>';
+      
+      mentorsList.forEach(mentor => {
+        const option = document.createElement('option');
+        const load = mentor.mentor_load || 0;
+        const capacity = mentor.mentor_capacity || 5;
+        const isFull = load >= capacity;
+        
+        option.value = mentor._id;
+        option.disabled = isFull;
+        option.textContent = `${mentor.firstName} ${mentor.lastName} [Load: ${load}/${capacity}] ${isFull ? '(FULL)' : ''}`;
+        
+        if (isFull) {
+          option.style.color = '#ef4444';
+        }
+        select.appendChild(option);
+      });
+      
+      document.getElementById('mentorModal').style.display = 'block';
+    }
+
+    function closeMentorModal() {
+      document.getElementById('mentorModal').style.display = 'none';
+      currentProjectId = null;
+      currentProgressId = null;
+    }
+
+    async function assignMentor(e) {
+      const mentorId = document.getElementById('mentorSelect').value;
+      
+      if (!mentorId) {
+        alert('Please select a mentor');
+        return;
+      }
+
+      const btn = e.target;
+      const originalText = btn.textContent;
+
+      try {
+        btn.textContent = 'Assigning...';
+        btn.disabled = true;
+
+        // Check if we're assigning for enrollment or project
+        if (currentProgressId) {
+          // Assign mentor to enrollment (student progress)
+          await window.api.assignMentor(currentProgressId, mentorId);
+          closeMentorModal();
+          alert('Mentor assigned to student successfully!');
+          currentProgressId = null;
+        } else if (currentProjectId) {
+          // Assign mentor to project
+          await window.api.assignMentorToProject(currentProjectId, mentorId);
+          closeMentorModal();
+          alert('Mentor assigned to project successfully!');
+          currentProjectId = null;
+        }
+        
+        initDashboard(); // Reload dashboard
+      } catch (error) {
+        alert('Error assigning mentor: ' + error.message);
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      const closeModalX = document.getElementById('closeModalX');
+      if (closeModalX) closeModalX.addEventListener('click', closeMentorModal);
+      
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      if (closeModalBtn) closeModalBtn.addEventListener('click', closeMentorModal);
+      
+      const confirmAssignBtn = document.getElementById('confirmAssignBtn');
+      if (confirmAssignBtn) confirmAssignBtn.addEventListener('click', assignMentor);
+      
+      const newProjectBtn = document.getElementById('newProjectBtn');
+      if (newProjectBtn) {
+        newProjectBtn.addEventListener('click', () => {
+          window.location.href = '/pages/center/project-management.html';
+        });
+      }
+
+      const manageMentorsBtn = document.getElementById('manageMentorsBtn');
+      if (manageMentorsBtn) {
+        manageMentorsBtn.addEventListener('click', () => {
+          window.location.href = '/pages/center/mentor-manager.html';
+        });
+      }
+
+      const manageProjectsBtn = document.getElementById('manageProjectsBtn');
+      if (manageProjectsBtn) {
+        manageProjectsBtn.addEventListener('click', () => {
+          window.location.href = '/pages/center/project-management.html';
+        });
+      }
+      
+      initDashboard();
+    });
+  </script>
+</body>
+</html>

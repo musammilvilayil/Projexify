@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .auth-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 1200px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+      border-radius: var(--radius-3xl);
+      overflow: hidden;
+      animation: slideUp 0.6s ease-out;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (min-width: 1024px) {
+      .auth-container {
+        grid-template-columns: 1fr 1fr;
+        min-height: 700px;
+      }
+    }
+
+    .auth-branding {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 4rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    @media (min-width: 1024px) {
+      .auth-branding {
+        display: flex;
+      }
+    }
+
+    .auth-branding h2 {
+      font-size: 3rem;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .auth-branding p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 400px;
+      line-height: 1.6;
+    }
+
+    .auth-form-section {
+      padding: clamp(2rem, 5vw, 4rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .auth-form-header h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    /* Aurora Background Styles */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    .auth-branding-icon {
+      text-align: center;
+      margin: 3rem 0;
+      opacity: 0.8;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .auth-branding-icon-inner {
+      font-size: 6rem;
+      filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.3));
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .auth-branding-proof {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      backdrop-filter: blur(10px);
+    }
+
+    .auth-branding-proof-avatars {
+      display: flex;
+      gap: -0.5rem;
+    }
+
+    .auth-branding-proof-avatar {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      border: 2px solid rgba(15, 23, 42, 0.8);
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+    }
+
+    .avatar-1 { background: var(--gradient-primary); margin-right: -0.5rem; }
+    .avatar-2 { background: var(--gradient-secondary); margin-right: -0.5rem; }
+    .avatar-3 { background: rgba(99, 102, 241, 0.3); }
+
+    .auth-branding-proof p {
+      font-size: 0.85rem;
+      margin: 0;
+    }
+
+    .auth-branding-proof strong {
+      color: white;
+      font-weight: 600;
+    }
+
+    .auth-form-section {
+      padding: 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    @media (min-width: 768px) {
+      .auth-form-section {
+        padding: 4rem;
+      }
+    }
+
+    .auth-form-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .auth-form-header .aurora-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .auth-form-header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.875rem 1.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      transition: var(--transition);
+      font-size: 1rem;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    /* Select dropdown styling */
+    .form-input select,
+    select.form-input {
+      cursor: pointer;
+    }
+
+    .form-input option,
+    select.form-input option {
+      background: #1a1b26;
+      color: #ffffff;
+      padding: 0.5rem;
+    }
+
+    .form-input option:hover,
+    select.form-input option:hover {
+      background: #2a2b36;
+    }
+
+    /* Password field wrapper */
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .password-toggle:hover {
+      color: var(--primary);
+    }
+
+    .password-toggle svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      font-size: 0.85rem;
+    }
+
+    .form-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .form-footer a:hover {
+      color: var(--primary-light);
+    }
+
+    .social-login {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .btn-social {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg-glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 600;
+    }
+
+    .btn-social:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--text-muted);
+    }
+
+    .toggle-form-text {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .toggle-form-text a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .toggle-form-text a:hover {
+      color: var(--primary-light);
+    }
+
+    @media (max-width: 1023px) {
+      .auth-form-header {
+        display: none;
+      }
+
+      .auth-mobile-logo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .auth-mobile-logo-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 3.5rem;
+        height: 3.5rem;
+        filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.3));
+      }
+
+      .auth-mobile-logo-icon img {
+        width: 100%;
+        height: 100%;
+      }
+
+      .auth-mobile-logo-text {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: var(--gradient-primary);
+        background-clip: text;
+        color: transparent;
+        -webkit-background-clip: text;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .auth-mobile-logo {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Aurora Background -->
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <div class="auth-wrapper">
+    <div class="glass-card auth-container">
+      
+      <!-- Left Side: Branding & Visual (Desktop Only) -->
+      <div class="auth-branding">
+        <div class="auth-branding-content">
+          <div class="auth-logo">
+            <img src="/assets/images/nexus-logo.svg" alt="Projexify" style="width: 3rem; height: 3rem;">
+            <span class="aurora-text">Projexify</span>
+          </div>
+          
+          <h2>
+            Launch Your <br>
+            <span class="auth-branding-highlight">Career Portfolio</span>
+          </h2>
+          <p>
+            Join the global ecosystem of creators and centers building the future of skills-based education.
+          </p>
+        </div>
+
+        <div class="auth-branding-icon">
+         <img src="/assets/images/nexus-logo.svg" alt="Projexify" style="width: 20rem; height: 20rem; opacity: 0.8; filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.3));">
+          
+        </div>
+
+        <div class="auth-branding-proof">
+          <div class="auth-branding-proof-avatars">
+            <div class="auth-branding-proof-avatar avatar-1">A</div>
+            <div class="auth-branding-proof-avatar avatar-2">B</div>
+            <div class="auth-branding-proof-avatar avatar-3">+</div>
+          </div>
+          <p>
+            <strong>500+</strong> project centers<br>already verified.
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Side: Auth Form -->
+      <div class="auth-form-section">
+        
+        <!-- Desktop Header (Hidden on Mobile) -->
+        <div class="auth-form-header">
+          <div class="aurora-text" id="logoClickable">Projexify</div>
+          <h1 class="gradient-text" id="formTitle">Welcome Back</h1>
+          <p style="color: var(--text-muted);" id="formSubtitle">Sign in to your Projexify account</p>
+        </div>
+
+        <!-- Mobile Logo (Hidden on Desktop) -->
+        <div class="auth-mobile-logo">
+          <div class="auth-mobile-logo-icon">
+            <img src="/assets/images/nexus-logo.svg" alt="Projexify" style="width: 100%; height: 100%;">
+          </div>
+          <div class="auth-mobile-logo-text">Projexify</div>
+        </div>
+
+        <div style="max-width: 100%;">
+
+          <!-- Login Form -->
+          <form id="loginForm">
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" class="form-input" placeholder="name@company.com" autocomplete="username" required>
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="password-wrapper">
+                <input type="password" id="password" class="form-input" placeholder="Enter your password" autocomplete="current-password" required style="padding-right: 3rem;">
+                <button type="button" class="password-toggle" onclick="togglePassword('password', this)">
+                  <svg class="eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  <svg class="eye-slash-icon" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); cursor: pointer;">
+                <input type="checkbox" id="rememberMe" style="accent-color: var(--primary); cursor: pointer;"> Remember me
+              </label>
+              <a href="#" id="forgotPasswordBtn" style="color: var(--primary); text-decoration: none; font-weight: 600;">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem;">Sign In</button>
+          </form>
+
+          <!-- Register Form -->
+          <form id="registerForm" style="display: none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="regFirstName">First Name</label>
+                <input type="text" id="regFirstName" class="form-input" placeholder="John" required>
+              </div>
+              <div class="form-group">
+                <label for="regLastName">Last Name</label>
+                <input type="text" id="regLastName" class="form-input" placeholder="Doe" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="regEmail">Email Address</label>
+              <input type="email" id="regEmail" class="form-input" placeholder="name@company.com" autocomplete="username" required>
+            </div>
+
+            <div class="form-group">
+              <label for="regRole">I am a...</label>
+              <select id="regRole" class="form-input" style="appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236366f1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto; padding-right: 2.5rem;">
+                <option value="student">Student</option>
+                <option value="center_admin">Center Admin</option>
+              </select>
+            </div>
+
+            <!-- Center Details (Conditional) -->
+            <div id="centerDetailsFields" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: rgba(255,255,255,0.05); border-radius: var(--radius-xl); border: 1px solid var(--glass-border);">
+              <h4 style="margin-bottom: 1rem; color: var(--primary);">Center Information</h4>
+              <div class="form-group">
+                <label for="centerName">Center Name</label>
+                <input type="text" id="centerName" class="form-input" placeholder="e.g. Tech Innovation Hub">
+              </div>
+              <div class="form-group">
+                <label for="centerDescription">Center Description</label>
+                <textarea id="centerDescription" class="form-input" placeholder="Briefly describe your center..." rows="3" style="resize: none;"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="centerAddress">Address</label>
+                <input type="text" id="centerAddress" class="form-input" placeholder="Street address, City, State">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="regPassword">Password</label>
+              <div class="password-wrapper">
+                <input type="password" id="regPassword" class="form-input" placeholder="Min. 8 characters" autocomplete="new-password" required style="padding-right: 3rem;">
+                <button type="button" class="password-toggle" onclick="togglePassword('regPassword', this)">
+                  <svg class="eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  <svg class="eye-slash-icon" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem;">Create Account</button>
+          </form>
+
+          <!-- Social Login -->
+          <div class="social-login">
+            <button type="button" class="btn-social" id="googleLoginBtn">
+              <img src="https://www.svgrepo.com/show/355037/google.svg" width="18" alt="Google"> Google
+            </button>
+            <button type="button" class="btn-social" id="githubLoginBtn">
+              <img src="https://www.svgrepo.com/show/447154/github.svg" width="18" alt="GitHub" style="filter: invert(1);"> GitHub
+            </button>
+          </div>
+
+          <p class="toggle-form-text" id="toggleText">
+            Don't have an account? <a href="javascript:void(0);" id="toggleForm" style="color: var(--primary); text-decoration: none; font-weight: 600;">Create one</a>
+          </p>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script>
+    // Password visibility toggle function
+    function togglePassword(inputId, button) {
+      const input = document.getElementById(inputId);
+      const eyeIcon = button.querySelector('.eye-icon');
+      const eyeSlashIcon = button.querySelector('.eye-slash-icon');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        eyeIcon.style.display = 'none';
+        eyeSlashIcon.style.display = 'block';
+      } else {
+        input.type = 'password';
+        eyeIcon.style.display = 'block';
+        eyeSlashIcon.style.display = 'none';
+      }
+    }
+
+    // Password validation helper
+    function validatePassword(password) {
+      if (password.length < 8) {
+        return { valid: false, message: 'Password must be at least 8 characters long' };
+      }
+      return { valid: true, message: '' };
+    }
+
+    // Email validation helper
+    function validateEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
+    // Notification helper
+    function showNotification(message, type = 'success') {
+      // Create a simple notification
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        background: ${type === 'success' ? '#10b981' : '#ef4444'};
+        color: white;
+        border-radius: 8px;
+        z-index: 10000;
+        animation: slideInRight 0.3s ease-out;
+        font-weight: 500;
+      `;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // Add animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInRight {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(400px); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const formTitle = document.getElementById('formTitle');
+    const formSubtitle = document.getElementById('formSubtitle');
+    const toggleText = document.getElementById('toggleText');
+    const logoClickable = document.getElementById('logoClickable');
+    const regRole = document.getElementById('regRole');
+    const centerDetailsFields = document.getElementById('centerDetailsFields');
+    const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const githubLoginBtn = document.getElementById('githubLoginBtn');
+    const rememberMeCheckbox = document.getElementById('rememberMe');
+
+    // Role change handler for center details
+    if (regRole) {
+      regRole.addEventListener('change', () => {
+        if (regRole.value === 'center_admin') {
+          centerDetailsFields.style.display = 'block';
+          document.getElementById('centerName').required = true;
+        } else {
+          centerDetailsFields.style.display = 'none';
+          document.getElementById('centerName').required = false;
+        }
+      });
+    }
+
+    // Forgot password handler
+    if (forgotPasswordBtn) {
+      forgotPasswordBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        
+        if (!email) {
+          showNotification('Please enter your email address', 'error');
+          return;
+        }
+
+        if (!validateEmail(email)) {
+          showNotification('Please enter a valid email address', 'error');
+          return;
+        }
+
+        try {
+          // Attempt to call password reset API
+          if (window.api && window.api.request) {
+            window.api.request('/auth/forgot-password', {
+              method: 'POST',
+              body: JSON.stringify({ email })
+            }).then(() => {
+              showNotification('Password reset link has been sent to your email', 'success');
+            }).catch(err => {
+              showNotification('Password reset request failed: ' + err.message, 'error');
+            });
+          } else {
+            showNotification('Password reset link has been sent to your email', 'success');
+          }
+        } catch (error) {
+          showNotification('An error occurred', 'error');
+        }
+      });
+    }
+
+    // Social login handlers
+    if (googleLoginBtn) {
+      googleLoginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        try {
+          // Check if OAuth is configured
+          if (window.api && window.api.loginWithGoogle) {
+            window.api.loginWithGoogle();
+          } else {
+            showNotification('Google OAuth is not configured yet. Please use email/password login.', 'error');
+          }
+        } catch (error) {
+          showNotification('Google login error: ' + error.message, 'error');
+        }
+      });
+    }
+
+    if (githubLoginBtn) {
+      githubLoginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        try {
+          // Check if OAuth is configured
+          if (window.api && window.api.loginWithGithub) {
+            window.api.loginWithGithub();
+          } else {
+            showNotification('GitHub OAuth is not configured yet. Please use email/password login.', 'error');
+          }
+        } catch (error) {
+          showNotification('GitHub login error: ' + error.message, 'error');
+        }
+      });
+    }
+
+    let isLogin = true;
+
+    function handleToggle(e) {
+      if (e) e.preventDefault();
+      isLogin = !isLogin;
+      
+      if (isLogin) {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+        formTitle.textContent = 'Welcome Back';
+        formSubtitle.textContent = 'Sign in to your Projexify account';
+        toggleText.innerHTML = 'Don\'t have an account? <a href="javascript:void(0);" id="toggleForm" style="color: var(--primary); text-decoration: none; font-weight: 600;">Create one</a>';
+        document.getElementById('toggleForm').addEventListener('click', handleToggle);
+      } else {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+        formTitle.textContent = 'Create Account';
+        formSubtitle.textContent = 'Join the Projexify innovation community';
+        toggleText.innerHTML = 'Already have an account? <a href="javascript:void(0);" id="toggleForm" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign in</a>';
+        document.getElementById('toggleForm').addEventListener('click', handleToggle);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleFormBtn = document.getElementById('toggleForm');
+      if (toggleFormBtn) {
+        toggleFormBtn.addEventListener('click', handleToggle);
+      }
+
+      // Add event listener to logo
+      if (logoClickable) {
+        logoClickable.style.cursor = 'pointer';
+        logoClickable.addEventListener('click', () => {
+          window.location.href = '/';
+        });
+      }
+
+      // Load remember me preference
+      if (rememberMeCheckbox && localStorage.getItem('rememberEmail')) {
+        document.getElementById('email').value = localStorage.getItem('rememberEmail');
+        rememberMeCheckbox.checked = true;
+      }
+
+      // Check URL for role intent (signup)
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('role')) {
+        handleToggle();
+      }
+    });
+
+    // Login Handler
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const rememberMe = rememberMeCheckbox.checked;
+
+      // Validation
+      if (!email) {
+        showNotification('Please enter your email address', 'error');
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        showNotification('Please enter a valid email address', 'error');
+        return;
+      }
+
+      if (!password) {
+        showNotification('Please enter your password', 'error');
+        return;
+      }
+
+      // Disable submit button during login
+      const submitBtn = loginForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Signing in...';
+
+      try {
+        if (!window.api || !window.api.login) {
+          showNotification('API client is not properly initialized', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+          return;
+        }
+
+        const response = await window.api.login(email, password);
+
+        if (response && response.token) {
+          window.api.setToken(response.token);
+          localStorage.setItem('user', JSON.stringify(response.user));
+          
+          // Handle remember me
+          if (rememberMe) {
+            localStorage.setItem('rememberEmail', email);
+          } else {
+            localStorage.removeItem('rememberEmail');
+          }
+          
+          showNotification('Login successful! Redirecting...', 'success');
+          
+          // Check if there's a redirect URL stored
+          setTimeout(() => {
+            const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+            if (redirectUrl) {
+              sessionStorage.removeItem('redirectAfterLogin');
+              window.location.href = redirectUrl;
+              return;
+            }
+            
+          // Role-based redirection
+          const userRoles = response.user.roles;
+          const role = Array.isArray(userRoles) ? userRoles[0] : userRoles;
+
+          // Ensure router.js compatibility (it expects authToken + user.role)
+          window.localStorage.setItem('authToken', response.token);
+          const normalizedUser = {
+            ...(response.user || {}),
+            role,
+          };
+          window.localStorage.setItem('userRole', role);
+          window.localStorage.setItem('userId', response.user?._id || response.user?.id);
+          window.localStorage.setItem('user', JSON.stringify(normalizedUser));
+
+          if (role === 'admin') window.location.href = '/pages/admin/dashboard.html';
+          else if (role === 'center_admin') window.location.href = '/pages/center/dashboard.html';
+          else if (role === 'mentor') window.location.href = '/pages/mentor/dashboard.html';
+          else window.location.href = '/pages/student/dashboard.html';
+          }, 1500);
+        } else {
+          showNotification('Login failed: Invalid credentials', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+      } catch (error) {
+        showNotification('Login failed: ' + (error.message || 'Unknown error'), 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
+
+    // Register Handler
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const firstName = document.getElementById('regFirstName').value.trim();
+      const lastName = document.getElementById('regLastName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const role = document.getElementById('regRole').value;
+
+      // Validation
+      if (!firstName) {
+        showNotification('Please enter your first name', 'error');
+        return;
+      }
+
+      if (!lastName) {
+        showNotification('Please enter your last name', 'error');
+        return;
+      }
+
+      if (!email) {
+        showNotification('Please enter your email address', 'error');
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        showNotification('Please enter a valid email address', 'error');
+        return;
+      }
+
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.valid) {
+        showNotification(passwordValidation.message, 'error');
+        return;
+      }
+
+      if (role === 'center_admin') {
+        const centerName = document.getElementById('centerName').value.trim();
+        if (!centerName) {
+          showNotification('Please enter your center name', 'error');
+          return;
+        }
+      }
+
+      // Disable submit button during registration
+      const submitBtn = registerForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating Account...';
+
+      try {
+        if (!window.api || !window.api.request) {
+          showNotification('API client is not properly initialized', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+          return;
+        }
+
+        // 1. Register User
+        const response = await window.api.request('/auth/register', {
+          method: 'POST',
+          body: JSON.stringify({ firstName, lastName, email, password, role })
+        });
+        
+        // 2. If Center Admin, also register the center
+        if (role === 'center_admin') {
+          try {
+            // We need to login first to get the token for center registration
+            const loginRes = await window.api.login(email, password);
+            if (loginRes && loginRes.token) {
+              window.api.setToken(loginRes.token);
+              localStorage.setItem('user', JSON.stringify(loginRes.user));
+
+              const centerName = document.getElementById('centerName').value.trim();
+              const centerDescription = document.getElementById('centerDescription').value.trim();
+              const centerAddress = document.getElementById('centerAddress').value.trim();
+
+              await window.api.request('/centers/register', {
+                method: 'POST',
+                body: JSON.stringify({
+                  name: centerName,
+                  description: centerDescription,
+                  address: centerAddress,
+                  email: email
+                })
+              });
+
+              showNotification('Registration successful! Your center is awaiting admin approval.', 'success');
+              setTimeout(() => {
+                window.location.href = '/pages/center/dashboard.html';
+              }, 2000);
+            } else {
+              showNotification('Registration successful but login failed. Please sign in manually.', 'error');
+              setTimeout(() => {
+                handleToggle();
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+              }, 2000);
+            }
+          } catch (centerError) {
+            showNotification('Center registration failed: ' + centerError.message, 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+          }
+        } else {
+          showNotification('Registration successful! Please sign in.', 'success');
+          setTimeout(() => {
+            handleToggle();
+            // Clear form
+            document.getElementById('regFirstName').value = '';
+            document.getElementById('regLastName').value = '';
+            document.getElementById('regEmail').value = '';
+            document.getElementById('regPassword').value = '';
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+          }, 2000);
+        }
+      } catch (error) {
+        showNotification('Registration failed: ' + (error.message || 'Unknown error'), 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
+  </script>
+</body>
+</html>

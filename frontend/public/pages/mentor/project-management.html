@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Management - Mentor Panel - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .dashboard-wrapper {
+      min-height: 100vh;
+      padding-top: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: clamp(2rem, 5vw, 4rem);
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .welcome-box h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .welcome-box p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+    }
+
+    .project-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-2xl);
+      padding: 3rem;
+      margin-bottom: 2.5rem;
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+      animation: slideUp 0.5s ease forwards;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+    }
+
+    .project-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .search-filter-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      backdrop-filter: blur(12px);
+      margin-bottom: 2.5rem;
+      animation: slideUp 0.5s ease forwards;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-input-wrapper input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .search-input-wrapper input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .search-input-wrapper input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-input-wrapper::before {
+      content: '🔍';
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.75rem 1.5rem;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+
+    .filter-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .breadcrumb-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      animation: slideUp 0.5s ease forwards;
+    }
+
+    .breadcrumb-nav a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .breadcrumb-nav a:hover {
+      color: #8b5cf6;
+      text-decoration: underline;
+    }
+
+    .breadcrumb-nav span {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 4rem 2rem;
+      animation: slideUp 0.5s ease forwards;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-container { padding: 1.5rem; }
+      .search-filter-section { padding: 1.5rem; }
+      .filter-buttons { flex-direction: column; }
+      .filter-btn { width: 100%; }
+      .breadcrumb-nav { font-size: 0.85rem; }
+    }
+
+    @media (max-width: 480px) {
+      .dashboard-container { padding: 1rem; }
+      .welcome-box h1 { font-size: 2rem; }
+      .search-input-wrapper input { padding: 0.875rem 0.875rem 0.875rem 2.5rem; font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <div class="dashboard-wrapper">
+    <div class="dashboard-container">
+      <div class="breadcrumb-nav" role="navigation" aria-label="breadcrumb">
+        <a href="/pages/mentor/dashboard.html">Dashboard</a>
+        <span>→</span>
+        <span aria-current="page">Projects</span>
+      </div>
+
+      <div class="dashboard-header">
+        <div class="welcome-box">
+          <h1>Project Management</h1>
+          <p>Oversee and manage all project assignments and student groups</p>
+        </div>
+      </div>
+
+      <div class="search-filter-section">
+        <div class="search-input-wrapper">
+          <input 
+            type="text" 
+            id="projectSearch" 
+            placeholder="Search by project name..." 
+            aria-label="Search projects"
+            autocomplete="off"
+          >
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Sort by:</label>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-sort="name" aria-pressed="true">Name</button>
+            <button class="filter-btn" data-sort="students" aria-pressed="false">Students</button>
+            <button class="filter-btn" data-sort="milestones" aria-pressed="false">Milestones</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="projectsContainer">
+        <div class="no-results">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+          <p style="color: var(--text-muted);">Loading projects...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    let allProjects = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      new UIManager();
+      loadProjects();
+      setupSearchAndFilters();
+    });
+
+    function setupSearchAndFilters() {
+      const searchInput = document.getElementById('projectSearch');
+      const sortButtons = document.querySelectorAll('.filter-btn');
+
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        filterAndRenderProjects(query, getCurrentSort());
+      });
+
+      sortButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          sortButtons.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-pressed', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-pressed', 'true');
+          const query = searchInput.value.toLowerCase();
+          filterAndRenderProjects(query, btn.dataset.sort);
+        });
+      });
+    }
+
+    function getCurrentSort() {
+      const activeBtn = document.querySelector('.filter-btn.active');
+      return activeBtn?.dataset.sort || 'name';
+    }
+
+    function filterAndRenderProjects(query, sortBy) {
+      let filtered = allProjects.filter(p => {
+        const title = p.title.toLowerCase();
+        const description = (p.description || '').toLowerCase();
+        return title.includes(query) || description.includes(query);
+      });
+
+      filtered.sort((a, b) => {
+        if (sortBy === 'name') {
+          return a.title.localeCompare(b.title);
+        } else if (sortBy === 'students') {
+          return (b.current_students || 0) - (a.current_students || 0);
+        } else if (sortBy === 'milestones') {
+          return (b.milestones?.length || 0) - (a.milestones?.length || 0);
+        }
+        return 0;
+      });
+
+      renderProjects(filtered, query);
+    }
+
+    async function loadProjects() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      try {
+        const response = await window.api.getProjects({ mentorId: user.id });
+        allProjects = response.projects || [];
+        renderProjects(allProjects);
+      } catch (err) {
+        document.getElementById('projectsContainer').innerHTML = `
+          <div class="no-results" style="background: rgba(239, 68, 68, 0.05); border: 2px dashed rgba(239, 68, 68, 0.2); border-radius: 16px;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Failed to Load Projects</h3>
+            <p style="color: var(--text-muted);">${err.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderProjects(projects) {
+      const container = document.getElementById('projectsContainer');
+
+      if (!projects || projects.length === 0) {
+        container.innerHTML = `
+          <div class="no-results" style="background: rgba(99, 102, 241, 0.03); border: 2px dashed rgba(99, 102, 241, 0.2); border-radius: 16px;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📁</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">No Projects Assigned</h3>
+            <p style="color: var(--text-muted);">You currently have no projects assigned to your mentorship group.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = projects.map((p, idx) => `
+        <div class="project-card" style="animation-delay: ${idx * 0.1}s;">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div style="flex: 1;">
+              <h3 style="font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; margin-bottom: 0.75rem;">📋 ${p.title}</h3>
+              <p style="color: var(--text-muted); margin: 0; line-height: 1.6;">${p.description}</p>
+            </div>
+            <span class="status-badge active">Active</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            <div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">👥 Students</div>
+              <div style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">${p.current_students || 0}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">✅ Milestones</div>
+              <div style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">${p.milestones?.length || 0}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">⏱️ Duration</div>
+              <div style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">${p.duration || 'N/A'}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

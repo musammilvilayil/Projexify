@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Center Management - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .main-content {
+      padding: clamp(2rem, 5vw, 4rem);
+      max-width: 1600px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .admin-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.5rem;
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      width: fit-content;
+      backdrop-filter: blur(12px);
+      overflow-x: auto;
+    }
+
+    .admin-nav-link {
+      padding: 0.8rem 2rem;
+      border-radius: 1rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .admin-nav-link:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .admin-nav-link.active {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .data-table-wrapper {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin-top: 2rem;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 1.5rem;
+      color: var(--text-dim);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .data-table td {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .center-badge {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .center-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .status-pill {
+      padding: 0.5rem 1.2rem;
+      border-radius: 2rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+    }
+
+    .status-pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .status-approved { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .status-rejected { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+    /* Aurora Background Styles */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #0B0C15;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 1.5rem;
+      color: var(--text-main);
+      font-size: 1.5rem;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .modal-form .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .modal-form label {
+      display: block;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .modal-form input,
+    .modal-form select {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+
+    .modal-form input:focus,
+    .modal-form select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    .modal-form .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      background: #0B0C15;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      z-index: 2000;
+      transform: translateX(120%);
+      transition: transform 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast-success { border-left: 3px solid #10b981; }
+    .toast-error { border-left: 3px solid #ef4444; }
+
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1.5rem;
+      }
+      
+      .admin-nav {
+        width: 100%;
+      }
+
+      .modal-form .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <main class="main-content">
+    <header class="header-content" style="margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1 class="gradient-text" style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 0.5rem;">Center Management</h1>
+        <p style="color: var(--text-muted); font-size: clamp(1rem, 2vw, 1.1rem);">Manage innovation centers and their administrators.</p>
+      </div>
+    </header>
+
+    <nav class="admin-nav">
+      <a href="/pages/admin/dashboard.html" class="admin-nav-link">📊 Dashboard</a>
+      <a href="/pages/admin/user-management.html" class="admin-nav-link">👥 Users</a>
+      <a href="/pages/admin/center-management.html" class="admin-nav-link active">🏢 Centers</a>
+      <a href="/pages/admin/project-management.html" class="admin-nav-link">📚 Projects</a>
+      <a href="/pages/admin/usage-logs.html" class="admin-nav-link">📋 System Logs</a>
+    </nav>
+
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Center Name</th>
+            <th>Location</th>
+            <th>Admin</th>
+            <th>Projects</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="centerTableBody">
+          <!-- Dynamic content -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Edit Center Modal -->
+  <div id="editCenterModal" class="modal-overlay">
+    <div class="modal-content">
+      <h2>✏️ Edit Center</h2>
+      <form id="editCenterForm" class="modal-form">
+        <input type="hidden" id="editCenterId">
+        
+        <div class="form-group">
+          <label for="editCenterName">Center Name</label>
+          <input type="text" id="editCenterName" placeholder="e.g. Tech Innovation Hub" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="editCenterEmail">Email</label>
+          <input type="email" id="editCenterEmail" placeholder="center@example.com" required>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editCenterCity">City</label>
+            <input type="text" id="editCenterCity" placeholder="City" required>
+          </div>
+          <div class="form-group">
+            <label for="editCenterCountry">Country</label>
+            <input type="text" id="editCenterCountry" placeholder="Country" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="editCenterPhone">Phone</label>
+          <input type="tel" id="editCenterPhone" placeholder="+1 (555) 000-0000">
+        </div>
+
+        <div class="form-group">
+          <label for="editCenterStatus">Status</label>
+          <select id="editCenterStatus">
+            <option value="approved">Approved</option>
+            <option value="pending">Pending</option>
+            <option value="rejected">Rejected</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary btn-icon">
+            💾 Save Changes
+          </button>
+          <button type="button" class="btn btn-glass" onclick="closeEditCenterModal()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Center Modal -->
+  <div id="deleteCenterModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px;">
+      <h2 style="color: #ef4444;">⚠️ Delete Center</h2>
+      <p style="color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6;">
+        Are you sure you want to delete <strong id="deleteCenterName" style="color: var(--text-main);"></strong>?
+        This action <strong style="color: #ef4444;">cannot be undone</strong>. All associated data will be permanently removed.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-danger btn-icon" onclick="confirmDeleteCenter()">
+          🗑️ Delete Center
+        </button>
+        <button class="btn btn-glass" onclick="closeDeleteCenterModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast">
+    <span id="toastMessage"></span>
+  </div>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    const editCenterModal = document.getElementById('editCenterModal');
+    const deleteCenterModal = document.getElementById('deleteCenterModal');
+    let centerToDelete = null;
+
+    // === Toast Notification ===
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      toast.className = `toast toast-${type}`;
+      toastMsg.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    // === Edit Center Modal ===
+    function openEditCenterModal(center) {
+      document.getElementById('editCenterId').value = center._id;
+      document.getElementById('editCenterName').value = center.name || '';
+      document.getElementById('editCenterEmail').value = center.email || '';
+      document.getElementById('editCenterCity').value = center.city || '';
+      document.getElementById('editCenterCountry').value = center.country || '';
+      document.getElementById('editCenterPhone').value = center.phone || '';
+      document.getElementById('editCenterStatus').value = center.status || 'approved';
+      editCenterModal.classList.add('active');
+    }
+
+    function closeEditCenterModal() {
+      editCenterModal.classList.remove('active');
+      document.getElementById('editCenterForm').reset();
+    }
+
+    // Close edit modal on overlay click
+    editCenterModal.addEventListener('click', (e) => {
+      if (e.target === editCenterModal) closeEditCenterModal();
+    });
+
+    // Handle edit form submission
+    document.getElementById('editCenterForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const centerId = document.getElementById('editCenterId').value;
+      const updates = {
+        name: document.getElementById('editCenterName').value.trim(),
+        email: document.getElementById('editCenterEmail').value.trim(),
+        city: document.getElementById('editCenterCity').value.trim(),
+        country: document.getElementById('editCenterCountry').value.trim(),
+        phone: document.getElementById('editCenterPhone').value.trim(),
+        status: document.getElementById('editCenterStatus').value
+      };
+
+      try {
+        uiManager.showLoading('Updating center...');
+        await window.api.updateCenter(centerId, updates);
+        uiManager.hideLoading();
+        showToast('✅ Center updated successfully!', 'success');
+        closeEditCenterModal();
+        // Reload after a short delay for the toast to show
+        setTimeout(() => window.location.reload(), 1200);
+      } catch (error) {
+        uiManager.hideLoading();
+        showToast('❌ Error updating center: ' + error.message, 'error');
+        console.error('Error:', error);
+      }
+    });
+
+    // === Delete Center Modal ===
+    function openDeleteCenterModal(centerId, centerName) {
+      centerToDelete = centerId;
+      document.getElementById('deleteCenterName').textContent = centerName;
+      deleteCenterModal.classList.add('active');
+    }
+
+    function closeDeleteCenterModal() {
+      deleteCenterModal.classList.remove('active');
+      centerToDelete = null;
+    }
+
+    // Close delete modal on overlay click
+    deleteCenterModal.addEventListener('click', (e) => {
+      if (e.target === deleteCenterModal) closeDeleteCenterModal();
+    });
+
+    async function confirmDeleteCenter() {
+      if (!centerToDelete) return;
+
+      try {
+        uiManager.showLoading('Deleting center...');
+        await window.api.deleteCenter(centerToDelete);
+        uiManager.hideLoading();
+        showToast('🗑️ Center deleted successfully!', 'success');
+        closeDeleteCenterModal();
+        setTimeout(() => window.location.reload(), 1200);
+      } catch (error) {
+        uiManager.hideLoading();
+        showToast('❌ Error deleting center: ' + error.message, 'error');
+        console.error('Error:', error);
+      }
+    }
+
+    // === Old manage function (kept for backward compatibility with inline onclick) ===
+    function openManageCenterModal(centerId, centerName, centerEmail, city, country) {
+      alert(`📋 Manage Center: ${centerName}\n\nEmail: ${centerEmail}\nLocation: ${city}, ${country}\n\nUse the Edit and Delete buttons in the Actions column.`);
+    }
+
+    // === Main page load ===
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user || !user.roles.includes('admin')) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      try {
+        const centers = await window.api.getCenters();
+        const tbody = document.getElementById('centerTableBody');
+        
+        if (centers.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 4rem; color: var(--text-muted);">No centers found.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = centers.map(c => {
+          const statusClass = `status-${c.status || 'pending'}`;
+          const isAdmin = c.admin_id;
+          const adminName = isAdmin ? `${isAdmin.firstName} ${isAdmin.lastName}` : 'N/A';
+          
+          return `
+            <tr>
+              <td>
+                <div class="center-badge">
+                  <div class="center-icon">${c.name[0]}</div>
+                  <div>
+                    <div style="font-weight: 700; color: var(--text-main);">${c.name}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-dim);">${c.email}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div style="color: var(--text-main);">${c.city || 'N/A'}</div>
+                <div style="font-size: 0.8rem; color: var(--text-dim);">${c.country || ''}</div>
+              </td>
+              <td>
+                <div style="font-weight: 600;">${adminName}</div>
+                <div style="font-size: 0.8rem; color: var(--text-dim);">${isAdmin?.email || ''}</div>
+              </td>
+              <td>
+                <span style="font-weight: 700; color: var(--primary);">${c.projectCount || 0}</span>
+              </td>
+              <td>
+                <span class="status-pill ${statusClass}">${(c.status || 'pending').toUpperCase()}</span>
+              </td>
+              <td>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                  ${c.status === 'pending' ? `
+                    <button class="btn btn-primary btn-sm approve-btn" data-id="${c._id}" style="padding: 0.5rem 0.8rem; font-size: 0.75rem;">✓ Approve</button>
+                    <button class="btn btn-glass btn-sm reject-btn" data-id="${c._id}" style="padding: 0.5rem 0.8rem; font-size: 0.75rem;">✕ Reject</button>
+                  ` : ''}
+                  <button class="btn btn-glass btn-sm btn-icon edit-center-btn" data-id="${c._id}" data-name="${c.name}" data-email="${c.email}" data-city="${c.city || ''}" data-country="${c.country || ''}" data-phone="${c.phone || ''}" data-status="${c.status || 'approved'}" style="padding: 0.5rem 0.8rem; font-size: 0.75rem;">
+                    ✏️ Edit
+                  </button>
+                  <button class="btn btn-glass btn-sm btn-icon delete-center-btn" data-id="${c._id}" data-name="${c.name}" style="padding: 0.5rem 0.8rem; font-size: 0.75rem; color: #ef4444;">
+                    🗑️ Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        // Add event listeners for approval
+        document.querySelectorAll('.approve-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            if (confirm('Are you sure you want to APPROVE this center? This will grant them full access to the platform.')) {
+              try {
+                await window.api.approveCenterRegistration(id, true);
+                location.reload();
+              } catch (error) {
+                alert('Error: ' + error.message);
+              }
+            }
+          });
+        });
+
+        document.querySelectorAll('.reject-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            if (confirm('Are you sure you want to REJECT this center?')) {
+              try {
+                await window.api.approveCenterRegistration(id, false);
+                location.reload();
+              } catch (error) {
+                alert('Error: ' + error.message);
+              }
+            }
+          });
+        });
+
+        // Edit button handlers
+        document.querySelectorAll('.edit-center-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const center = {
+              _id: btn.dataset.id,
+              name: btn.dataset.name,
+              email: btn.dataset.email,
+              city: btn.dataset.city,
+              country: btn.dataset.country,
+              phone: btn.dataset.phone,
+              status: btn.dataset.status
+            };
+            openEditCenterModal(center);
+          });
+        });
+
+        // Delete button handlers
+        document.querySelectorAll('.delete-center-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            const name = btn.getAttribute('data-name');
+            openDeleteCenterModal(id, name);
+          });
+        });
+
+      } catch (error) {
+        console.error('Error loading centers:', error);
+      }
+    });
+  </script>
+</body>
+</html>

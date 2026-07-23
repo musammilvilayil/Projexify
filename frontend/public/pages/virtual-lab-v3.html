@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Lab v3.0 - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/css/file-manager.css">
+  <!-- Load Jitsi API -->
+  <script src="https://meet.jit.si/external_api.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0B0C15;
+      color: #d4d4d4;
+      overflow: hidden;
+    }
+
+    /* Main Layout */
+    .virtual-lab-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Video Conference Panel (Top) */
+    .video-panel {
+      height: 50vh;
+      background: #1e1e1e;
+      border-bottom: 2px solid #333;
+      position: relative;
+      display: none; /* Hidden by default, shown when mentor online */
+    }
+
+    .video-panel.active {
+      display: block;
+    }
+
+    #jitsi-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .video-status {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 8px 16px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      z-index: 100;
+    }
+
+    .recording-indicator {
+      width: 8px;
+      height: 8px;
+      background: #ff4444;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .end-session-btn {
+      background: #ff4444;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+      display: none;
+    }
+
+    .end-session-btn:hover {
+      background: #cc0000;
+      transform: translateY(-1px);
+    }
+
+    .end-session-btn:active {
+      transform: translateY(0);
+    }
+
+    .end-session-btn.visible {
+      display: block;
+    }
+
+    /* Workspace Panel (Bottom or Full Screen) */
+    .workspace-panel {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      background: #1e1e1e;
+      overflow: hidden;
+    }
+
+    .workspace-panel.fullscreen {
+      height: 100vh;
+    }
+
+    /* File Manager Sidebar */
+    .file-manager-sidebar {
+      background: #252526;
+      border-right: 1px solid #333;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .file-manager-sidebar .file-manager {
+      min-height: 0;
+      flex: 1;
+    }
+
+    .file-manager-sidebar .file-tree {
+      overflow-y: auto !important;
+      overflow-x: hidden;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Editor Area */
+    .editor-area {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .editor-tabs {
+      display: flex;
+      background: #2d2d30;
+      border-bottom: 1px solid #333;
+      overflow-x: auto;
+      min-height: 35px;
+    }
+
+    .editor-tab {
+      padding: 8px 16px;
+      cursor: pointer;
+      border-right: 1px solid #333;
+      background: #2d2d30;
+      color: #969696;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .editor-tab.active {
+      background: #1e1e1e;
+      color: #ffffff;
+    }
+
+    .editor-tab:hover {
+      background: #323233;
+    }
+
+    .editor-tab-close {
+      margin-left: 8px;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+
+    .editor-tab-close:hover {
+      opacity: 1;
+    }
+
+    .editor-content {
+      flex: 1;
+      background: #1e1e1e;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #code-editor {
+      width: 100%;
+      height: 100%;
+    }
+
+    .editor-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #858585;
+      gap: 16px;
+    }
+
+    .editor-placeholder svg {
+      width: 64px;
+      height: 64px;
+      opacity: 0.3;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: #252526;
+      border-bottom: 1px solid #333;
+    }
+
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .toolbar-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #cccccc;
+      margin-right: 16px;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      background: #3c3c3c;
+      border: 1px solid #4a4a4a;
+      border-radius: 4px;
+      color: #cccccc;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: #454545;
+      border-color: #5a5a5a;
+    }
+
+    .btn-primary {
+      background: #0e639c;
+      border-color: #1177bb;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #1177bb;
+      border-color: #1890d5;
+    }
+
+    .btn-success {
+      background: #0e8a16;
+      border-color: #0fa926;
+      color: #ffffff;
+    }
+
+    .btn-success:hover {
+      background: #0fa926;
+    }
+
+    .btn-danger {
+      background: #d73a49;
+      border-color: #e5343d;
+      color: #ffffff;
+    }
+
+    .btn-danger:hover {
+      background: #e5343d;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-online {
+      background: #0e8a16;
+      color: #ffffff;
+    }
+
+    .status-offline {
+      background: #6a737d;
+      color: #ffffff;
+    }
+
+    /* Mentor Status Banner */
+    .mentor-status-banner {
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .mentor-status-banner.offline {
+      background: #3c3c3c;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .video-panel {
+        height: 40vh;
+      }
+
+      .workspace-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .file-manager-sidebar {
+        display: none;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+      }
+
+      .toolbar-left, .toolbar-right {
+        justify-content: space-between;
+      }
+    }
+
+    /* Loading Screen */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #1e1e1e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      gap: 20px;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #333;
+      border-top-color: #0e639c;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: #858585;
+      font-size: 14px;
+    }
+
+    /* Save Indicator */
+    .save-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 16px;
+      background: #0e8a16;
+      color: white;
+      border-radius: 6px;
+      font-size: 13px;
+      display: none;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .save-indicator.show {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Run Console */
+    .run-console {
+      background: #111318;
+      border-top: 1px solid #333;
+      padding: 12px 16px;
+      min-height: 160px;
+      max-height: 240px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .console-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      color: #c5c5c5;
+    }
+
+    .console-title {
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .console-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .console-output {
+      background: #0b0d12;
+      border: 1px solid #1f2933;
+      border-radius: 6px;
+      padding: 12px;
+      color: #c0d4ff;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      overflow: auto;
+      flex: 1;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .console-line.info { color: #93c5fd; }
+    .console-line.output { color: #c7ffb0; }
+    .console-line.error { color: #ff8a8a; }
+    .console-line.meta { color: #9ca3af; }
+
+    .status-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      font-size: 10px;
+      border: 1px solid transparent;
+    }
+
+    .status-dot.idle { color: #9ca3af; border-color: #374151; }
+    .status-dot.running { color: #fbbf24; border-color: #fbbf24; }
+    .status-dot.success { color: #4ade80; border-color: #4ade80; }
+    .status-dot.failed { color: #f87171; border-color: #f87171; }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
+    /* AI Assistant */
+    .ai-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      display: none;
+      z-index: 9000;
+    }
+
+    .ai-panel {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 360px;
+      max-width: calc(100vw - 32px);
+      background: #0f1118;
+      border: 1px solid #1f2933;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      z-index: 9500;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+
+    .ai-panel.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .ai-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .ai-title { font-weight: 700; color: #f3f4f6; font-size: 15px; }
+    .ai-subtitle { color: #9ca3af; font-size: 12px; }
+
+    .ai-messages {
+      max-height: 260px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 4px;
+    }
+
+    .ai-message {
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .ai-message.user {
+      background: #1e293b;
+      border: 1px solid #334155;
+    }
+
+    .ai-message.assistant {
+      background: #111827;
+      border: 1px solid #1f2933;
+    }
+
+    .ai-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ai-input {
+      width: 100%;
+      min-height: 80px;
+      border-radius: 8px;
+      border: 1px solid #1f2933;
+      background: #0b0d12;
+      color: #e5e7eb;
+      padding: 10px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      resize: vertical;
+    }
+
+    .ai-input:focus {
+      outline: 1px solid #2563eb;
+      border-color: #2563eb;
+    }
+
+    .ai-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .ai-hint { color: #9ca3af; font-size: 12px; }
+
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loading-screen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading Virtual Lab...</div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="virtual-lab-container" style="display: none;">
+    
+    <!-- Mentor Status Banner -->
+    <div class="mentor-status-banner offline" id="mentor-status-banner">
+      <span id="mentor-status-text">
+        <strong>Self-Study Mode</strong> - Mentor not available
+      </span>
+      <span id="next-session-info"></span>
+    </div>
+
+    <!-- Video Conference Panel (Hidden by default) -->
+    <div class="video-panel" id="video-panel">
+      <div class="video-status">
+        <div class="recording-indicator" id="recording-indicator" style="display: none;"></div>
+        <span id="recording-text" style="display: none;">Recording</span>
+        <span id="session-timer">00:00:00</span>
+        <button class="end-session-btn" id="end-session-btn" title="End session for all participants">🛑 End Session</button>
+      </div>
+      <div id="jitsi-container"></div>
+    </div>
+
+    <!-- Workspace Panel -->
+    <div class="workspace-panel fullscreen" id="workspace-panel">
+      
+      <!-- File Manager Sidebar -->
+      <div class="file-manager-sidebar">
+        <div id="file-manager-container"></div>
+      </div>
+
+      <!-- Editor Area -->
+      <div class="editor-area">
+        
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <span class="toolbar-title" id="project-title">Virtual Lab</span>
+            <span class="session-mode-badge" id="sessionModeBadge" style="display: none; padding: 4px 12px; background: rgba(99, 102, 241, 0.2); border-radius: 12px; font-size: 12px; color: #6366f1;">
+              👤 Self-Study Mode
+            </span>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn" id="btn-save" title="Save All Files (Ctrl+S)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Save
+            </button>
+            <button class="btn" id="btn-format" title="Format Code (Alt+Shift+F)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="4 7 4 4 20 4 20 7"/>
+                <line x1="9" y1="20" x2="15" y2="20"/>
+                <line x1="12" y1="4" x2="12" y2="20"/>
+              </svg>
+              Format
+            </button>
+            <button class="btn" id="btn-run" title="Run Code (F5)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              Run
+            </button>
+            <button class="btn" id="btn-ai-help" title="AI Assistant" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+              🤖 AI Help
+            </button>
+            <button class="btn" id="btn-back-to-workspace" title="Back to Project Workspace">
+              ← Back
+            </button>
+          </div>
+        </div>
+
+        <!-- Editor Tabs -->
+        <div class="editor-tabs" id="editor-tabs">
+          <!-- Tabs will be dynamically added here -->
+        </div>
+
+        <!-- Editor Content -->
+        <div class="editor-content">
+          <div class="editor-placeholder" id="editor-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <div>Select a file to start editing</div>
+          </div>
+          <div id="code-editor" style="display: none;"></div>
+        </div>
+
+        <div class="run-console" id="run-console">
+          <div class="console-header">
+            <div class="console-title">Run Console</div>
+            <div class="console-actions">
+              <span class="status-dot idle" id="run-status">Idle</span>
+              <button class="btn btn-sm" id="btn-clear-console">Clear</button>
+            </div>
+          </div>
+          <pre class="console-output" id="console-output">Ready. Click Run to execute the current file.</pre>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Save Indicator -->
+  <div class="save-indicator" id="save-indicator">
+    ✓ File saved successfully
+  </div>
+
+  <div class="ai-backdrop" id="ai-backdrop"></div>
+  <div class="ai-panel" id="ai-panel">
+    <div class="ai-header">
+      <div>
+        <div class="ai-title">AI Assistant</div>
+        <div class="ai-subtitle">Context-aware help for this file</div>
+      </div>
+      <button class="btn btn-sm" id="btn-close-ai">Close</button>
+    </div>
+    <div class="ai-messages" id="ai-messages">
+      <div class="ai-message assistant">Ask a question or request an explanation of the latest error.</div>
+    </div>
+    <form class="ai-form" id="ai-form">
+      <textarea id="ai-input" class="ai-input" placeholder="Ask about the current file, recent error, or request an explanation..." required></textarea>
+      <div class="ai-actions">
+        <button type="button" class="btn btn-sm" id="btn-ai-explain">Explain last error</button>
+        <div style="display: flex; gap: 8px; align-items: center; margin-left: auto;">
+          <span class="ai-hint">Shift+Enter for new line</span>
+          <button type="submit" class="btn btn-primary">Send</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <script src="/js/FileManagerUI.js"></script>
+  <script src="/js/JitsiIntegration.js"></script>
+  
+  <script>
+    // Virtual Lab Manager
+    class VirtualLabManager {
+      constructor() {
+        this.projectId = null;
+        this.user = null;
+        this.token = localStorage.getItem('token');
+        this.socket = null;
+        this.fileManager = null;
+        this.jitsi = null;
+        this.editor = null;
+        this.currentFile = null;
+        this.openTabs = [];
+        this.isMentor = false;
+        this.mentorOnline = false;
+        this.sessionTimer = null;
+        this.isRunning = false;
+        this.lastRunSnapshot = null;
+        this.consoleOutputEl = document.getElementById('console-output');
+        this.runStatusEl = document.getElementById('run-status');
+        this.aiPanelEl = document.getElementById('ai-panel');
+        this.aiBackdropEl = document.getElementById('ai-backdrop');
+        this.aiMessagesEl = document.getElementById('ai-messages');
+        this.aiInputEl = document.getElementById('ai-input');
+        this.aiBusy = false;
+
+        this.init();
+      }
+
+      async init() {
+        try {
+          // Get user info
+          this.user = JSON.parse(localStorage.getItem('user'));
+          
+          // Check URL for role parameter and use it if provided
+          const urlParams = new URLSearchParams(window.location.search);
+          const roleParam = urlParams.get('role');
+          
+          // Set isMentor based on user role or URL parameter
+          if (roleParam) {
+            this.isMentor = roleParam === 'mentor';
+          } else {
+            this.isMentor = this.user?.role === 'mentor';
+          }
+
+          // Get project ID from URL (support 'project', 'projectId', and 'id' parameters)
+          const sessionId = urlParams.get('sessionId');
+          
+          // If sessionId is provided, fetch the session to get projectId
+          if (sessionId) {
+            try {
+              const sessionResponse = await fetch(`/api/sessions/${sessionId}`, {
+                headers: { 'Authorization': `Bearer ${this.token}` }
+              });
+              
+              if (sessionResponse.ok) {
+                const sessionData = await sessionResponse.json();
+                this.projectId = sessionData.projectId?._id || sessionData.projectId;
+                this.sessionId = sessionId;
+                console.log('[VirtualLab] Loaded project from session:', this.projectId);
+                console.log('[VirtualLab] User role: ', this.isMentor ? 'mentor' : 'student');
+              }
+            } catch (err) {
+              console.warn('[VirtualLab] Failed to load session data:', err);
+            }
+          }
+          
+          // If no project from session, check URL parameters
+          if (!this.projectId) {
+            this.projectId = urlParams.get('id') || urlParams.get('projectId') || urlParams.get('project');
+          }
+
+          if (!this.projectId) {
+            throw new Error('No project selected');
+          }
+
+          // Initialize components
+          await this.loadProjects();
+          await this.checkMentorStatus();
+          await this.initializeMonacoEditor();
+          this.initializeFileManager();
+          this.initializeSocketIO();
+          this.attachEventListeners();
+          this.setRunStatus('idle', 'Idle');
+
+          // Hide loading screen
+          document.getElementById('loading-screen').style.display = 'none';
+          document.querySelector('.virtual-lab-container').style.display = 'flex';
+
+        } catch (error) {
+          console.error('Initialization error:', error);
+          alert('Failed to initialize Virtual Lab: ' + error.message);
+        }
+      }
+
+      async loadProjects() {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await fetch('/api/progress/my-enrollments', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (!response.ok) {
+            console.warn('Failed to load projects list, using current project only');
+            // Set a default project title
+            const titleEl = document.getElementById('project-title');
+            if (titleEl) titleEl.textContent = 'Current Project';
+            return;
+          }
+
+          const data = await response.json();
+          const selector = document.getElementById('project-selector');
+          const titleEl = document.getElementById('project-title');
+          const projects = data.projects || data;
+
+          if (!selector) {
+            // Project selector is optional, just set title if available
+            if (titleEl) titleEl.textContent = 'Current Project';
+            return;
+          }
+
+          projects.forEach(progress => {
+            const project = progress.projectId;
+            if (!project) return;
+            
+            const option = document.createElement('option');
+            option.value = project._id;
+            option.textContent = project.title;
+            if (project._id === this.projectId) {
+              option.selected = true;
+              if (titleEl) titleEl.textContent = project.title;
+            }
+            selector.appendChild(option);
+          });
+
+        } catch (error) {
+          console.error('Failed to load projects:', error);
+          const titleEl = document.getElementById('project-title');
+          if (titleEl) titleEl.textContent = 'Current Project';
+        }
+      }
+
+      async checkMentorStatus() {
+        try {
+          const banner = document.getElementById('mentor-status-banner');
+          const statusText = document.getElementById('mentor-status-text');
+          const sessionInfo = document.getElementById('next-session-info');
+
+          // Check if this is an active session
+          if (this.sessionId) {
+            try {
+              const sessionResponse = await fetch(`/api/sessions/${this.sessionId}`, {
+                headers: { 'Authorization': `Bearer ${this.token}` }
+              });
+              
+              if (sessionResponse.ok) {
+                const sessionData = await sessionResponse.json();
+                console.log('[VirtualLab] Session data:', sessionData);
+                
+                // Check if session is active
+                if (sessionData.status === 'active' || sessionData.status === 'in_progress' || sessionData.isInstant) {
+                  this.mentorOnline = true;
+                  banner.classList.remove('offline');
+                  statusText.innerHTML = '<strong>🎥 Live Session</strong> - Mentor is online';
+                  this.showVideoPanel();
+                  return; // Session is active, don't check other status
+                }
+              }
+            } catch (err) {
+              console.warn('[VirtualLab] Failed to check session status:', err);
+            }
+          }
+
+          // Fallback to Jitsi integration check
+          const status = await JitsiIntegration.checkMeetingStatus(this.projectId, this.token);
+          this.mentorOnline = status.isMentorOnline;
+
+          if (this.mentorOnline) {
+            banner.classList.remove('offline');
+            statusText.innerHTML = '<strong>🎥 Live Session</strong> - Mentor is online';
+            this.showVideoPanel();
+          } else {
+            banner.classList.add('offline');
+            statusText.innerHTML = '<strong>📚 Self-Study Mode</strong> - Mentor not available';
+            
+            if (status.schedule) {
+              const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+              sessionInfo.textContent = `Next session: ${days[status.schedule.dayOfWeek]} at ${status.schedule.startTime}`;
+            }
+            
+            this.hideVideoPanel();
+          }
+
+          // Only refresh status if we got a successful response (stop on 401)
+          if (this._mentorStatusCheckCount === undefined) this._mentorStatusCheckCount = 0;
+          this._mentorStatusCheckCount++;
+          if (this._mentorStatusCheckCount < 10) {
+            setTimeout(() => this.checkMentorStatus(), 30000);
+          } else {
+            console.log('[VirtualLab] Stopping mentor status polling after max attempts');
+          }
+
+        } catch (error) {
+          console.error('Failed to check mentor status:', error);
+          // Don't retry on auth errors
+        }
+      }
+
+      showVideoPanel() {
+        const videoPanel = document.getElementById('video-panel');
+        const workspacePanel = document.getElementById('workspace-panel');
+        const sessionBadge = document.getElementById('sessionModeBadge');
+        const endSessionBtn = document.getElementById('end-session-btn');
+
+        videoPanel.classList.add('active');
+        workspacePanel.classList.remove('fullscreen');
+        
+        // Show End Session button for mentors
+        if (this.isMentor && endSessionBtn) {
+          endSessionBtn.classList.add('visible');
+          endSessionBtn.onclick = () => this.endSession();
+        }
+        
+        // Update session mode badge
+        if (sessionBadge) {
+          sessionBadge.textContent = this.isMentor ? '👨‍🏫 Mentor Session' : '👤 Student Session';
+          sessionBadge.style.display = 'inline-block';
+          sessionBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+          sessionBadge.style.color = '#10b981';
+        }
+
+        // Initialize Jitsi if not already
+        if (!this.jitsi) {
+          this.initializeJitsi();
+        }
+      }
+
+      hideVideoPanel() {
+        const videoPanel = document.getElementById('video-panel');
+        const workspacePanel = document.getElementById('workspace-panel');
+        const sessionBadge = document.getElementById('sessionModeBadge');
+        const endSessionBtn = document.getElementById('end-session-btn');
+
+        videoPanel.classList.remove('active');
+        workspacePanel.classList.add('fullscreen');
+        
+        // Hide End Session button
+        if (endSessionBtn) {
+          endSessionBtn.classList.remove('visible');
+        }
+        
+        // Update session mode badge
+        if (sessionBadge) {
+          sessionBadge.textContent = '👤 Self-Study Mode';
+          sessionBadge.style.display = 'inline-block';
+          sessionBadge.style.background = 'rgba(99, 102, 241, 0.2)';
+          sessionBadge.style.color = '#6366f1';
+        }
+
+        // Dispose Jitsi
+        if (this.jitsi) {
+          this.jitsi.dispose();
+          this.jitsi = null;
+        }
+      }
+
+      initializeJitsi() {
+        if (!this.user) {
+          console.warn('[VirtualLab] Cannot initialize Jitsi - no user data');
+          return;
+        }
+        this.jitsi = new JitsiIntegration('jitsi-container', {
+          projectId: this.projectId,
+          displayName: (this.user && (this.user.firstName || this.user.name)) || 'Participant',
+          isMentor: this.isMentor,
+          token: this.token,
+          sessionId: this.sessionId,
+          roomName: this.sessionId ? `session-${this.sessionId}` : `project-${this.projectId}`,
+          onReady: () => {
+            console.log('[VirtualLab] Jitsi ready');
+            // Update status to show video is initialized
+            const statusEl = document.getElementById('mentor-status-text');
+            if (statusEl) {
+              statusEl.innerHTML = '<strong>🎥 Live Session</strong> - Video conference active. Please enable your camera and microphone.';
+            }
+            // Automatically enable camera and mic for both mentors and students
+            this.enableCameraAndMicrophone();
+          },
+          onJoined: () => {
+            console.log('[VirtualLab] Joined meeting');
+            this.startSessionTimer();
+          },
+          onLeft: () => {
+            console.log('[VirtualLab] Left meeting');
+            this.stopSessionTimer();
+          },
+          onRecordingStatusChanged: (data) => {
+            const indicator = document.getElementById('recording-indicator');
+            const text = document.getElementById('recording-text');
+            if (data.on) {
+              indicator.style.display = 'block';
+              text.style.display = 'block';
+            } else {
+              indicator.style.display = 'none';
+              text.style.display = 'none';
+            }
+          },
+          onError: (error) => {
+            console.warn('[VirtualLab] Jitsi event:', error);
+            const statusEl = document.getElementById('mentor-status-text');
+            if (!statusEl) return;
+
+            if (error?.type === 'lobby') {
+              statusEl.innerHTML = '<strong>🎥 Live Session</strong> - Lobby enabled. Please wait for mentor admission.';
+              return;
+            }
+
+            if (error?.type === 'camera-disabled') {
+              statusEl.innerHTML = '<strong>🎥 Live Session</strong> - Camera unavailable. Continuing with microphone only.';
+              return;
+            }
+
+            if (String(error?.message || '').toLowerCase().includes('notreadableerror')) {
+              statusEl.innerHTML = '<strong>🎥 Live Session</strong> - Camera is busy, switched to audio-only mode.';
+            }
+          }
+        });
+
+        this.jitsi.init();
+      }
+
+      /**
+       * Enable camera and microphone for both mentor and student
+       */
+      enableCameraAndMicrophone() {
+        if (this.jitsi && this.jitsi.enableAudioVideo) {
+          this.jitsi.enableAudioVideo().catch((error) => {
+            console.warn('[VirtualLab] Camera/Mic permission needed:', error.message);
+            // Show user-friendly message
+            const statusEl = document.getElementById('mentor-status-text');
+            if (statusEl) {
+              statusEl.innerHTML = '<strong>🎥 Live Session</strong> - Please grant camera & microphone permissions to participate.';
+            }
+          });
+        }
+      }
+
+      startSessionTimer() {
+        // Clear any existing timer first
+        if (this.sessionTimer) {
+          clearInterval(this.sessionTimer);
+        }
+
+        const timerEl = document.getElementById('session-timer');
+        if (!timerEl) {
+          console.error('[VirtualLab] Timer element not found');
+          return;
+        }
+
+        let seconds = 0;
+        
+        // Update immediately
+        timerEl.textContent = '00:00:00';
+        
+        this.sessionTimer = setInterval(() => {
+          seconds++;
+          const hrs = Math.floor(seconds / 3600);
+          const mins = Math.floor((seconds % 3600) / 60);
+          const secs = seconds % 60;
+          timerEl.textContent = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+          console.log('[VirtualLab] Timer update:', timerEl.textContent);
+        }, 1000);
+        
+        console.log('[VirtualLab] Session timer started');
+      }
+
+      stopSessionTimer() {
+        if (this.sessionTimer) {
+          clearInterval(this.sessionTimer);
+          this.sessionTimer = null;
+        }
+      }
+
+      /**
+       * End session (Mentor only)
+       */
+      async endSession() {
+        if (!this.isMentor) {
+          alert('Only mentors can end the session.');
+          return;
+        }
+
+        if (!confirm('Are you sure you want to end this session? This will disconnect all participants.')) {
+          return;
+        }
+
+        try {
+          // End Jitsi meeting
+          if (this.jitsi) {
+            this.jitsi.hangup();
+          }
+
+          // Stop session timer
+          this.stopSessionTimer();
+
+          // Hide video panel
+          this.hideVideoPanel();
+
+          // Show success message
+          const statusEl = document.getElementById('mentor-status-text');
+          if (statusEl) {
+            statusEl.innerHTML = '<strong>Session Ended</strong> - Session completed successfully';
+          }
+
+          // Notify via alert
+          alert('Session ended successfully! Redirecting to dashboard...');
+
+          // Redirect to mentor dashboard
+          setTimeout(() => {
+            window.location.href = '/pages/mentor/dashboard.html';
+          }, 1500);
+
+        } catch (error) {
+          console.error('[VirtualLab] Error ending session:', error);
+          alert('Failed to end session. Please try again.');
+        }
+      }
+
+      async initializeMonacoEditor() {
+        return new Promise((resolve) => {
+          require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+          require(['vs/editor/editor.main'], () => {
+            this.editor = monaco.editor.create(document.getElementById('code-editor'), {
+              value: '',
+              language: 'javascript',
+              theme: 'vs-dark',
+              automaticLayout: true,
+              minimap: { enabled: true },
+              fontSize: 14,
+              wordWrap: 'on'
+            });
+
+            // Enable save on Ctrl+S
+            this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+              this.saveCurrentFile();
+            });
+
+            // Run on F5
+            this.editor.addCommand(monaco.KeyCode.F5, () => {
+              this.runCurrentFile();
+            });
+
+            // Track changes
+            this.editor.onDidChangeModelContent(() => {
+              document.getElementById('btn-save').disabled = false;
+            });
+
+            resolve();
+          });
+        });
+      }
+
+      initializeFileManager() {
+        this.fileManager = new FileManagerUI('file-manager-container', {
+          projectId: this.projectId,
+          token: this.token,
+          onFileSelect: (data) => this.openFile(data),
+          onError: (error) => console.error('File manager error:', error)
+        });
+      }
+
+      initializeSocketIO() {
+        this.socket = io({
+          auth: { token: this.token }
+        });
+
+        this.socket.on('connect', () => {
+          console.log('Socket connected');
+          const userId = this.user?._id || this.user?.id || 'unknown';
+          this.socket.emit('join-session', {
+            projectId: this.projectId,
+            userId: userId
+          });
+        });
+
+        this.socket.on('file-updated', (data) => {
+          console.log('File updated by another user:', data);
+          // Optionally reload file if currently open
+        });
+
+        this.socket.on('mentor-status-changed', (data) => {
+          this.checkMentorStatus();
+        });
+      }
+
+      async openFile(data) {
+        const filePath = data.path || data.filePath || '';
+        this.currentFile = { filePath };
+
+        // Show editor, hide placeholder
+        document.getElementById('editor-placeholder').style.display = 'none';
+        document.getElementById('code-editor').style.display = 'block';
+
+        // Set editor content
+        const language = this.getLanguageFromPath(filePath);
+        monaco.editor.setModelLanguage(this.editor.getModel(), language);
+        this.editor.setValue(data.content || '');
+
+        // Add tab
+        this.addTab(filePath);
+
+        // Reset save button
+        document.getElementById('btn-save').disabled = true;
+      }
+
+      openExtraFile(filePath, content) {
+        this.openFile({ path: filePath, content });
+      }
+
+      getLanguageFromPath(path) {
+          if (!path) return 'plaintext';
+        const ext = path.split('.').pop().toLowerCase();
+        const langMap = {
+          'js': 'javascript',
+          'ts': 'typescript',
+          'html': 'html',
+          'css': 'css',
+          'json': 'json',
+          'py': 'python',
+          'java': 'java',
+          'cpp': 'cpp',
+          'c': 'c',
+          'md': 'markdown',
+          'txt': 'plaintext'
+        };
+        return langMap[ext] || 'plaintext';
+      }
+
+      addTab(filePath) {
+        if (!filePath) return;
+        // Check if tab already exists
+        if (this.openTabs.find(t => t.path === filePath)) {
+          this.activateTab(filePath);
+          return;
+        }
+
+        const tab = {
+          path: filePath,
+          name: filePath.split('/').pop()
+        };
+
+        this.openTabs.push(tab);
+        this.renderTabs();
+        this.activateTab(filePath);
+      }
+
+      renderTabs() {
+        const container = document.getElementById('editor-tabs');
+        container.innerHTML = this.openTabs.map(tab => `
+          <div class="editor-tab ${tab.path === this.currentFile?.filePath ? 'active' : ''}" 
+               data-path="${tab.path}">
+            <span>${tab.name}</span>
+            <span class="editor-tab-close" data-path="${tab.path}">✕</span>
+          </div>
+        `).join('');
+
+        // Attach click handlers
+        container.querySelectorAll('.editor-tab').forEach(el => {
+          el.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('editor-tab-close')) {
+              this.selectFileByPath(el.dataset.path);
+            }
+          });
+        });
+
+        container.querySelectorAll('.editor-tab-close').forEach(el => {
+          el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.closeTab(el.dataset.path);
+          });
+        });
+      }
+
+      activateTab(filePath) {
+        document.querySelectorAll('.editor-tab').forEach(el => {
+          el.classList.toggle('active', el.dataset.path === filePath);
+        });
+      }
+
+      closeTab(filePath) {
+        this.openTabs = this.openTabs.filter(t => t.path !== filePath);
+        this.renderTabs();
+
+        if (this.currentFile?.filePath === filePath) {
+          if (this.openTabs.length > 0) {
+            this.selectFileByPath(this.openTabs[0].path);
+          } else {
+            this.currentFile = null;
+            document.getElementById('editor-placeholder').style.display = 'flex';
+            document.getElementById('code-editor').style.display = 'none';
+          }
+        }
+      }
+
+      async selectFileByPath(filePath) {
+        // Load file content and open
+        const fileManager = this.fileManager;
+        const node = document.querySelector(`.tree-node[data-path="${filePath}"]`);
+        if (node) {
+          await fileManager.selectFile(filePath, node.dataset.type);
+        }
+      }
+
+      async saveCurrentFile() {
+        if (!this.currentFile) return;
+
+        const content = this.editor.getValue();
+        const success = await this.fileManager.saveFile(this.currentFile.filePath, content);
+
+        if (success) {
+          document.getElementById('btn-save').disabled = true;
+          this.showSaveIndicator();
+
+          // Emit socket event (with null-safe userId)
+          const userId = this.user?._id || this.user?.id || 'unknown';
+          this.socket.emit('file-updated', {
+            projectId: this.projectId,
+            filePath: this.currentFile.filePath,
+            userId: userId
+          });
+        } else {
+          alert('Failed to save file');
+        }
+      }
+
+      showSaveIndicator() {
+        const indicator = document.getElementById('save-indicator');
+        indicator.classList.add('show');
+        setTimeout(() => {
+          indicator.classList.remove('show');
+        }, 2000);
+      }
+
+      appendConsoleLine(message, type = 'output') {
+        if (!this.consoleOutputEl) return;
+        const lines = (message || '').toString().split('\n');
+        lines.forEach(line => {
+          const div = document.createElement('div');
+          div.className = `console-line ${type}`;
+          div.textContent = line.length ? line : ' ';
+          this.consoleOutputEl.appendChild(div);
+        });
+        this.consoleOutputEl.scrollTop = this.consoleOutputEl.scrollHeight;
+      }
+
+      clearConsole() {
+        if (!this.consoleOutputEl) return;
+        this.consoleOutputEl.textContent = 'Ready. Click Run to execute the current file.';
+      }
+
+      setRunStatus(state = 'idle', label = 'Idle') {
+        if (!this.runStatusEl) return;
+        this.runStatusEl.className = `status-dot ${state}`;
+        this.runStatusEl.textContent = label;
+      }
+
+      async runCurrentFile() {
+        if (this.isRunning) return;
+        if (!this.currentFile) {
+          this.appendConsoleLine('Open a file to run first.', 'error');
+          return;
+        }
+
+        const runBtn = document.getElementById('btn-run');
+        const code = this.editor?.getValue() || '';
+        const language = this.getLanguageFromPath(this.currentFile.filePath);
+
+        this.isRunning = true;
+        if (runBtn) runBtn.disabled = true;
+        this.setRunStatus('running', 'Running');
+        this.clearConsole();
+        this.appendConsoleLine(`> Running ${this.currentFile.filePath} (${language})`, 'meta');
+
+        try {
+          const response = await fetch('/api/exec/run', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.token}`
+            },
+            body: JSON.stringify({
+              language,
+              code,
+              files: [{ path: this.currentFile.filePath, content: code }]
+            })
+          });
+
+          if (!response.ok) {
+            let errorMsg = 'Run failed';
+            try {
+              const errData = await response.json();
+              errorMsg = errData.message || JSON.stringify(errData);
+            } catch (e) {
+              errorMsg = await response.text();
+            }
+            throw new Error(errorMsg);
+          }
+
+          const job = await response.json();
+          await this.renderJobOutput(job, language);
+
+          if (job.jobId && job.status && job.status !== 'completed') {
+            await this.pollJobLogs(job.jobId, language);
+          }
+        } catch (error) {
+          console.error('Run error:', error);
+          this.appendConsoleLine(error.message || 'Run failed', 'error');
+          this.setRunStatus('failed', 'Failed');
+          this.lastRunSnapshot = {
+            filePath: this.currentFile.filePath,
+            language,
+            stdout: '',
+            stderr: error.message,
+            status: 'failed'
+          };
+        } finally {
+          this.isRunning = false;
+          if (runBtn) runBtn.disabled = false;
+        }
+      }
+
+      async pollJobLogs(jobId, language) {
+        for (let i = 0; i < 5; i++) {
+          await new Promise(resolve => setTimeout(resolve, 800));
+          try {
+            const res = await fetch(`/api/exec/logs/${jobId}`, {
+              headers: { 'Authorization': `Bearer ${this.token}` }
+            });
+            if (!res.ok) continue;
+            const job = await res.json();
+            await this.renderJobOutput(job, language);
+            if (job.status === 'completed' || job.status === 'failed') break;
+          } catch (err) {
+            console.warn('Log poll failed', err);
+          }
+        }
+      }
+
+      async renderJobOutput(job, language) {
+        if (!job) return;
+        if (job.stdout) this.appendConsoleLine(job.stdout, 'output');
+        if (job.stderr) this.appendConsoleLine(job.stderr, 'error');
+
+        const failed = job.exitCode && job.exitCode !== 0 ? true : Boolean(job.stderr && job.stderr.trim());
+        const state = failed ? 'failed' : 'success';
+        this.setRunStatus(state, job.status ? job.status.toUpperCase() : state.toUpperCase());
+
+        this.lastRunSnapshot = {
+          filePath: this.currentFile?.filePath,
+          language,
+          stdout: job.stdout,
+          stderr: job.stderr,
+          status: job.status,
+          exitCode: job.exitCode
+        };
+      }
+
+      getConsoleTail(limit = 1200) {
+        if (!this.consoleOutputEl) return '';
+        return this.consoleOutputEl.textContent.slice(-limit);
+      }
+
+      openAiPanel() {
+        if (this.aiBackdropEl) this.aiBackdropEl.style.display = 'block';
+        if (this.aiPanelEl) this.aiPanelEl.classList.add('open');
+        if (this.aiInputEl) this.aiInputEl.focus();
+      }
+
+      closeAiPanel() {
+        if (this.aiBackdropEl) this.aiBackdropEl.style.display = 'none';
+        if (this.aiPanelEl) this.aiPanelEl.classList.remove('open');
+      }
+
+      addAiMessage(role, text, toolData = null) {
+        if (!this.aiMessagesEl) return;
+        
+        // If it's just a tool proposal with no text, we can append it to the last assistant message 
+        // OR create a special container. Let's create a specialized container.
+        const div = document.createElement('div');
+        div.className = `ai-message ${role}`;
+        
+        if (text) {
+          const textSpan = document.createElement('div');
+          textSpan.textContent = text;
+          div.appendChild(textSpan);
+        } else if (role === 'tool') {
+          // Empty text for tool role is fine, we just want the proposal box
+          div.style.background = 'transparent';
+          div.style.border = 'none';
+          div.style.padding = '0';
+        }
+
+        if (toolData && toolData.name === 'update_file') {
+          const { filePath, content } = toolData.args;
+          const proposalDiv = document.createElement('div');
+          proposalDiv.style.marginTop = '12px';
+          proposalDiv.style.padding = '10px';
+          proposalDiv.style.background = '#1e293b';
+          proposalDiv.style.borderRadius = '6px';
+          proposalDiv.style.border = '1px solid #3b82f6';
+
+          proposalDiv.innerHTML = `
+            <div style="font-size: 11px; font-weight: 700; color: #3b82f6; margin-bottom: 4px;">PROPOSED EDIT</div>
+            <div style="font-size: 12px; color: #e5e7eb; margin-bottom: 8px;">File: <code>${filePath}</code></div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-sm btn-primary" id="btn-apply-${Date.now()}">Apply Changes</button>
+              <button class="btn btn-sm" id="btn-diff-${Date.now()}">View Changes</button>
+            </div>
+          `;
+
+          div.appendChild(proposalDiv);
+
+          // Add listeners after a short delay so element is in DOM
+          setTimeout(() => {
+            const applyBtn = proposalDiv.querySelector('button[id^="btn-apply-"]');
+            const diffBtn = proposalDiv.querySelector('button[id^="btn-diff-"]');
+
+            if (applyBtn) {
+              applyBtn.addEventListener('click', () => this.applyProposedEdit(filePath, content, applyBtn));
+            }
+            if (diffBtn) {
+              diffBtn.addEventListener('click', () => {
+                // For now, simpler than full diff, just show file in editor if path matches
+                this.showProposedDiff(filePath, content);
+              });
+            }
+          }, 0);
+        }
+
+        this.aiMessagesEl.appendChild(div);
+        this.aiMessagesEl.scrollTop = this.aiMessagesEl.scrollHeight;
+      }
+
+      async applyProposedEdit(filePath, content, btn) {
+        try {
+          btn.disabled = true;
+          btn.textContent = 'Applying...';
+
+          const res = await fetch('/api/ai/apply-edit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.token}`
+            },
+            body: JSON.stringify({
+              projectId: this.projectId,
+              filePath,
+              content
+            })
+          });
+
+          if (!res.ok) throw new Error(await res.text() || 'Apply failed');
+
+          const data = await res.json();
+          btn.textContent = 'Applied ✓';
+          btn.classList.remove('btn-primary');
+          btn.classList.add('btn-success');
+
+          // Refresh file manager and current file if it's the one we just edited
+          if (this.fileManager) await this.fileManager.loadFiles();
+          if (this.currentFile && this.currentFile.filePath === filePath) {
+             this.editor.setValue(content);
+          } else {
+             // Ask if user wants to open the edited file
+             if (confirm(`Successfully updated ${filePath}. Open it now?`)) {
+               this.openExtraFile(filePath, content);
+             }
+          }
+        } catch (error) {
+          console.error('Apply edit failed:', error);
+          alert('Failed to apply edit: ' + error.message);
+          btn.disabled = false;
+          btn.textContent = 'Try Again';
+        }
+      }
+
+      showProposedDiff(filePath, content) {
+        // Basic implementation: show comparison if possible or just log it
+        console.log(`AI proposed change for ${filePath}:`, content);
+        alert(`AI proposed new content for ${filePath}. Check console for details. Full diff UI coming soon.`);
+      }
+
+      setAiBusy(busy) {
+        this.aiBusy = busy;
+        const sendBtn = document.querySelector('#ai-form button[type="submit"]');
+        if (sendBtn) sendBtn.disabled = busy;
+        if (this.aiInputEl) this.aiInputEl.disabled = busy;
+      }
+
+      async askAssistant(prompt) {
+        if (!prompt || this.aiBusy) return;
+        this.addAiMessage('user', prompt);
+        this.setAiBusy(true);
+
+        try {
+          const payload = {
+            prompt,
+            filePath: this.currentFile?.filePath,
+            fileContent: this.editor?.getValue()?.slice(0, 4000),
+            consoleTail: this.getConsoleTail(1200),
+            errorStack: this.lastRunSnapshot?.stderr
+          };
+
+          const res = await fetch('/api/ai/assist', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.token}`
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!res.ok) {
+            const msg = await res.text();
+            throw new Error(msg || 'AI request failed');
+          }
+
+          const data = await res.json();
+          const message = data.message || 'AI responded with no text message.';
+          
+          this.addAiMessage('assistant', message);
+
+          if (data.toolCalls && data.toolCalls.length > 0) {
+            data.toolCalls.forEach(call => {
+              // We'll add a specialized "tool proposal" message or attach it to the previous one
+              // For simplicity, we add it as a new invisible-text message with the tool data
+              this.addAiMessage('tool', '', call);
+            });
+          }
+        } catch (error) {
+          console.error('AI error:', error);
+          this.addAiMessage('assistant', `Error: ${error.message}`);
+        } finally {
+          this.setAiBusy(false);
+        }
+      }
+
+      explainLastError() {
+        if (!this.lastRunSnapshot || !this.lastRunSnapshot.stderr) {
+          this.addAiMessage('assistant', 'No recent error to explain. Run your code first.');
+          this.openAiPanel();
+          return;
+        }
+
+        const snippet = this.editor?.getValue()?.slice(0, 1200) || '';
+        const prompt = `Explain this error and how to fix it. File: ${this.currentFile?.filePath}. Error: ${this.lastRunSnapshot.stderr}. Code snippet:\n${snippet}`;
+        this.openAiPanel();
+        this.askAssistant(prompt);
+      }
+
+      attachEventListeners() {
+        // Save button
+        document.getElementById('btn-save').addEventListener('click', () => {
+          this.saveCurrentFile();
+        });
+
+        // Format button
+        document.getElementById('btn-format').addEventListener('click', () => {
+          this.editor.getAction('editor.action.formatDocument').run();
+        });
+
+        // Run button
+        document.getElementById('btn-run').addEventListener('click', () => {
+          this.runCurrentFile();
+        });
+
+        // Clear console
+        const clearBtn = document.getElementById('btn-clear-console');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', () => this.clearConsole());
+        }
+
+        // AI Help button
+        const aiHelpBtn = document.getElementById('btn-ai-help');
+        if (aiHelpBtn) {
+          aiHelpBtn.addEventListener('click', () => {
+            this.openAiPanel();
+          });
+        }
+
+        const aiClose = document.getElementById('btn-close-ai');
+        if (aiClose) aiClose.addEventListener('click', () => this.closeAiPanel());
+        if (this.aiBackdropEl) this.aiBackdropEl.addEventListener('click', () => this.closeAiPanel());
+
+        const aiForm = document.getElementById('ai-form');
+        if (aiForm) {
+          aiForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const value = this.aiInputEl?.value?.trim();
+            if (!value) return;
+            this.aiInputEl.value = '';
+            this.askAssistant(value);
+          });
+        }
+
+        const aiExplain = document.getElementById('btn-ai-explain');
+        if (aiExplain) aiExplain.addEventListener('click', () => this.explainLastError());
+
+        // Back to Workspace button
+        const backBtn = document.getElementById('btn-back-to-workspace');
+        if (backBtn) {
+          backBtn.addEventListener('click', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('projectId') || this.projectId;
+            if (projectId) {
+              window.location.href = `/pages/student/project-workspace.html?projectId=${projectId}`;
+            } else {
+              window.location.href = `/pages/student/dashboard.html`;
+            }
+          });
+        }
+
+        // Check for session mode
+        this.checkSessionMode();
+      }
+
+      checkSessionMode() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        const sessionId = urlParams.get('sessionId');
+        
+        const badge = document.getElementById('sessionModeBadge');
+        if (badge) {
+          if (sessionId && mode === 'session') {
+            badge.textContent = '🎥 Live Session Mode';
+            badge.style.background = 'rgba(34, 197, 94, 0.2)';
+            badge.style.color = '#22c55e';
+            badge.style.display = 'inline-block';
+          } else {
+            badge.textContent = '👤 Self-Study Mode';
+            badge.style.display = 'inline-block';
+          }
+        }
+      }
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        new VirtualLabManager();
+      });
+    } else {
+      new VirtualLabManager();
+    }
+  </script>
+</body>
+</html>

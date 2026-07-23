@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .dashboard-wrapper {
+      min-height: 100vh;
+      padding-top: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: clamp(2rem, 5vw, 4rem);
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .welcome-box h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .welcome-box p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+    }
+
+    .stat-card {
+      padding: 2.5rem 2rem;
+      border-radius: var(--radius-xl);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 160px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+    }
+
+    .stat-value {
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .project-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-2xl);
+      padding: 3rem;
+      margin-bottom: 2.5rem;
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+      animation: slideUp 0.5s ease forwards;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .project-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .project-info h3 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      color: var(--text-main);
+    }
+
+    .status-badge {
+      padding: 0.6rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .status-badge.enrolled { background: rgba(99, 102, 241, 0.1); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.2); }
+    .status-badge.in-progress { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .status-badge.completed { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+
+    /* Aurora Background Styles */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+ }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .progress-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .progress-percentage {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--gradient-primary);
+      border-radius: 10px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Mentor Info */
+    .mentor-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      padding: 1.5rem;
+      background: rgba(99, 102, 241, 0.03);
+      border-radius: 12px;
+      border: 1px solid rgba(99, 102, 241, 0.1);
+      margin-top: 1.5rem;
+    }
+
+    .mentor-detail {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .mentor-detail-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mentor-detail-value {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* Milestones */
+    .milestones-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .milestone-card {
+      background: rgba(17, 24, 39, 0.5);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: all 0.3s ease;
+      animation: slideUp 0.5s ease forwards;
+      opacity: 0;
+    }
+
+    .milestone-card:nth-child(1) { animation-delay: 0.1s; }
+    .milestone-card:nth-child(2) { animation-delay: 0.2s; }
+    .milestone-card:nth-child(3) { animation-delay: 0.3s; }
+    .milestone-card:nth-child(4) { animation-delay: 0.4s; }
+    .milestone-card:nth-child(n+5) { animation-delay: 0.5s; }
+
+    .milestone-card:hover {
+      background: rgba(17, 24, 39, 0.7);
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(99, 102, 241, 0.1);
+    }
+
+    .milestone-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .milestone-content h4 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1rem;
+    }
+
+    .milestone-content p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .milestone-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .milestone-status.completed {
+      color: #10b981;
+    }
+
+    .milestone-status.active {
+      color: #3b82f6;
+    }
+
+    .milestone-status.pending {
+      color: var(--text-muted);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: rgba(99, 102, 241, 0.03);
+      border: 2px dashed rgba(99, 102, 241, 0.2);
+      border-radius: 16px;
+      animation: slideUp 0.5s ease;
+    }
+
+    .empty-state h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .dashboard-container {
+        padding: 1.5rem;
+      }
+
+      .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .dashboard-actions {
+        width: 100%;
+      }
+
+      .dashboard-actions .btn {
+        flex: 1;
+        min-width: 150px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .project-header {
+        flex-direction: column;
+      }
+
+      .project-card {
+        padding: 1.5rem;
+      }
+
+      .milestones-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .mentor-info {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .dashboard-container {
+        padding: 1rem;
+      }
+
+      .dashboard-header {
+        margin-bottom: 2rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .stat-card {
+        padding: 1rem;
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+      }
+
+      .stat-value {
+        font-size: 1.75rem;
+      }
+
+      .project-card {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .section-header h2 {
+        font-size: 1.25rem;
+      }
+
+      .milestones-grid {
+        gap: 1rem;
+      }
+
+      .milestone-card {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Aurora Background -->
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>   
+
+  <!-- Navigation will be injected by ui-manager.js -->
+
+  <div class="dashboard-wrapper">
+    <div class="dashboard-container">
+      <!-- Dashboard Header -->
+      <div class="dashboard-header">
+        <div class="welcome-box">
+          <div id="welcome-section">
+            <h1 class="gradient-text">Welcome back!</h1>
+            <p>Loading your progress...</p>
+          </div>
+        </div>
+        <div class="dashboard-actions">
+          <button class="btn btn-primary" id="openProjectWorkspaceBtn" title="Go to your active project workspace">
+            🚀 Open Workspace
+          </button>
+          <a href="/marketplace.html" class="btn btn-glass">
+            🛍️ Browse Projects
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats Overview -->
+      <div class="stats-grid" id="stats-container">
+        <!-- Will be populated dynamically -->
+      </div>
+
+      <!-- Current Projects Section -->
+      <div class="projects-section">
+        <div class="section-header">
+          <span class="icon">📋</span>
+          <h2>My Projects</h2>
+        </div>
+        <div id="current-project-container">
+          <!-- Will be loaded dynamically -->
+        </div>
+      </div>
+
+      <!-- Milestones Section -->
+      <div class="projects-section">
+        <div class="section-header">
+          <span class="icon">🎯</span>
+          <h2>Active Milestones</h2>
+        </div>
+        <div id="milestones-container" class="milestones-grid">
+          <!-- Will be loaded dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/data-service.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    // Add event listeners for buttons
+    document.addEventListener('DOMContentLoaded', () => {
+      // Add event listeners for navigation buttons
+      const openVirtualLabBtn = document.getElementById('openVirtualLabBtn');
+      if (openVirtualLabBtn) {
+        openVirtualLabBtn.addEventListener('click', () => {
+          window.location.href = '/pages/virtual-lab-v3.html';
+        });
+      }
+      
+      const openProjectWorkspaceBtn = document.getElementById('openProjectWorkspaceBtn');
+      if (openProjectWorkspaceBtn) {
+        openProjectWorkspaceBtn.addEventListener('click', async () => {
+          // Get user's enrolled projects
+          const user = JSON.parse(localStorage.getItem('user'));
+          if (!user) {
+            window.location.href = '/login.html';
+            return;
+          }
+          
+          try {
+            // Fetch user's enrolled projects
+            const response = await window.api.getMyEnrolledProjects();
+            const progressData = response.projects || response;
+            
+            if (progressData && progressData.length > 0) {
+              // Get the most recently updated project
+              const sortedProgress = [...progressData].sort((a, b) => {
+                const dateA = new Date(a.updated_at || a.enrolled_at || 0);
+                const dateB = new Date(b.updated_at || b.enrolled_at || 0);
+                return dateB - dateA;
+              });
+              
+              const mostRecentProject = sortedProgress[0];
+              const projectId = mostRecentProject.projectId?._id || mostRecentProject.projectId;
+              
+              // Navigate to project workspace
+              window.location.href = `/pages/student/project-workspace.html?projectId=${projectId}`;
+            } else {
+              alert('You have no enrolled projects yet. Please enroll in a project first.');
+              window.location.href = '/marketplace.html';
+            }
+          } catch (error) {
+            console.error('Error opening workspace:', error);
+            alert('Failed to open workspace. Please try again.');
+          }
+        });
+      }
+      
+      const resumeWorkBtn = document.getElementById('resumeWorkBtn');
+      if (resumeWorkBtn) {
+        resumeWorkBtn.addEventListener('click', async () => {
+          // Get user's enrolled projects
+          const user = JSON.parse(localStorage.getItem('user'));
+          if (!user) {
+            window.location.href = '/login.html';
+            return;
+          }
+          
+          try {
+            console.log('🎯 Resume Work clicked - fetching progress...');
+            
+            // Fetch user's enrolled projects
+            const response = await window.api.getMyEnrolledProjects();
+            const progressData = response.projects || response;
+            console.log('📊 Progress data:', progressData);
+            
+            if (progressData && progressData.length > 0) {
+              // Get the most recently updated project (sort by updated_at)
+              const sortedProgress = [...progressData].sort((a, b) => {
+                const dateA = new Date(a.updated_at || a.enrolled_at || 0);
+                const dateB = new Date(b.updated_at || b.enrolled_at || 0);
+                return dateB - dateA;
+              });
+              
+              const mostRecentProject = sortedProgress[0];
+              const projectId = mostRecentProject.projectId?._id || mostRecentProject.projectId;
+              
+              console.log('📚 Most recent project ID:', projectId);
+              
+              // For enrolled projects, go to project details page
+              // where they can access resources, milestones, and virtual lab
+              window.location.href = `/pages/project-details.html?id=${projectId}`;
+              
+            } else {
+              // No enrolled projects, go to marketplace
+              console.log('ℹ️ No enrolled projects found');
+              alert('No enrolled projects found. Browse the marketplace to get started!');
+              setTimeout(() => {
+                window.location.href = '/marketplace.html';
+              }, 500);
+            }
+          } catch (error) {
+            console.error('❌ Error in Resume Work:', error);
+            // Show error and stay on dashboard
+            alert('Error loading your projects. Please try again.');
+          }
+        });
+      }
+      
+      initDashboard();
+    });
+
+    // Dashboard initialization
+    async function initDashboard() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      const welcomeSection = document.getElementById('welcome-section');
+      if (welcomeSection) {
+        welcomeSection.innerHTML = `
+          <h1 class="gradient-text">Welcome back, ${user.firstName}! 👋</h1>
+          <p>Here's your learning progress at a glance</p>
+        `;
+      }
+
+      try {
+        // Fetch enrolled projects
+        const enrolledResponse = await window.api.getEnrolledProjects();
+        const projects = enrolledResponse.projects || [];
+
+        // Update stats
+        updateStats(projects);
+
+        const container = document.getElementById('current-project-container');
+        if (!projects || projects.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <h3>No Projects Yet</h3>
+              <p>Start your learning journey by enrolling in a project</p>
+              <a href="/marketplace.html" class="btn btn-primary">Explore Marketplace</a>
+            </div>
+          `;
+          return;
+        }
+
+        // Render all enrolled projects
+        container.innerHTML = projects.map((progress, index) => {
+          const project = progress.projectId;
+          if (!project) return ''; // Skip if project data is missing
+          
+          // Check assignedMentorId first (mentor assigned during enrollment), then fall back to project's mentor_id
+          const mentor = progress.assignedMentorId || project.mentor_id;
+          const mentorName = mentor?.firstName ? `${mentor.firstName} ${mentor.lastName || ''}` : 'Not assigned yet';
+          const statusClass = progress.status === 'completed' ? 'completed' : (progress.status === 'in_progress' ? 'in-progress' : 'enrolled');
+          const isGroup = progress.enrollment_type === 'group';
+          
+          return `
+            <div class="project-card" data-project-id="${project._id}" style="animation-delay: ${index * 0.1}s; position: relative; overflow: hidden; cursor: pointer;">
+              ${isGroup ? '<div style="position: absolute; top: 0; right: 0; background: var(--color-primary); color: white; padding: 0.5rem 1.5rem; border-radius: 0 0 0 15px; font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">SQUAD TRACK</div>' : ''}
+              
+              <div class="project-header">
+                <div class="project-info">
+                  <h3>${project.title}</h3>
+                  <p>Mentor: ${mentorName}</p>
+                </div>
+                <span class="status-badge ${statusClass}">${progress.status}</span>
+              </div>
+
+              <div class="progress-section">
+                <div class="progress-info">
+                  <span class="progress-label">Progress</span>
+                  <span class="progress-percentage">${progress.completion_percentage}%</span>
+                </div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar-fill" style="width: ${progress.completion_percentage}%"></div>
+                </div>
+              </div>
+
+              <div class="mentor-info">
+                <div class="mentor-detail">
+                  <span class="mentor-detail-label">Receipt ID</span>
+                  <span class="mentor-detail-value" style="font-family: monospace; font-size: 0.8rem;">${progress.transaction_id || 'MOCK-RECEIPT-N/A'}</span>
+                </div>
+                <div class="mentor-detail">
+                   <span class="mentor-detail-label">Track</span>
+                  <span class="mentor-detail-value">${isGroup ? 'Squad Collaboration' : 'Individual Focus'}</span>
+                </div>
+                <div class="mentor-detail">
+                  <span class="mentor-detail-label">Action</span>
+                  <a href="/pages/project-details.html?id=${project._id}" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">View Assets 🔑</a>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Add click handlers to project cards
+        document.querySelectorAll('.project-card').forEach(card => {
+          card.addEventListener('click', function(e) {
+            // Don't redirect if clicking on a link
+            if (e.target.tagName === 'A') {
+              return;
+            }
+            const projectId = this.getAttribute('data-project-id');
+            window.location.href = `/pages/virtual-lab-v3.html?id=${projectId}`;
+          });
+        });
+
+        // Fetch and render milestones
+        loadMilestones(projects.filter(p => p.projectId));
+
+      } catch (error) {
+        console.error('Dashboard error:', error);
+        document.getElementById('current-project-container').innerHTML = `
+          <div class="empty-state" style="border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.03);">
+            <h3 style="color: #ef4444;">⚠️ Error Loading Projects</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    function updateStats(projects) {
+      const total = projects.length;
+      const completed = projects.filter(p => p.status === 'completed').length;
+      const inProgress = projects.filter(p => p.status === 'in_progress').length;
+      const avgProgress = projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + p.completion_percentage, 0) / projects.length) : 0;
+
+      const statsContainer = document.getElementById('stats-container');
+      if (statsContainer) {
+        statsContainer.innerHTML = `
+          <div class="stat-card">
+            <div class="stat-label">📚 Total Projects</div>
+            <div class="stat-value">${total}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">✅ Completed</div>
+            <div class="stat-value">${completed}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">🔄 In Progress</div>
+            <div class="stat-value">${inProgress}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">📈 Avg Progress</div>
+            <div class="stat-value">${avgProgress}%</div>
+          </div>
+        `;
+      }
+
+      // Setup Open Workspace button
+      const workspaceBtn = document.getElementById('openProjectWorkspaceBtn');
+      if (workspaceBtn && projects.length > 0) {
+        const activeProject = projects[0]; // Get first active project
+        workspaceBtn.onclick = () => {
+          window.location.href = `/pages/student/project-workspace.html?projectId=${activeProject.projectId._id}`;
+        };
+      }
+    }
+
+    async function loadMilestones(projects) {
+      const milestonesContainer = document.getElementById('milestones-container');
+      if (!milestonesContainer) return;
+      
+      const allMilestones = [];
+
+      for (const progress of projects) {
+        try {
+          const milestones = await window.api.getProjectMilestones(progress.projectId._id);
+          if (milestones && Array.isArray(milestones)) {
+            allMilestones.push(...milestones.map((m, idx) => ({
+              ...m,
+              projectTitle: progress.projectId.title,
+              index: idx
+            })));
+          }
+        } catch (err) {
+          console.warn(`Could not load milestones for ${progress.projectId.title}:`, err);
+        }
+      }
+
+      if (allMilestones.length === 0) {
+        milestonesContainer.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <h3>No Milestones Yet</h3>
+            <p>Milestones will appear once your projects are set up</p>
+          </div>
+        `;
+        return;
+      }
+
+      milestonesContainer.innerHTML = allMilestones.map((m, idx) => {
+        const statusClass = m.completed ? 'completed' : (m.dueDate && new Date(m.dueDate) < new Date() ? 'pending' : 'active');
+        const dueDate = m.dueDate ? new Date(m.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No deadline';
+        
+        return `
+          <div class="milestone-card" style="animation-delay: ${idx * 0.05}s;">
+            <div style="display: flex; gap: 1rem;">
+              <div class="milestone-number">${m.index + 1}</div>
+              <div class="milestone-content" style="flex: 1;">
+                <h4>${m.title}</h4>
+                <p>${m.projectTitle}</p>
+              </div>
+            </div>
+            <div class="milestone-status ${statusClass}">
+              ${m.completed ? '✅ Completed' : (new Date(m.dueDate) < new Date() ? '⏰ Overdue' : '⏳ In Progress')}
+              <span style="margin-left: auto; color: var(--text-muted);">${dueDate}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>
+

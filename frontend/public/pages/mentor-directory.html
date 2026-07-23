@@ -1,0 +1,503 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentor Directory - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .mentor-container {
+      padding: clamp(2rem, 5vw, 4rem);
+      max-width: 1600px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .mentor-header {
+      text-align: center;
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+    }
+
+    .mentor-header-title {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 900;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .mentor-header-subtitle {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto clamp(2rem, 4vw, 3rem);
+    }
+
+    .search-bar-container {
+      margin: 0 auto clamp(3rem, 6vw, 4rem);
+      position: relative;
+      max-width: 700px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1.25rem 2rem;
+      padding-left: 3.5rem;
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1.5rem;
+      color: white;
+      outline: none;
+      transition: var(--transition);
+      backdrop-filter: blur(12px);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 1.2rem;
+    }
+
+    .mentor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+    }
+
+    .mentor-card {
+      border-radius: var(--radius-xl);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .mentor-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+    }
+
+    .mentor-card-header {
+      padding: 3rem 2rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: center;
+    }
+
+    .mentor-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 24px;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: white;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+      overflow: hidden;
+    }
+
+    .mentor-name {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.01em;
+    }
+
+    .mentor-title {
+      font-size: 0.95rem;
+      color: var(--primary);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .mentor-info {
+      padding: 2rem;
+      flex-grow: 1;
+    }
+
+    .mentor-bio {
+      font-size: 1rem;
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .mentor-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      margin-top: auto;
+    }
+
+    /* Aurora Background Styles */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    @media (max-width: 768px) {
+      .mentor-container {
+        padding: 1.5rem;
+      }
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 2rem;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal-content {
+      background: rgba(15, 16, 26, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-xl);
+      padding: 3rem;
+      max-width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .mentor-card {
+      animation: slideUp 0.5s ease-out forwards;
+    }
+
+    .mentor-card:nth-child(1) { animation-delay: 0.05s; }
+    .mentor-card:nth-child(2) { animation-delay: 0.1s; }
+    .mentor-card:nth-child(3) { animation-delay: 0.15s; }
+ .empty-state {
+      text-align: center;
+      padding: clamp(3rem, 5vw, 5rem) clamp(1.5rem, 3vw, 2rem);
+      grid-column: 1 / -1;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.04));
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .empty-state h3 {
+      font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .mentor-container {
+        padding: 1.5rem;
+      }
+
+      .mentor-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .mentor-header {
+        margin-bottom: 2rem;
+      }
+
+      .mentor-meta {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .btn-mentor {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .mentor-container {
+        padding: 1rem;
+      }
+
+      .mentor-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .mentor-header-title {
+        font-size: clamp(1.5rem, 4vw, 2.2rem);
+      }
+
+      .search-bar-container {
+        margin: 0 auto 1.5rem;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .mentor-card {
+      animation: slideUp 0.5s ease-out forwards;
+    }
+
+    .mentor-card:nth-child(1) { animation-delay: 0.05s; }
+    .mentor-card:nth-child(2) { animation-delay: 0.1s; }
+    .mentor-card:nth-child(3) { animation-delay: 0.15s; }
+    .mentor-card:nth-child(n+4) { animation-delay: 0.2s; }
+  </style>
+</head>
+<body>
+  <!-- Aurora Background -->
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <main class="mentor-container">
+    <div class="mentor-header">
+      <h1 class="gradient-text mentor-header-title">Connect with Mentors</h1>
+      <p class="mentor-header-subtitle">
+        Learn from industry leaders and academic experts. Our mentors provide the guidance you need to turn your ideas into reality.
+      </p>
+      
+      <div class="search-bar-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" class="search-input" placeholder="Search by name, expertise, or industry...">
+      </div>
+    </div>
+
+    <div class="mentor-grid" id="mentors-grid">
+      <!-- Mentors will be loaded here dynamically -->
+    </div>
+  </main>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const mentorContainer = document.getElementById('mentors-grid');
+      const searchInput = document.getElementById('search-input');
+      let allMentors = [];
+
+      async function loadMentors() {
+        try {
+          allMentors = await window.api.getMentors();
+          renderMentors(allMentors);
+        } catch (error) {
+          console.error('Error loading mentors:', error);
+          mentorContainer.innerHTML = '<div class="glass-card" style="padding: 3rem; text-align: center;">Error loading mentors. Please try again later.</div>';
+        }
+      }
+
+      function renderMentors(mentors) {
+        if (mentors.length === 0) {
+          mentorContainer.innerHTML = '<div class="glass-card empty-state"><h3>No mentors found</h3><p style="color: var(--text-dim);">Try adjusting your search terms.</p></div>';
+          return;
+        }
+
+        mentorContainer.innerHTML = mentors.map(mentor => `
+          <div class="glass-card mentor-card">
+            <div class="mentor-card-header">
+              <div class="mentor-avatar">
+                ${mentor.avatar_url ? `<img src="${mentor.avatar_url}" alt="${mentor.firstName || 'Mentor'}">` : (mentor.firstName || 'M').substring(0, 1)}
+              </div>
+              <h3 style="font-size: 1.5rem; margin-bottom: 0.25rem;">${mentor.firstName || 'Expert'} ${mentor.lastName || 'Mentor'}</h3>
+              <div class="aurora-text" style="font-weight: 600; font-size: 0.9rem;">Expert Mentor</div>
+            </div>
+            <div class="mentor-info">
+              <p class="mentor-bio">${mentor.bio || 'Dedicated mentor helping students bridge the gap between theory and practice through hands-on project guidance.'}</p>
+              <div class="mentor-meta">
+                <div style="font-size: 0.85rem; color: var(--text-dim);">
+                  <span style="color: var(--secondary);">●</span> Available for guidance
+                </div>
+                <button class="btn btn-primary btn-sm view-mentor-btn" data-mentor-id="${mentor._id}">View Profile</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        // Add event delegation for view profile buttons
+        mentorContainer.addEventListener('click', (e) => {
+          const btn = e.target.closest('.view-mentor-btn');
+          if (btn) {
+            const mentorId = btn.getAttribute('data-mentor-id');
+            const mentor = allMentors.find(m => m._id === mentorId);
+            if (mentor) {
+              showMentorProfile(mentor);
+            }
+          }
+        });
+      }
+
+      function showMentorProfile(mentor) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+          <div class="modal-content" style="max-width: 700px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+              <h2 style="margin: 0;">Mentor Profile</h2>
+              <button class="close-modal" style="background: none; border: none; font-size: 2rem; color: var(--text-muted); cursor: pointer; padding: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 2rem;">
+              <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 800; margin: 0 auto 1rem; box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);">
+                ${mentor.avatar_url ? `<img src="${mentor.avatar_url}" alt="${mentor.firstName}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">` : (mentor.firstName || 'M').substring(0, 1)}
+              </div>
+              <h3 style="font-size: 2rem; margin-bottom: 0.5rem;">${mentor.firstName || ''} ${mentor.lastName || ''}</h3>
+              <div class="aurora-text" style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem;">Expert Mentor</div>
+              <p style="color: var(--text-muted); font-size: 0.9rem;">${mentor.email || ''}</p>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;">
+              <h4 style="margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem;">About</h4>
+              <p style="color: var(--text-muted); line-height: 1.6;">
+                ${mentor.bio || 'This mentor is dedicated to helping students bridge the gap between theory and practice through hands-on project guidance and real-world experience.'}
+              </p>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;">
+              <h4 style="margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem;">How to Connect</h4>
+              <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem;">
+                To work with this mentor, enroll in one of their projects through the marketplace. Once enrolled, you'll have direct access to:
+              </p>
+              <ul style="color: var(--text-muted); line-height: 1.8; padding-left: 1.5rem;">
+                <li>One-on-one mentoring sessions</li>
+                <li>Project guidance and feedback</li>
+                <li>Career advice and industry insights</li>
+                <li>Code reviews and technical support</li>
+              </ul>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+              <a href="/marketplace.html?mentor=${mentor._id}" class="btn btn-primary" style="flex: 1; text-align: center; text-decoration: none;">View ${mentor.firstName}'s Projects</a>
+              <button class="btn btn-secondary close-modal" style="flex: 1;">Close</button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Close modal handlers
+        modal.querySelectorAll('.close-modal').forEach(btn => {
+          btn.addEventListener('click', () => modal.remove());
+        });
+        
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) modal.remove();
+        });
+      }
+
+      searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = allMentors.filter(m => 
+          (m.firstName && m.firstName.toLowerCase().includes(term)) || 
+          (m.lastName && m.lastName.toLowerCase().includes(term)) || 
+          (m.bio && m.bio.toLowerCase().includes(term))
+        );
+        renderMentors(filtered);
+      });
+
+      loadMentors();
+    });
+  </script>
+</body>
+</html>

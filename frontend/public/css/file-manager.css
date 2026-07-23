@@ -1,0 +1,276 @@
+/* File Manager Component Styles */
+
+.file-manager {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 13px;
+}
+
+.file-manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #333;
+  background: #252526;
+}
+
+.file-manager-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #cccccc;
+}
+
+.file-manager-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-icon {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 3px;
+  color: #cccccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background: #2a2d2e;
+  border-color: #454545;
+}
+
+.btn-icon:active {
+  background: #37373d;
+}
+
+.file-tree {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 5px 0;
+}
+
+.file-tree::-webkit-scrollbar {
+  width: 10px;
+}
+
+.file-tree::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.file-tree::-webkit-scrollbar-thumb {
+  background: #424242;
+  border-radius: 5px;
+}
+
+.file-tree::-webkit-scrollbar-thumb:hover {
+  background: #4e4e4e;
+}
+
+.tree-node {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.tree-node:hover {
+  background: #2a2d2e;
+}
+
+.tree-node.selected {
+  background: #094771;
+}
+
+.tree-node.selected:hover {
+  background: #0e639c;
+}
+
+.tree-node-toggle {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2px;
+  font-size: 10px;
+  color: #cccccc;
+}
+
+.tree-node-toggle:not(.has-children) {
+  visibility: hidden;
+}
+
+.tree-node-icon {
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+.tree-node-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree-node-size {
+  margin-left: 10px;
+  font-size: 11px;
+  color: #858585;
+}
+
+.tree-children {
+  margin-left: 0;
+}
+
+.tree-node.folder .tree-node-name {
+  font-weight: 500;
+}
+
+/* Context Menu */
+.context-menu {
+  position: fixed;
+  background: #252526;
+  border: 1px solid #454545;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 10000;
+  min-width: 150px;
+  padding: 4px 0;
+}
+
+.context-menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  color: #cccccc;
+  transition: background 0.15s;
+}
+
+.context-menu-item:hover {
+  background: #094771;
+}
+
+.context-menu-item:active {
+  background: #0e639c;
+}
+
+/* Loading & Error States */
+.loading,
+.error {
+  padding: 20px;
+  text-align: center;
+  color: #858585;
+}
+
+.error {
+  color: #f48771;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .file-manager {
+    font-size: 12px;
+  }
+
+  .tree-node {
+    padding: 6px 8px;
+  }
+
+  .tree-node-size {
+    display: none;
+  }
+
+  .file-manager-header h3 {
+    font-size: 13px;
+  }
+
+  .btn-icon {
+    padding: 4px;
+  }
+
+  .btn-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Dark/Light Theme Support */
+.file-manager.light-theme {
+  background: #ffffff;
+  color: #333333;
+}
+
+.file-manager.light-theme .file-manager-header {
+  background: #f3f3f3;
+  border-bottom-color: #e0e0e0;
+}
+
+.file-manager.light-theme .tree-node:hover {
+  background: #e8e8e8;
+}
+
+.file-manager.light-theme .tree-node.selected {
+  background: #cce8ff;
+}
+
+.file-manager.light-theme .context-menu {
+  background: #ffffff;
+  border-color: #cccccc;
+}
+
+.file-manager.light-theme .context-menu-item:hover {
+  background: #e8e8e8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.context-menu {
+  animation: fadeIn 0.15s ease-out;
+}
+
+/* File type specific colors */
+.tree-node[data-path$=".html"] .tree-node-name {
+  color: #e34c26;
+}
+
+.tree-node[data-path$=".css"] .tree-node-name {
+  color: #563d7c;
+}
+
+.tree-node[data-path$=".js"] .tree-node-name {
+  color: #f1e05a;
+}
+
+.tree-node[data-path$=".json"] .tree-node-name {
+  color: #89e051;
+}
+
+.tree-node[data-path$=".md"] .tree-node-name {
+  color: #cccccc;
+}
+
+.tree-node[data-path$=".py"] .tree-node-name {
+  color: #3572a5;
+}

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Logs - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .main-content {
+      padding: clamp(1.5rem, 5vw, 4rem);
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .admin-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: clamp(2rem, 5vw, 3rem);
+      overflow-x: auto;
+      padding-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .admin-nav-link {
+      padding: clamp(0.6rem, 1.5vw, 0.9rem) clamp(1rem, 2vw, 1.8rem);
+      border-radius: var(--radius-md);
+      background: var(--bg-glass);
+      color: var(--text-muted);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: var(--transition);
+      border: 1.5px solid rgba(99, 102, 241, 0.2);
+      font-weight: 600;
+      font-size: clamp(0.85rem, 1.5vw, 0.95rem);
+    }
+
+    .admin-nav-link:hover, .admin-nav-link.active {
+      background: var(--gradient-primary);
+      color: white;
+      border-color: transparent;
+      transform: translateY(-2px);
+    }
+
+    .log-container-wrapper {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin-top: 2rem;
+    }
+
+    .log-entry {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--glass-border);
+      display: grid;
+      grid-template-columns: 180px 120px 1fr;
+      gap: 1.5rem;
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 0.9rem;
+      align-items: center;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    .log-entry:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .log-type {
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    .type-info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .type-warn { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .type-error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .type-success { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1.5rem;
+      }
+      .log-entry {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+      .log-type {
+        width: fit-content;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+  </div>
+
+  <main class="main-content">
+    <header class="header-content" style="margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1 class="gradient-text" style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 0.5rem;">System Logs</h1>
+        <p style="color: var(--text-muted); font-size: clamp(1rem, 2vw, 1.1rem);">Real-time platform activity and audit trails.</p>
+      </div>
+      <button class="btn btn-glass">Clear Logs</button>
+    </header>
+
+    <nav class="admin-nav">
+      <a href="/pages/admin/dashboard.html" class="admin-nav-link">📊 Dashboard</a>
+      <a href="/pages/admin/user-management.html" class="admin-nav-link">👥 Users</a>
+      <a href="/pages/admin/center-management.html" class="admin-nav-link">🏢 Centers</a>
+      <a href="/pages/admin/project-management.html" class="admin-nav-link">📚 Projects</a>
+      <a href="/pages/admin/usage-logs.html" class="admin-nav-link active">📋 System Logs</a>
+    </nav>
+
+    <div class="log-container-wrapper">
+      <div id="logContainer">
+        <div class="log-entry">
+          <div style="color: var(--text-dim);">2026-05-20 14:22:01</div>
+          <div class="log-type type-info">INFO</div>
+          <div style="color: var(--text-main);">System startup sequence initiated...</div>
+        </div>
+        <div class="log-entry">
+          <div style="color: var(--text-dim);">2026-05-20 14:22:05</div>
+          <div class="log-type type-success">SUCCESS</div>
+          <div style="color: var(--text-main);">Database connection established (MongoDB Atlas)</div>
+        </div>
+        <div class="log-entry">
+          <div style="color: var(--text-dim);">2026-05-20 14:23:12</div>
+          <div class="log-type type-info">INFO</div>
+          <div style="color: var(--text-main);">User @admin logged in from 192.168.1.1</div>
+        </div>
+        <div class="log-entry">
+          <div style="color: var(--text-dim);">2026-05-20 14:25:45</div>
+          <div class="log-type type-warn">WARN</div>
+          <div style="color: var(--text-main);">High memory usage detected on API node-01</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user || !user.roles.includes('admin')) {
+        window.location.href = '/login.html';
+        return;
+      }
+    });
+  </script>
+</body>
+</html>

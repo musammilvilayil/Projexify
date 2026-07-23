@@ -1,0 +1,580 @@
+/* ===================================================================
+   PROJEXIFY DESIGN SYSTEM - "Nexus Glow" Theme
+   A professional dark theme with neon accents for EdTech platforms
+   ================================================================ */
+
+/* ===================================================================
+   1. CSS VARIABLES - DESIGN TOKENS
+   ================================================================ */
+:root {
+  /* Primary Gradient - The "Nexus" Glow */
+  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #10b981 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #4f46e5 0%, #059669 100%);
+  
+  /* Background Palette */
+  --bg-main: #0f172a;        /* Slate 950 - Main canvas */
+  --bg-card: #1e293b;        /* Slate 800 - Card backgrounds */
+  --bg-elevated: #334155;    /* Slate 700 - Elevated elements */
+  --bg-hover: #475569;       /* Slate 600 - Hover states */
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  
+  /* Text Hierarchy */
+  --text-primary: #f8fafc;   /* Slate 50 - High contrast */
+  --text-secondary: #94a3b8; /* Slate 400 - Muted text */
+  --text-tertiary: #64748b;  /* Slate 500 - Disabled/metadata */
+  
+  /* Status Colors */
+  --color-verified: #38bdf8;  /* Sky Blue - Verified badges */
+  --color-success: #22c55e;   /* Green - Success/Active */
+  --color-warning: #f59e0b;   /* Amber - Pending/Warning */
+  --color-danger: #f43f5e;    /* Rose - Critical/Error */
+  --color-info: #6366f1;      /* Indigo - Info/Primary action */
+  
+  /* Accent Colors */
+  --accent-indigo: #6366f1;
+  --accent-emerald: #10b981;
+  --accent-sky: #38bdf8;
+  
+  /* Borders */
+  --border-subtle: #334155;
+  --border-standard: #475569;
+  --border-emphasis: #64748b;
+  
+  /* Spacing System (8px base) */
+  --space-xs: 0.25rem;  /* 4px */
+  --space-sm: 0.5rem;   /* 8px */
+  --space-md: 1rem;     /* 16px */
+  --space-lg: 1.5rem;   /* 24px */
+  --space-xl: 2rem;     /* 32px */
+  --space-2xl: 3rem;    /* 48px */
+  
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'Fira Code', 'Courier New', monospace;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.4);
+  
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===================================================================
+   2. GLOBAL RESETS & BASE STYLES
+   ================================================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===================================================================
+   3. GLASSMORPHISM COMPONENTS
+   ================================================================ */
+
+/* Standard Glass Card */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  transition: all var(--transition-base);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Elevated Glass (for modals and active states) */
+.glass-elevated {
+  background: rgba(51, 65, 85, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Solid Card (no transparency) */
+.solid-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+}
+
+.solid-card:hover {
+  border-color: var(--border-standard);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ===================================================================
+   4. BUTTONS & INTERACTIVE ELEMENTS
+   ================================================================ */
+
+/* Primary Button - Nexus Gradient */
+.btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: 600;
+  padding: var(--space-sm) var(--space-lg);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+  background: var(--gradient-primary-hover);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary Button - Glass Style */
+.btn-secondary {
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  color: var(--text-primary);
+  font-weight: 500;
+  padding: var(--space-sm) var(--space-lg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.btn-secondary:hover {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Ghost Button */
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.btn-ghost:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-subtle);
+}
+
+/* Icon Button */
+.btn-icon {
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  color: var(--text-primary);
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.btn-icon:hover {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ===================================================================
+   5. STATUS BADGES & INDICATORS
+   ================================================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-verified {
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--color-verified);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.badge-active {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--color-success);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.badge-pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-danger {
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--color-danger);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+.badge-info {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--color-info);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+/* Status Dot Indicator */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+}
+
+.status-dot-active {
+  background: var(--color-success);
+  box-shadow: 0 0 8px var(--color-success);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.status-dot-inactive {
+  background: var(--text-tertiary);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ===================================================================
+   6. FORM ELEMENTS
+   ================================================================ */
+
+.input-field {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.875rem;
+  transition: all var(--transition-base);
+  width: 100%;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--accent-indigo);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.input-field::placeholder {
+  color: var(--text-tertiary);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.input-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.input-error {
+  border-color: var(--color-danger);
+}
+
+.input-error-message {
+  color: var(--color-danger);
+  font-size: 0.75rem;
+  margin-top: var(--space-xs);
+}
+
+/* ===================================================================
+   7. NAVIGATION & ACTIVE STATES
+   ================================================================ */
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.active {
+  color: white;
+  background: var(--gradient-primary);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.nav-link.active::before {
+  content: '';
+  width: 3px;
+  height: 100%;
+  background: white;
+  position: absolute;
+  left: 0;
+  border-radius: 0 3px 3px 0;
+}
+
+/* ===================================================================
+   8. LOADING STATES & SKELETONS
+   ================================================================ */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 0%,
+    var(--bg-elevated) 50%,
+    var(--bg-card) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-text {
+  height: 1em;
+  margin-bottom: var(--space-sm);
+}
+
+.skeleton-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+}
+
+.skeleton-card {
+  height: 200px;
+  width: 100%;
+}
+
+/* Loading Spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-subtle);
+  border-top-color: var(--accent-indigo);
+  border-radius: var(--radius-full);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===================================================================
+   9. EMPTY STATES
+   ================================================================ */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  text-align: center;
+  min-height: 300px;
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  opacity: 0.3;
+  margin-bottom: var(--space-lg);
+}
+
+.empty-state-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.empty-state-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-lg);
+  max-width: 400px;
+}
+
+/* ===================================================================
+   10. UTILITY CLASSES
+   ================================================================ */
+
+/* Text Colors */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-danger { color: var(--color-danger); }
+.text-info { color: var(--color-info); }
+
+/* Background Colors */
+.bg-main { background-color: var(--bg-main); }
+.bg-card { background-color: var(--bg-card); }
+.bg-elevated { background-color: var(--bg-elevated); }
+
+/* Gradient Text */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Spacing Utilities */
+.p-xs { padding: var(--space-xs); }
+.p-sm { padding: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+.p-xl { padding: var(--space-xl); }
+
+.m-xs { margin: var(--space-xs); }
+.m-sm { margin: var(--space-sm); }
+.m-md { margin: var(--space-md); }
+.m-lg { margin: var(--space-lg); }
+.m-xl { margin: var(--space-xl); }
+
+/* Flexbox Utilities */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-xs { gap: var(--space-xs); }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+
+/* Border Radius */
+.rounded-sm { border-radius: var(--radius-sm); }
+.rounded-md { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-full { border-radius: var(--radius-full); }
+
+/* Shadows */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-glow { box-shadow: var(--shadow-glow); }
+
+/* Transitions */
+.transition { transition: all var(--transition-base); }
+.transition-fast { transition: all var(--transition-fast); }
+.transition-slow { transition: all var(--transition-slow); }
+
+/* Hover Effects */
+.hover-lift {
+  transition: transform var(--transition-base);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+.hover-glow:hover {
+  box-shadow: var(--shadow-glow);
+}
+
+/* ===================================================================
+   11. RESPONSIVE BREAKPOINTS
+   ================================================================ */
+
+/* Mobile First Approach */
+@media (max-width: 640px) {
+  :root {
+    --space-xl: 1.5rem;
+    --space-2xl: 2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  /* Tablet styles */
+}
+
+@media (min-width: 1024px) {
+  /* Desktop styles */
+}
+
+@media (min-width: 1280px) {
+  /* Large desktop styles */
+}

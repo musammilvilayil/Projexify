@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Group Manager - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .student-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      overflow-x: auto;
+      padding-bottom: 1rem;
+    }
+
+    .student-nav-link {
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+    }
+
+    .student-nav-link:hover, .student-nav-link.active {
+      background: var(--gradient-primary);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .member-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+    }
+
+    .member-card:hover {
+      transform: translateX(10px);
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .member-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .member-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .group-card {
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-xl);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .group-card:hover {
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--gradient-primary);
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(12px);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: rgba(15, 15, 30, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-2xl);
+      padding: 3rem;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Aurora Background Styles */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <main class="main-content container" style="padding-top: 8rem; padding-bottom: 5rem;">
+    <header style="margin-bottom: 3rem;">
+      <h1 class="gradient-text" style="font-size: 3rem; margin-bottom: 0.5rem;">My Groups</h1>
+      <p style="color: var(--text-muted); font-size: 1.1rem;">Collaborate with your team on assigned projects.</p>
+    </header>
+
+    <nav class="student-nav">
+      <a href="/pages/student/dashboard.html" class="student-nav-link">Dashboard</a>
+      <a href="/pages/student/group-manager.html" class="student-nav-link active">My Groups</a>
+    </nav>
+
+    <!-- Groups Grid -->
+    <h2 style="margin-bottom: 1.5rem;">Your Groups</h2>
+    <div class="groups-grid" id="groupsGrid">
+      <div class="glass-card" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+        Loading groups...
+      </div>
+    </div>
+
+    <!-- Selected Group Details -->
+    <div id="groupDetailsSection" style="display: none;">
+      <h2 style="margin-bottom: 1.5rem;">Group Details: <span id="groupTitle"></span></h2>
+      
+      <!-- Members List -->
+      <div>
+        <h3 style="margin-bottom: 1.5rem;">Team Members</h3>
+        <div id="membersList"></div>
+      </div>
+
+      <!-- Group Progress -->
+      <div style="margin-top: 2rem;">
+        <h3 style="margin-bottom: 1.5rem;">Group Progress</h3>
+        <div id="groupProgressList"></div>
+      </div>
+
+      <button class="btn btn-glass" id="backToGroupsBtn" style="margin-top: 2rem;">← Back to Groups</button>
+    </div>
+  </main>
+
+  <!-- Group Progress Modal -->
+  <div id="progressModal" class="modal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0;">Group Progress</h2>
+        <button id="closeProgressModalBtn" style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">✕</button>
+      </div>
+      <div id="progressDetails"></div>
+    </div>
+  </div>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/data-service.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    let allGroups = [];
+    let selectedGroupId = null;
+
+    new UIManager();
+
+    async function initGroups() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user || !user.roles.includes('student')) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      try {
+        // Fetch all groups for this student
+        allGroups = await window.api.getMyGroups();
+        
+        const grid = document.getElementById('groupsGrid');
+        
+        if (!allGroups || allGroups.length === 0) {
+          grid.innerHTML = `
+            <div class="glass-card" style="padding: 2rem; text-align: center; grid-column: 1 / -1;">
+              <p style="color: var(--text-muted); margin-bottom: 1rem;">No groups yet. Enroll in a project to be assigned to a group!</p>
+              <a href="/marketplace.html" class="btn btn-primary">Browse Projects</a>
+            </div>
+          `;
+          return;
+        }
+
+        // Render groups
+        grid.innerHTML = allGroups.map(group => `
+          <div class="group-card" data-group-id="${group._id}">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+              <div>
+                <h3 style="margin: 0; margin-bottom: 0.25rem;">${group.name}</h3>
+                <p style="margin: 0; color: var(--text-muted); font-size: 0.85rem;">
+                  📚 ${group.projectId?.title || 'Project'}
+                </p>
+              </div>
+              <span style="background: rgba(16,185,129,0.2); color: #10b981; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">
+                ${group.status}
+              </span>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.85rem;">
+                <span>Progress</span>
+                <span>${group.progress?.completion_percentage || 0}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${group.progress?.completion_percentage || 0}%"></div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted);">
+              <span>👥 ${group.students?.length || 0} members</span>
+              <span>🎓 Mentor: ${group.mentorId?.firstName || 'Not assigned'}</span>
+            </div>
+          </div>
+        `).join('');
+
+        // Add click listeners to group cards
+        grid.querySelectorAll('.group-card').forEach(card => {
+          card.addEventListener('click', () => viewGroupDetails(card.dataset.groupId));
+        });
+
+      } catch (error) {
+        console.error('Error loading groups:', error);
+        document.getElementById('groupsGrid').innerHTML = `
+          <div class="error-message">Error loading groups: ${error.message}</div>
+        `;
+      }
+    }
+
+    async function viewGroupDetails(groupId) {
+      selectedGroupId = groupId;
+      const group = allGroups.find(g => g._id === groupId);
+      
+      if (!group) return;
+
+      // Update group title
+      document.getElementById('groupTitle').textContent = group.name;
+
+      // Render members
+      const membersList = document.getElementById('membersList');
+      membersList.innerHTML = (group.students || []).map(student => `
+        <div class="member-card">
+          <div class="member-info">
+            <div class="member-avatar">${(student.firstName || 'U')[0]}</div>
+            <div>
+              <div style="font-weight: 600;">${student.firstName} ${student.lastName}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">${student.email}</div>
+            </div>
+          </div>
+          ${group.mentorId?._id === student._id ? '<span style="color: #f59e0b; font-size: 0.75rem; font-weight: 600;">👨‍🏫 MENTOR</span>' : ''}
+        </div>
+      `).join('');
+
+      if (!group.students || group.students.length === 0) {
+        membersList.innerHTML = '<div class="glass-card" style="padding: 1.5rem; text-align: center; color: var(--text-muted);">No members yet</div>';
+      }
+
+      // Render group progress
+      try {
+        const progress = await window.api.getGroupProgress(groupId);
+        const progressList = document.getElementById('groupProgressList');
+        
+        progressList.innerHTML = `
+          <div class="glass-card" style="padding: 1.5rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+              <div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Average Completion</div>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">${progress.averageCompletion}%</div>
+              </div>
+              <div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Total Members</div>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">${progress.totalStudents}</div>
+              </div>
+            </div>
+            <button class="btn btn-primary" id="viewProgressDetailsBtn" style="width: 100%;">View Details</button>
+          </div>
+        `;
+
+        document.getElementById('viewProgressDetailsBtn').addEventListener('click', showProgressDetails);
+      } catch (error) {
+        console.error('Error loading group progress:', error);
+      }
+
+      // Show details section
+      document.getElementById('groupDetailsSection').style.display = 'block';
+      document.getElementById('groupsGrid').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goBackToGroups() {
+      document.getElementById('groupDetailsSection').style.display = 'none';
+      document.getElementById('groupsGrid').style.display = 'grid';
+      selectedGroupId = null;
+    }
+
+    async function showProgressDetails() {
+      try {
+        const progress = await window.api.getGroupProgress(selectedGroupId);
+        
+        const progressDetails = document.getElementById('progressDetails');
+        progressDetails.innerHTML = `
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="margin-bottom: 1rem;">Member Progress</h3>
+            ${progress.studentProgress.map(p => `
+              <div style="padding: 1rem; background: rgba(99,102,241,0.05); border-radius: 0.5rem; margin-bottom: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <strong>${p.studentName || 'Unknown Student'}</strong>
+                  <span style="color: var(--color-primary); font-weight: 600;">${p.completion_percentage || 0}%</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+                  <div style="background: var(--gradient-primary); height: 100%; width: ${p.completion_percentage || 0}%"></div>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                  Status: <strong>${p.status || 'N/A'}</strong>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+
+        document.getElementById('progressModal').classList.add('active');
+      } catch (error) {
+        alert('Error loading progress details: ' + error.message);
+      }
+    }
+
+    function closeProgressModal() {
+      document.getElementById('progressModal').classList.remove('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initGroups();
+      
+      document.getElementById('backToGroupsBtn').addEventListener('click', goBackToGroups);
+      document.getElementById('closeProgressModalBtn').addEventListener('click', closeProgressModal);
+    });
+  </script>
+</body>
+</html>

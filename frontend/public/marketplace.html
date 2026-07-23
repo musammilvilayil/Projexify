@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Marketplace - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .marketplace-container {
+      padding: clamp(2rem, 5vw, 4rem);
+      max-width: 1800px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .marketplace-header {
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+      text-align: center;
+    }
+
+    .marketplace-header h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .marketplace-header p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+    }
+
+    .marketplace-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: clamp(2rem, 4vw, 3rem);
+      margin-top: clamp(2rem, 4vw, 3rem);
+    }
+
+    .filters-sidebar {
+      position: sticky;
+      top: clamp(5rem, 10vh, 8rem);
+      height: fit-content;
+      padding: 2.5rem;
+      border-radius: var(--radius-xl);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .filter-group {
+      margin-bottom: 2.5rem;
+    }
+
+    .filter-group h4 {
+      margin-bottom: 1.25rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .filter-option {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: var(--transition);
+      font-size: 0.95rem;
+    }
+
+    .filter-option:hover {
+      color: var(--text-main);
+      transform: translateX(8px);
+    }
+
+    .filter-option input {
+      accent-color: var(--primary);
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+
+    .project-card {
+      padding: 0;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-xl);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .project-card:hover {
+      transform: translateY(-12px);
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+    }
+
+    .project-image {
+      height: 240px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(16, 185, 129, 0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+    }
+
+    .project-info {
+      padding: 2rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .project-tags {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      padding: 0.4rem 1rem;
+      background: rgba(99, 102, 241, 0.1);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .price {
+      font-size: 1.5rem;
+      font-weight: 900;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .search-bar-container {
+      margin-bottom: 4rem;
+      position: relative;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1.5rem 2rem;
+      padding-left: 4rem;
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-xl);
+      color: white;
+      outline: none;
+      transition: var(--transition);
+      backdrop-filter: blur(12px);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.25rem;
+    }
+
+    /* Aurora Background Styles */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    .project-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%);
+    }
+
+    .project-info {
+      padding: clamp(1.25rem, 3vw, 2rem);
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .project-tags {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      padding: 0.35rem 0.85rem;
+      background: rgba(99, 102, 241, 0.08);
+      color: var(--primary);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .price {
+      font-size: clamp(1.2rem, 3vw, 1.5rem);
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .search-bar-container {
+      margin-bottom: clamp(3rem, 5vw, 4rem);
+      position: relative;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: clamp(1rem, 2vw, 1.25rem) clamp(1.5rem, 3vw, 2rem);
+      padding-left: clamp(2.8rem, 5vw, 3.5rem);
+      font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
+      border: 1.5px solid rgba(99, 102, 241, 0.3);
+      border-radius: var(--radius-lg);
+      color: white;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+      background: rgba(99, 102, 241, 0.15);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: clamp(1rem, 2vw, 1.25rem);
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: clamp(1rem, 2vw, 1.2rem);
+    }
+
+    @media (max-width: 1024px) {
+      .marketplace-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filters-sidebar {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .marketplace-container {
+        padding: 1.5rem;
+      }
+
+      .marketplace-grid {
+        gap: 1.5rem;
+      }
+
+      .project-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .marketplace-header h1 {
+        font-size: clamp(1.5rem, 5vw, 2.5rem);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .marketplace-container {
+        padding: 1rem;
+      }
+
+      .marketplace-header {
+        margin-bottom: 1.5rem;
+      }
+
+      .marketplace-header h1 {
+        font-size: clamp(1.3rem, 4vw, 2rem);
+      }
+
+      .project-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .project-info {
+        padding: 1rem;
+      }
+
+      .search-bar-container {
+        margin-bottom: 2rem;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .project-card {
+      animation: slideUp 0.5s ease-out forwards;
+    }
+
+    .project-card:nth-child(1) { animation-delay: 0.05s; }
+    .project-card:nth-child(2) { animation-delay: 0.1s; }
+    .project-card:nth-child(3) { animation-delay: 0.15s; }
+    .project-card:nth-child(4) { animation-delay: 0.2s; }
+    .project-card:nth-child(n+5) { animation-delay: 0.25s; }
+  </style>
+</head>
+<body>
+  <!-- Aurora Background -->
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <!-- Navigation will be injected by ui-manager.js -->
+
+  <main class="marketplace-container">
+    <div class="marketplace-header">
+      <h1 class="gradient-text">Project Marketplace</h1>
+      <p>Discover and join high-impact projects hosted by top incubation centers worldwide.</p>
+    </div>
+
+    <div class="search-bar-container">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" class="search-input" placeholder="Search projects by technology, industry, or center name...">
+    </div>
+
+    <div class="marketplace-grid">
+      <!-- Filters -->
+      <aside class="glass-card filters-sidebar">
+        <div class="filter-group">
+          <h4>Category</h4>
+          <label class="filter-option" data-filter="category" data-value="all"><input type="checkbox" checked> All Categories</label>
+          <label class="filter-option" data-filter="category" data-value="Web Development"><input type="checkbox"> Web Development</label>
+          <label class="filter-option" data-filter="category" data-value="Artificial Intelligence"><input type="checkbox"> AI & ML</label>
+          <label class="filter-option" data-filter="category" data-value="Blockchain"><input type="checkbox"> Blockchain</label>
+          <label class="filter-option" data-filter="category" data-value="Mobile Apps"><input type="checkbox"> Mobile Apps</label>
+        </div>
+
+        <div class="filter-group">
+          <h4>Difficulty</h4>
+          <label class="filter-option" data-filter="difficulty" data-value="all"><input type="checkbox" checked> All Levels</label>
+          <label class="filter-option" data-filter="difficulty" data-value="beginner"><input type="checkbox"> Beginner</label>
+          <label class="filter-option" data-filter="difficulty" data-value="intermediate"><input type="checkbox"> Intermediate</label>
+          <label class="filter-option" data-filter="difficulty" data-value="advanced"><input type="checkbox"> Advanced</label>
+        </div>
+
+        <div class="filter-group">
+          <h4>Price Range</h4>
+          <input type="range" id="price-range" min="0" max="2000" step="100" value="2000" style="width: 100%; accent-color: var(--primary);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-dim);">
+            <span>₹0</span>
+            <span id="price-value">₹2000+</span>
+          </div>
+        </div>
+
+        <button class="btn btn-glass" id="reset-filters" style="width: 100%; margin-top: 1rem; padding: 1rem;">Reset All Filters</button>
+      </aside>
+
+      <!-- Projects Grid -->
+      <div id="projects-grid" class="project-grid">
+        <!-- Projects will be loaded dynamically -->
+      </div>
+    </div>
+  </main>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/data-service.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script src="/assets/js/marketplace.js"></script>
+  <script>
+    // Initialize API client and marketplace
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 Marketplace page loaded');
+      
+      // Ensure API client is initialized
+      if (!window.api) {
+        console.log('Initializing API client...');
+        window.api = new APIClient();
+      }
+      
+      // Log for debugging
+      setTimeout(() => {
+        console.log('API client available:', !!window.api);
+        console.log('Marketplace controller:', !!window.marketplace);
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

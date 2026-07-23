@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Certificate - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .verify-container {
+      max-width: 1200px;
+      margin: 100px auto;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .verify-card {
+      padding: 4rem;
+      margin-top: 3rem;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-2xl);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .certificate-preview {
+      margin-top: 3rem;
+      padding: 3rem;
+      border: 1px solid var(--primary);
+      border-radius: var(--radius-xl);
+      background: rgba(99, 102, 241, 0.05);
+      display: none;
+      animation: slideUp 0.5s ease-out forwards;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 1rem;
+      max-width: 600px;
+      margin: 2rem auto;
+    }
+
+    .input-group input {
+      flex: 1;
+      padding: 1.25rem 1.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1rem;
+      color: white;
+      outline: none;
+      font-size: 1.1rem;
+      transition: var(--transition);
+    }
+
+    .input-group input:focus {
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* Aurora Background Styles */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Aurora Background -->
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <main class="main-content container" style="padding-top: 8rem; padding-bottom: 5rem;">
+    <div class="verify-container">
+      <h1 class="gradient-text" style="font-size: 3rem;">Verify Achievement</h1>
+      <p style="color: var(--text-muted); font-size: 1.2rem;">Enter a certificate ID to verify its authenticity on the Projexify platform.</p>
+
+      <div class="glass-card verify-card">
+        <div class="input-group">
+          <input type="text" id="certId" placeholder="e.g. NEX-2023-8842">
+          <button class="btn btn-primary" id="verifyCertBtn">Verify</button>
+        </div>
+
+        <div id="result" class="certificate-preview">
+          <div style="font-size: 0.85rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem;">Official Verification</div>
+          <h2 id="studentName" style="font-size: 2rem; margin-bottom: 0.5rem;">Alex Johnson</h2>
+          <p id="projectName" style="color: var(--text-muted); margin-bottom: 2rem;">AI Chatbot Framework Specialization</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; text-align: left; border-top: 1px solid var(--glass-border); padding-top: 2rem;">
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-dim);">Issued By</div>
+              <div id="centerName">Innovation Hub Central</div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-dim);">Issue Date</div>
+              <div id="issueDate">October 24, 2023</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 3rem; color: var(--secondary); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            Verified Authentic
+          </div>
+        </div>
+
+        <div id="error" style="display: none; color: #ef4444; margin-top: 2rem;">
+          Invalid Certificate ID. Please check and try again.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    async function verify() {
+      const certId = document.getElementById('certId').value;
+      if (!certId) return;
+
+      const resultDiv = document.getElementById('result');
+      const errorDiv = document.getElementById('error');
+      
+      resultDiv.style.display = 'none';
+      errorDiv.style.display = 'none';
+
+      try {
+        const cert = await window.api.request(`/certificates/verify/${certId}`);
+        
+        document.getElementById('studentName').textContent = cert.studentName;
+        document.getElementById('projectName').textContent = cert.projectName;
+        document.getElementById('centerName').textContent = cert.centerName;
+        document.getElementById('issueDate').textContent = new Date(cert.issueDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        resultDiv.style.display = 'block';
+      } catch (error) {
+        errorDiv.textContent = error.message || 'Invalid Certificate ID. Please check and try again.';
+        errorDiv.style.display = 'block';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const verifyCertBtn = document.getElementById('verifyCertBtn');
+      if (verifyCertBtn) {
+        verifyCertBtn.addEventListener('click', verify);
+      }
+    });
+  </script>
+</body>
+</html>

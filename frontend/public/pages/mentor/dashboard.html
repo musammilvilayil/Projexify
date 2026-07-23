@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentor Dashboard - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .dashboard-wrapper {
+      min-height: 100vh;
+      padding-top: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: clamp(2rem, 5vw, 4rem);
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .welcome-box h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .welcome-box p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+    }
+
+    .stat-card {
+      padding: 2.5rem 2rem;
+      border-radius: var(--radius-xl);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 160px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+    }
+
+    .stat-value {
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .project-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-2xl);
+      padding: 3rem;
+      margin-bottom: 2.5rem;
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+      animation: slideUp 0.5s ease forwards;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .project-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.2); }
+    }
+
+    @keyframes popupSlideIn {
+      from { opacity: 0; transform: scale(0.9) translateY(-20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .breadcrumb-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      animation: slideUp 0.5s ease forwards;
+    }
+
+    .breadcrumb-nav span {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .breadcrumb-nav a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .breadcrumb-nav a:hover {
+      color: #8b5cf6;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-container { padding: 1.5rem; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      #openVirtualLabBtn { padding: 0.75rem 1rem; font-size: 0.9rem; }
+    }
+
+    @media (max-width: 480px) {
+      .dashboard-container { padding: 1rem; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .dashboard-header { flex-direction: column; gap: 1rem; }
+      #openVirtualLabBtn { width: 100%; }
+      .welcome-box h1 { font-size: 2rem; }
+    }
+
+    /* Chat Styles */
+    .mentor-chat-container {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+      height: 650px;
+      position: relative;
+    }
+
+    .students-list {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.05));
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 20px;
+      overflow-y: auto;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .students-list-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+      color: #a5b4fc;
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+
+    .student-item {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      position: relative;
+    }
+
+    .student-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 3px;
+      background: linear-gradient(180deg, #6366f1, #8b5cf6);
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+
+    .student-item:hover {
+      background: rgba(99, 102, 241, 0.12);
+      transform: translateX(4px);
+    }
+
+    .student-item.active {
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.25), rgba(99, 102, 241, 0.08));
+      border-left: none;
+    }
+
+    .student-item.active::before {
+      transform: scaleY(1);
+    }
+
+    .student-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    .student-avatar::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 12px;
+      height: 12px;
+      background: #10b981;
+      border: 2px solid rgba(15, 23, 42, 0.9);
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    }
+
+    .student-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .student-name {
+      font-weight: 600;
+      color: #f8fafc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .student-preview {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.03));
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .chat-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #f8fafc;
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-header::after {
+      content: '🟢';
+      font-size: 0.8rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .messages-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+      scroll-behavior: smooth;
+    }
+
+    .messages-area::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .messages-area::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+
+    .messages-area::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #6366f1, #8b5cf6);
+      border-radius: 10px;
+    }
+
+    .messages-area::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #4f46e5, #7c3aed);
+    }
+
+    .message {
+      display: flex;
+      gap: 0.75rem;
+      animation: messageSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      opacity: 0;
+    }
+
+    @keyframes messageSlide {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.sent {
+      justify-content: flex-end;
+    }
+
+    .message-content {
+      max-width: 100%;
+      padding: 0.875rem 1.125rem;
+      border-radius: 16px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .message.received .message-content {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(99, 102, 241, 0.15));
+      color: #f8fafc;
+      border-bottom-left-radius: 4px;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .message.sent .message-content {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      border-bottom-right-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .message-time {
+      font-size: 0.7rem;
+      color: #64748b;
+      margin-top: 0.375rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    .chat-input-area {
+      padding: 1.25rem 1.5rem;
+      border-top: 2px solid rgba(99, 102, 241, 0.2);
+      display: flex;
+      gap: 0.875rem;
+      background: linear-gradient(180deg, rgba(99, 102, 241, 0.05), transparent);
+      backdrop-filter: blur(10px);
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      padding: 0.875rem 1.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(99, 102, 241, 0.2);
+      border-radius: 12px;
+      color: #f8fafc;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .chat-input-area input::placeholder {
+      color: #64748b;
+    }
+
+    .chat-input-area input:focus {
+      outline: none;
+      border-color: #6366f1;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .chat-send-btn {
+      padding: 0.875rem 1.75rem;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chat-send-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .chat-send-btn:hover::before {
+      left: 100%;
+    }
+
+    .chat-send-btn:hover {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    }
+
+    .chat-send-btn:active {
+      transform: translateY(0);
+    }
+
+    .chat-send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .no-student-selected {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #94a3b8;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.6;
+        transform: scale(0.95);
+      }
+    }
+
+    /* Typing Indicator */
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 0.75rem 1rem;
+      background: rgba(99, 102, 241, 0.15);
+      border-radius: 16px;
+      border-bottom-left-radius: 4px;
+      width: fit-content;
+    }
+
+    .typing-indicator span {
+      width: 8px;
+      height: 8px;
+      background: #6366f1;
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite;
+    }
+
+    .typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typingBounce {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-8px);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .mentor-chat-container {
+        grid-template-columns: 250px 1fr;
+        height: 500px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mentor-chat-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 500px;
+      }
+
+      .students-list {
+        max-height: 200px;
+        order: 2;
+      }
+
+      .chat-box {
+        order: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <div class="dashboard-wrapper">
+    <div class="dashboard-container">
+      <div class="breadcrumb-nav" role="navigation" aria-label="breadcrumb">
+        <span aria-current="page">Dashboard</span>
+      </div>
+
+      <div class="dashboard-header">
+        <div class="welcome-box">
+          <h1 id="welcomeText">Mentor Command Center</h1>
+          <p>Oversee projects, schedule sessions, and guide your students</p>
+        </div>
+       
+      </div>
+
+
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="activeStudents">0</div>
+          <div class="stat-label">Active Students</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="assignedProjects">0</div>
+          <div class="stat-label">Assigned Projects</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="upcomingSessions">0</div>
+          <div class="stat-label">Upcoming Sessions</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 3rem;">
+        <div class="project-card">
+          <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem;">📅 Recent Sessions</h3>
+          <div id="sessions-grid">
+            <div style="text-align: center; padding: 3rem;">
+              <div style="font-size: 2.5rem; margin-bottom: 1rem;">⏳</div>
+              <p style="color: var(--text-muted);">Loading sessions...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem;">⚡ Quick Actions</h3>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <a href="/pages/mentor/student-management.html" class="btn btn-primary" style="border-radius: 12px; padding: 1rem; font-weight: 600; text-align: left;">
+              <i class="fas fa-users me-2"></i>View Students
+            </a>
+            <a href="/pages/mentor/project-management.html" class="btn btn-secondary" style="border-radius: 12px; padding: 1rem; font-weight: 600; text-align: left;">
+              <i class="fas fa-project-diagram me-2"></i>Manage Projects
+            </a>
+            <button id="startOnDemandBtn" class="btn btn-secondary" style="border-radius: 12px; padding: 1rem; font-weight: 600; text-align: left; background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(10, 155, 110, 0.2)); border-color: rgba(16, 185, 129, 0.3); color: #10b981;">
+              <i class="fas fa-play me-2"></i>Start Session Now
+            </button>
+            <button id="scheduleSessionBtn" class="btn btn-secondary" style="border-radius: 12px; padding: 1rem; font-weight: 600; text-align: left;">
+              <i class="fas fa-calendar-plus me-2"></i>Schedule Session
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mentor Chat Section -->
+      <div class="project-card">
+        <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem;">💬 Student Messages</h3>
+        <div class="mentor-chat-container">
+          <!-- Students List -->
+          <div class="students-list">
+            <div class="students-list-header">Students</div>
+            <div id="studentsList"></div>
+          </div>
+
+          <!-- Chat Box -->
+          <div class="chat-box">
+            <div class="chat-header" id="chatHeader">Select a student to view messages</div>
+            <div class="messages-area" id="messagesArea"></div>
+            <div class="chat-input-area">
+              <input type="text" id="messageInput" placeholder="Type your message..." disabled>
+              <button class="chat-send-btn" id="sendBtn" onclick="sendMentorMessage()" disabled>Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schedule Session Popup -->
+  <div id="schedulePopup" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 24px; backdrop-filter: blur(16px); width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 0; box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);">
+      <div style="padding: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center;">
+        <h5 style="background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; margin: 0;">Schedule Session</h5>
+        <button onclick="closeSchedulePopup()" style="background: none; border: none; color: rgba(255, 255, 255, 0.6); font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1;">×</button>
+      </div>
+      <div style="padding: 2rem;">
+        <form id="scheduleForm">
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Session Title</label>
+            <input type="text" id="sessionTitle" class="form-control" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
+          </div>
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Select Students</label>
+            <select id="studentSelect" class="form-select" multiple style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; min-height: 120px; width: 100%; font-family: inherit; font-size: inherit;"></select>
+          </div>
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Date</label>
+            <input type="date" id="sessionDate" class="form-control" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div>
+              <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Start Time</label>
+              <input type="time" id="startTime" class="form-control" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">End Time</label>
+              <input type="time" id="endTime" class="form-control" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
+            </div>
+          </div>
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Duration (minutes)</label>
+            <input type="number" id="duration" class="form-control" required min="15" max="240" placeholder="e.g., 60" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
+            <small style="color: var(--text-muted); margin-top: 0.5rem; display: block;">Typical sessions: 30-90 minutes</small>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <button type="button" onclick="closeSchedulePopup()" style="flex: 1; padding: 0.75rem 1.5rem; border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.1); color: #6366f1; font-weight: 700; cursor: pointer; transition: all 0.3s ease;">Cancel</button>
+            <button type="submit" style="flex: 1; padding: 0.75rem 1.5rem; border-radius: 12px; border: none; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; font-weight: 700; cursor: pointer; transition: all 0.3s ease;">Create Session</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- On-Demand Session Popup -->
+  <div id="onDemandPopup" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 2000; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
+    <div style="background: #0f172a; border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 16px; padding: 2rem; width: 90%; max-width: 500px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); animation: popupSlideIn 0.3s ease;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 style="margin: 0; color: white; font-size: 1.5rem; font-weight: 700;">Start Session Now</h3>
+        <button onclick="closeOnDemandPopup()" style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">&times;</button>
+      </div>
+      <form id="onDemandForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Select Student(s)</label>
+          <select id="onDemandStudentSelect" multiple class="form-control" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit; min-height: 120px;">
+          </select>
+          <small style="color: var(--text-muted); margin-top: 0.5rem; display: block;">Hold Ctrl/Cmd to select multiple students</small>
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Session Title</label>
+          <input type="text" id="onDemandTitle" class="form-control" placeholder="e.g., Code Review Session" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Description (Optional)</label>
+          <textarea id="onDemandDescription" class="form-control" placeholder="What will you discuss?" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit; min-height: 80px; resize: vertical;"></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+          <button type="button" onclick="closeOnDemandPopup()" style="flex: 1; padding: 0.75rem 1.5rem; border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.1); color: #6366f1; font-weight: 700; cursor: pointer; transition: all 0.3s ease;">Cancel</button>
+          <button type="submit" style="flex: 1; padding: 0.75rem 1.5rem; border-radius: 12px; border: none; background: linear-gradient(135deg, #10b981, #059669); color: white; font-weight: 700; cursor: pointer; transition: all 0.3s ease;">Start Session</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script>
+    let sessionStatusPollInterval = null;
+    const activeSessionConnections = new Map();
+
+    function openSchedulePopup() {
+      populateStudentSelect();
+      document.getElementById('schedulePopup').style.display = 'flex';
+    }
+
+    function closeSchedulePopup() {
+      document.getElementById('schedulePopup').style.display = 'none';
+      document.getElementById('scheduleForm').reset();
+    }
+
+    function openOnDemandPopup() {
+      populateOnDemandStudentSelect();
+      document.getElementById('onDemandPopup').style.display = 'flex';
+    }
+
+    function closeOnDemandPopup() {
+      document.getElementById('onDemandPopup').style.display = 'none';
+      document.getElementById('onDemandForm').reset();
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      // Close popup when clicking outside
+      const schedulePopup = document.getElementById('schedulePopup');
+      const onDemandPopup = document.getElementById('onDemandPopup');
+      
+      if (schedulePopup) {
+        schedulePopup.addEventListener('click', (e) => {
+          if (e.target.id === 'schedulePopup') {
+            closeSchedulePopup();
+          }
+        });
+      }
+      
+      if (onDemandPopup) {
+        onDemandPopup.addEventListener('click', (e) => {
+          if (e.target.id === 'onDemandPopup') {
+            closeOnDemandPopup();
+          }
+        });
+      }
+      
+      // Disable notifications on this page to reduce API calls
+      new UIManager({ enableNotifications: false });
+      initDashboard().then(data => {
+        // Pass the students data to initMentorChat to avoid duplicate API call
+        initMentorChat(data.students);
+      }).catch(err => console.error('Failed to init dashboard:', err));
+      initMentorSocket();
+      startSessionStatusPolling();
+      
+      const scheduleSessionBtn = document.getElementById('scheduleSessionBtn');
+      const startOnDemandBtn = document.getElementById('startOnDemandBtn');
+      const scheduleForm = document.getElementById('scheduleForm');
+      const onDemandForm = document.getElementById('onDemandForm');
+      const openVirtualLabBtn = document.getElementById('openVirtualLabBtn');
+      
+      if (scheduleSessionBtn) scheduleSessionBtn.addEventListener('click', openSchedulePopup);
+      if (startOnDemandBtn) startOnDemandBtn.addEventListener('click', openOnDemandPopup);
+      if (scheduleForm) scheduleForm.addEventListener('submit', handleScheduleSubmit);
+      if (onDemandForm) onDemandForm.addEventListener('submit', handleOnDemandSubmit);
+      if (openVirtualLabBtn) openVirtualLabBtn.addEventListener('click', openVirtualLab);
+
+      // Auto-calculate duration when start/end time changes
+      const startTimeInput = document.getElementById('startTime');
+      const endTimeInput = document.getElementById('endTime');
+      const durationInput = document.getElementById('duration');
+      
+      function calculateDuration() {
+        const start = startTimeInput.value;
+        const end = endTimeInput.value;
+        if (start && end) {
+          const [startHour, startMin] = start.split(':').map(Number);
+          const [endHour, endMin] = end.split(':').map(Number);
+          const startMinutes = startHour * 60 + startMin;
+          const endMinutes = endHour * 60 + endMin;
+          const diff = endMinutes - startMinutes;
+          if (diff > 0) {
+            durationInput.value = diff;
+          }
+        }
+      }
+      
+      if (startTimeInput && endTimeInput && durationInput) {
+        startTimeInput.addEventListener('change', calculateDuration);
+        endTimeInput.addEventListener('change', calculateDuration);
+      }
+    });
+
+    async function initDashboard() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) {
+        window.location.href = '/login.html';
+        return;
+      }
+      
+      document.getElementById('welcomeText').textContent = `Welcome, ${user.firstName}`;
+      
+      try {
+        // Stagger the API calls to avoid rate limiting
+        const projects = await window.api.getProjects({ mentorId: user.id });
+        const sessions = await window.api.getMySessions();
+        const students = await window.api.getMentorStudents();
+
+        // Filter students to only show those with projects assigned to this mentor
+        const filteredStudents = students.filter(record => {
+          return record && record.projectId && record.assignedMentorId === user.id;
+        });
+
+        console.log('[Mentor Dashboard] All students:', students);
+        console.log('[Mentor Dashboard] Filtered students:', filteredStudents);
+
+        document.getElementById('activeStudents').textContent = filteredStudents.length;
+        document.getElementById('assignedProjects').textContent = projects.projects?.length || 0;
+        document.getElementById('upcomingSessions').textContent = sessions.length;
+
+        renderSessions(sessions);
+        
+        // Return students data for reuse in initMentorChat
+        return { students, filteredStudents };
+      } catch (err) {
+        console.error('Dashboard init failed', err);
+        return { students: [], filteredStudents: [] };
+      }
+    }
+
+    function renderSessions(sessions) {
+      const container = document.getElementById('sessions-grid');
+      if (!sessions || sessions.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No upcoming sessions</div>';
+        return;
+      }
+
+      container.innerHTML = sessions.slice(0, 5).map((s, idx) => `
+        <div style="padding: 1.5rem; background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 12px; margin-bottom: 1rem; animation: slideUp 0.5s ease forwards; animation-delay: ${idx * 0.1}s; opacity: 0;">
+          <div style="font-weight: 700; margin-bottom: 0.5rem;">${s.title || s.description || 'Session'}</div>
+          <div style="font-size: 0.9rem; color: var(--text-muted);">${new Date(s.scheduledDate).toLocaleDateString()} at ${s.startTime}</div>
+          <button onclick="joinSession('${s._id}')" class="btn btn-primary btn-sm mt-2" style="border-radius: 8px;">Join</button>
+        </div>
+      `).join('');
+    }
+
+    // ========== MENTOR CHAT FUNCTIONS ==========
+    let currentSelectedStudent = null;
+    let mentorUser = null;
+
+    async function initMentorChat(passedStudents = null) {
+      const user = JSON.parse(localStorage.getItem('user'));
+      mentorUser = user;
+
+      try {
+        // Use passed students data if available to avoid duplicate API call
+        // Otherwise, fetch them (shouldn't happen, but fallback just in case)
+        let students = passedStudents;
+        if (!students) {
+          students = await window.api.getMentorStudents();
+        }
+        
+        const uniqueStudents = [];
+        const seenIds = new Set();
+
+        students.forEach(record => {
+          if (record && record.studentId && !seenIds.has(record.studentId._id || record.studentId.id)) {
+            seenIds.add(record.studentId._id || record.studentId.id);
+            uniqueStudents.push(record.studentId);
+          }
+        });
+
+        displayStudentsList(uniqueStudents);
+
+        // Set up event listener for message input
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        
+        if (messageInput) {
+          messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && currentSelectedStudent) {
+              sendMentorMessage();
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Error initializing mentor chat:', err);
+        // Silently fail - chat is not critical
+      }
+    }
+
+    function displayStudentsList(students) {
+      const container = document.getElementById('studentsList');
+      
+      if (!students || students.length === 0) {
+        container.innerHTML = '<div style="padding: 1.5rem; text-align: center; color: #94a3b8; font-size: 0.9rem;">No students yet</div>';
+        return;
+      }
+
+      container.innerHTML = students.map(student => {
+        const studentId = student._id || student.id;
+        const name = student.firstName || student.name || 'Unknown';
+        const initial = name.charAt(0).toUpperCase();
+        
+        return `
+          <div class="student-item" onclick="selectStudent('${studentId}', '${name}')">
+            <div class="student-avatar">${initial}</div>
+            <div class="student-info">
+              <div class="student-name">${name}</div>
+              <div class="student-preview">Click to view messages</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function selectStudent(studentId, studentName) {
+      currentSelectedStudent = studentId;
+
+      // Update UI
+      document.querySelectorAll('.student-item').forEach(item => item.classList.remove('active'));
+      event.currentTarget?.classList.add('active');
+
+      document.getElementById('chatHeader').textContent = `Chat with ${studentName}`;
+      const messageInput = document.getElementById('messageInput');
+      const sendBtn = document.getElementById('sendBtn');
+      messageInput.disabled = false;
+      sendBtn.disabled = false;
+
+      // Load messages (messages update in real-time via Socket.io)
+      await loadMentorMessages(studentId);
+    }
+
+    async function loadMentorMessages(studentId) {
+      try {
+        const token = localStorage.getItem('token');
+        // Get user's projects to fetch messages from
+        const user = JSON.parse(localStorage.getItem('user'));
+        const userId = user._id || user.id;
+        
+        console.log('[Mentor Chat] Loading messages for student:', studentId);
+        console.log('[Mentor Chat] Mentor ID:', userId);
+        
+        // For now, load messages from all projects this mentor teaches
+        const projects = await window.api.getProjects({ mentorId: userId });
+        
+        console.log('[Mentor Chat] Found projects:', projects.projects?.length || 0);
+        
+        let allMessages = [];
+
+        for (const project of (projects.projects || [])) {
+          try {
+            console.log(`[Mentor Chat] Fetching messages for project ${project._id}`);
+            const response = await fetch(`/api/messages/project/${project._id}/student/${studentId}`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+              const messages = await response.json();
+              console.log(`[Mentor Chat] Got ${messages.length} messages for project ${project._id}`);
+              allMessages = allMessages.concat(messages);
+            } else {
+              console.warn(`[Mentor Chat] Failed to load messages for project ${project._id}:`, response.status);
+            }
+          } catch (err) {
+            console.log('No messages for this project:', err);
+          }
+        }
+
+        console.log('[Mentor Chat] Total messages:', allMessages.length);
+        displayMessages(allMessages, studentId);
+      } catch (err) {
+        console.error('Error loading messages:', err);
+      }
+    }
+
+    function displayMessages(messages, studentId) {
+      const messagesArea = document.getElementById('messagesArea');
+      
+      if (!messages || messages.length === 0) {
+        messagesArea.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #94a3b8; text-align: center;"><p>No messages yet. Start the conversation!</p></div>';
+        return;
+      }
+
+      const user = JSON.parse(localStorage.getItem('user'));
+      const userId = user._id || user.id;
+
+      messagesArea.innerHTML = messages.map(msg => {
+        const isSender = (msg.senderId === userId || msg.senderId._id === userId || msg.senderId === userId);
+        const time = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        return `
+          <div class="message ${isSender ? 'sent' : 'received'}">
+            <div>
+              <div class="message-content">${msg.message || msg.text}</div>
+              <div class="message-time">${time}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Scroll to bottom
+      messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    // ========== MENTOR CHAT FUNCTIONS ==========
+    async function sendMentorMessage() {
+      if (!currentSelectedStudent) {
+        console.warn('[Mentor Chat] No student selected');
+        return;
+      }
+
+      const input = document.getElementById('messageInput');
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      const sendBtn = document.getElementById('sendBtn');
+
+      try {
+        if (sendBtn) sendBtn.disabled = true;
+
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        // Get first project this mentor teaches
+        const projects = await window.api.getProjects({ mentorId: user.id });
+        
+        if (!projects.projects || projects.projects.length === 0) {
+          alert('You must be assigned to a project to send messages');
+          return;
+        }
+
+        const projectId = projects.projects[0]._id;
+
+        // Save message to database
+        const response = await fetch('/api/messages/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            projectId,
+            studentId: currentSelectedStudent,
+            message
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        // Send via Socket.io for real-time delivery to student
+        if (mentorSocket && mentorSocket.connected) {
+          mentorSocket.emit('send-message', {
+            studentId: currentSelectedStudent,
+            projectId,
+            message,
+            senderId: user._id || user.id,
+            timestamp: new Date()
+          });
+          
+          // Broadcast mentor online status
+          mentorSocket.emit('mentor-online', {
+            projectId,
+            studentId: currentSelectedStudent
+          });
+        }
+
+        // Add to UI immediately
+        addMentorMessageToUI(message, 'sent');
+        input.value = '';
+
+      } catch (error) {
+        console.error('[Mentor Chat] Error sending message:', error);
+        alert('Failed to send message. Please try again.');
+      } finally {
+        if (sendBtn) sendBtn.disabled = false;
+      }
+    }
+
+    function addMentorMessageToUI(message, type = 'received') {
+      const messagesArea = document.getElementById('messagesArea');
+      if (!messagesArea) return;
+
+      const messageEl = document.createElement('div');
+      messageEl.className = `message ${type}`;
+      
+      // Escape HTML to prevent XSS
+      const safeMessage = escapeHtmlMentor(message);
+      
+      messageEl.innerHTML = `
+        <div>
+          <div class="message-content">${safeMessage}</div>
+          <div class="message-time">Just now</div>
+        </div>
+      `;
+      messagesArea.appendChild(messageEl);
+      messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    function escapeHtmlMentor(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ========== MENTOR SOCKET INITIALIZATION ==========
+    let mentorSocket = null;
+
+    function initMentorSocket() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) return;
+
+      mentorSocket = io();
+
+      mentorSocket.on('connect', () => {
+        console.log('[Mentor Dashboard] Connected to server');
+        // Notify that mentor is online
+        mentorSocket.emit('mentor-online', { 
+          mentorId: user._id || user.id,
+          mentorName: user.firstName
+        });
+      });
+
+      mentorSocket.on('disconnect', () => {
+        console.log('[Mentor Dashboard] Disconnected from server');
+      });
+
+      mentorSocket.on('student-joined', (data) => {
+        console.log('[Mentor Dashboard] Student joined:', data);
+      });
+
+      // Listen for student requests
+      mentorSocket.on('request-mentor-status', (data) => {
+        console.log('[Mentor Dashboard] Student requested mentor status');
+        mentorSocket.emit('mentor-status', { 
+          isOnline: true,
+          mentorId: user._id || user.id
+        });
+      });
+
+      // Listen for incoming messages from students (real-time)
+      mentorSocket.on('student-message', (data) => {
+        console.log('[Mentor Dashboard] New message from student:', data);
+        
+        // Only display if this message is from the currently selected student
+        // This prevents messages from other students appearing in wrong conversation
+        if (currentSelectedStudent === data.studentId) {
+          const user = JSON.parse(localStorage.getItem('user'));
+          const userId = user._id || user.id;
+          const senderId = data.senderId?._id || data.senderId;
+          
+          // Don't display our own messages (avoid duplicates)
+          if (senderId !== userId) {
+            addMentorMessageToUI(data.message, 'received');
+          }
+        }
+      });
+
+      // Cleanup on page leave
+      window.addEventListener('beforeunload', () => {
+        if (mentorSocket) {
+          mentorSocket.emit('mentor-offline', { 
+            mentorId: user._id || user.id
+          });
+          mentorSocket.disconnect();
+        }
+      });
+    } // end initMentorSocket
+
+    async function populateStudentSelect() {
+      const select = document.getElementById('studentSelect');
+      try {
+        const students = await window.api.getMentorStudents();
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        // Filter to only show students with projects assigned to this mentor
+        const filteredStudents = students.filter(record => {
+          return record && record.projectId && record.assignedMentorId === user.id;
+        });
+
+        select.innerHTML = filteredStudents.map(record => `
+          <option value="${record.studentId?._id || record.studentId}">${record.studentId?.firstName || 'Student'} ${record.studentId?.lastName || ''}</option>
+        `).join('');
+      } catch (err) {
+        select.innerHTML = '<option disabled>Failed to load students</option>';
+      }
+    }
+
+    async function populateOnDemandStudentSelect() {
+      const select = document.getElementById('onDemandStudentSelect');
+      try {
+        const students = await window.api.getMentorStudents();
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        // Filter to only show students with projects assigned to this mentor
+        const filteredStudents = students.filter(record => {
+          return record && record.projectId && record.assignedMentorId === user.id;
+        });
+
+        select.innerHTML = filteredStudents.map(record => `
+          <option value="${record.studentId?._id || record.studentId}">${record.studentId?.firstName || 'Student'} ${record.studentId?.lastName || ''}</option>
+        `).join('');
+      } catch (err) {
+        select.innerHTML = '<option disabled>Failed to load students</option>';
+      }
+    }
+
+    async function handleScheduleSubmit(e) {
+      e.preventDefault();
+      const studentIds = Array.from(document.getElementById('studentSelect').selectedOptions).map(o => o.value);
+      
+      if (studentIds.length === 0) {
+        alert('Please select at least one student');
+        return;
+      }
+      
+      const sessionData = {
+        title: document.getElementById('sessionTitle').value,
+        studentIds,
+        scheduledDate: document.getElementById('sessionDate').value,
+        startTime: document.getElementById('startTime').value,
+        endTime: document.getElementById('endTime').value,
+        duration: parseInt(document.getElementById('duration').value),
+        description: document.getElementById('sessionTitle').value
+      };
+
+      try {
+        await window.api.createSession(sessionData);
+        closeSchedulePopup();
+        alert('Session scheduled successfully!');
+        initDashboard();
+      } catch (err) {
+        alert('Failed to schedule session: ' + err.message);
+      }
+    }
+
+    async function handleOnDemandSubmit(e) {
+      e.preventDefault();
+      const studentIds = Array.from(document.getElementById('onDemandStudentSelect').selectedOptions).map(o => o.value);
+      
+      if (studentIds.length === 0) {
+        alert('Please select at least one student');
+        return;
+      }
+
+      const sessionData = {
+        title: document.getElementById('onDemandTitle').value,
+        studentIds,
+        description: document.getElementById('onDemandDescription').value,
+        isInstant: true,
+        recordingEnabled: true
+      };
+
+      try {
+        const response = await window.api.createInstantSession(sessionData);
+        closeOnDemandPopup();
+        
+        // Notify students that mentor has started a session
+        notifyStudentsSessionStarted(studentIds, response.sessionId);
+        
+        // Redirect to virtual lab with the session
+        setTimeout(() => {
+          window.location.href = `/pages/virtual-lab-v3.html?sessionId=${response.sessionId}&role=mentor`;
+        }, 500);
+      } catch (err) {
+        alert('Failed to start session: ' + err.message);
+      }
+    }
+
+    let lastSessionsData = null; // Track last sessions to prevent unnecessary re-renders
+
+    function startSessionStatusPolling() {
+      if (sessionStatusPollInterval) {
+        clearInterval(sessionStatusPollInterval);
+      }
+
+      // Poll session status every 30 seconds, but only update if data changed
+      sessionStatusPollInterval = setInterval(async () => {
+        // Only poll if page is visible to reduce API calls
+        if (document.hidden) return;
+        
+        try {
+          const sessions = await window.api.getMySessions();
+          
+          // Only update display if sessions data actually changed
+          const sessionsJSON = JSON.stringify(sessions);
+          if (sessionsJSON !== lastSessionsData) {
+            lastSessionsData = sessionsJSON;
+            if (sessions.length > 0) {
+              updateSessionDisplay(sessions);
+            }
+          }
+        } catch (err) {
+          console.error('Session polling failed:', err);
+        }
+      }, 30000);
+    }
+
+    function updateSessionDisplay(sessions) {
+      const container = document.getElementById('sessions-grid');
+      if (!sessions || sessions.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No upcoming sessions</div>';
+        return;
+      }
+
+      // Update with current sessions, highlighting active ones
+      container.innerHTML = sessions.slice(0, 5).map((s, idx) => {
+        const isActive = s.status === 'active' || s.status === 'ongoing';
+        const statusColor = isActive ? '#10b981' : '#6b7280';
+        
+        return `
+          <div style="padding: 1.5rem; background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 12px; margin-bottom: 1rem; position: relative;">
+            ${isActive ? `<div style="position: absolute; top: 1rem; right: 1rem; width: 10px; height: 10px; background: ${statusColor}; border-radius: 50%; animation: pulse 2s infinite;"></div>` : ''}
+            <div style="font-weight: 700; margin-bottom: 0.5rem;">${s.title || s.description || 'Session'}</div>
+            <div style="font-size: 0.9rem; color: var(--text-muted);">${new Date(s.scheduledDate || s.createdAt).toLocaleDateString()} at ${s.startTime || 'On-demand'}</div>
+            <div style="font-size: 0.85rem; color: ${statusColor}; margin-top: 0.5rem; font-weight: 600;">Status: ${s.status || 'pending'}</div>
+            <button onclick="joinSession('${s._id}')" class="btn btn-primary btn-sm mt-2" style="border-radius: 8px;">Join</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function notifyStudentsSessionStarted(studentIds, sessionId) {
+      try {
+        // Send notification via API that mentor started a session
+        await window.api.notifySessionStarted(studentIds, sessionId, 
+          'Your mentor has started a session',
+          'Click to join the virtual lab'
+        );
+        console.log('[Dashboard] Students notified of session start');
+      } catch (err) {
+        console.error('Failed to notify students:', err);
+      }
+    }
+
+    async function openVirtualLab() {
+      try {
+        const sessions = await window.api.getMySessions();
+        if (sessions.length === 0) {
+          alert('No active sessions available.');
+          return;
+        }
+        window.location.href = `/pages/virtual-lab-v3.html?sessionId=${sessions[0]._id}&role=mentor`;
+      } catch (err) {
+        alert('Failed to open virtual lab.');
+      }
+    }
+
+    function joinSession(id) {
+      window.location.href = `/pages/virtual-lab-v3.html?sessionId=${id}&role=mentor`;
+    }
+
+    // Cleanup when leaving page
+    window.addEventListener('beforeunload', () => {
+      if (sessionStatusPollInterval) {
+        clearInterval(sessionStatusPollInterval);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .main-content {
+      padding: clamp(2rem, 5vw, 4rem);
+      max-width: 1600px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .admin-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.5rem;
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      width: fit-content;
+      backdrop-filter: blur(12px);
+      overflow-x: auto;
+    }
+
+    .admin-nav-link {
+      padding: 0.8rem 2rem;
+      border-radius: 1rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .admin-nav-link:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .admin-nav-link.active {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .data-table-wrapper {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin-top: 2rem;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 1.5rem;
+      color: var(--text-dim);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .data-table td {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .role-tag {
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    /* Aurora Background Styles */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #0B0C15;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 1.5rem;
+      color: var(--text-main);
+      font-size: 1.5rem;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .modal-form .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .modal-form label {
+      display: block;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .modal-form input,
+    .modal-form select {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+
+    .modal-form input:focus,
+    .modal-form select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    .modal-form .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      background: #0B0C15;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      z-index: 2000;
+      transform: translateX(120%);
+      transition: transform 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast-success { border-left: 3px solid #10b981; }
+    .toast-error { border-left: 3px solid #ef4444; }
+
+    .center-fields-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(99,102,241,0.05);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 0.5rem;
+    }
+
+    .center-fields-box h4 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1.5rem;
+      }
+      
+      .admin-nav {
+        width: 100%;
+      }
+
+      .modal-form .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <main class="main-content">
+    <header class="header-content" style="margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1 class="gradient-text" style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 0.5rem;">User Management</h1>
+        <p style="color: var(--text-muted); font-size: clamp(1rem, 2vw, 1.1rem);">Manage platform users and their permissions.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openAddUserModal()">➕ Add New User</button>
+    </header>
+
+    <nav class="admin-nav">
+      <a href="/pages/admin/dashboard.html" class="admin-nav-link">📊 Dashboard</a>
+      <a href="/pages/admin/user-management.html" class="admin-nav-link active">👥 Users</a>
+      <a href="/pages/admin/center-management.html" class="admin-nav-link">🏢 Centers</a>
+      <a href="/pages/admin/project-management.html" class="admin-nav-link">📚 Projects</a>
+      <a href="/pages/admin/usage-logs.html" class="admin-nav-link">📋 System Logs</a>
+    </nav>
+
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Roles</th>
+            <th>Joined</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody">
+          <!-- Dynamic content -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Add/Edit User Modal -->
+  <div id="userModal" class="modal-overlay">
+    <div class="modal-content">
+      <h2 id="modalTitle">Add New User</h2>
+      <form id="userForm" class="modal-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" placeholder="First name" required>
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" placeholder="Last name" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="user@example.com" required>
+        </div>
+        <div class="form-group" id="passwordField">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Password" required>
+        </div>
+        <div class="form-group">
+          <label for="role">Role</label>
+          <select id="role" required>
+            <option value="student">Student</option>
+            <option value="mentor">Mentor</option>
+            <option value="center_admin">Center Admin</option>
+            <option value="admin">System Admin</option>
+          </select>
+        </div>
+
+        <!-- Center fields (shown when role = center_admin in add mode) -->
+        <div id="centerFields" class="center-fields-box" style="display: none;">
+          <h4>🏢 Center Registration Details</h4>
+          <div class="form-group">
+            <label for="centerName">Center Name</label>
+            <input type="text" id="centerName" placeholder="e.g. Tech Innovation Hub">
+          </div>
+          <div class="form-group" style="margin-top: 0.75rem;">
+            <label for="centerEmail">Center Email</label>
+            <input type="email" id="centerEmail" placeholder="center@example.com">
+          </div>
+          <div class="form-row" style="margin-top: 0.75rem;">
+            <div class="form-group">
+              <label for="centerCity">City</label>
+              <input type="text" id="centerCity" placeholder="City">
+            </div>
+            <div class="form-group">
+              <label for="centerCountry">Country</label>
+              <input type="text" id="centerCountry" placeholder="Country">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary btn-icon">
+            💾 Save User
+          </button>
+          <button type="button" class="btn btn-glass" onclick="closeUserModal()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete User Modal -->
+  <div id="deleteUserModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px;">
+      <h2 style="color: #ef4444;">⚠️ Delete User</h2>
+      <p style="color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6;">
+        Are you sure you want to delete <strong id="deleteUserName" style="color: var(--text-main);"></strong>?
+        This will terminate all sessions, remove from all groups, delete all progress records. This action <strong style="color: #ef4444;">cannot be undone</strong>.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-danger btn-icon" onclick="confirmDeleteUser()">
+          🗑️ Delete User
+        </button>
+        <button class="btn btn-glass" onclick="closeDeleteUserModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast">
+    <span id="toastMessage"></span>
+  </div>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    let editingUserId = null;
+    let userToDelete = null;
+    const userModal = document.getElementById('userModal');
+    const deleteUserModal = document.getElementById('deleteUserModal');
+
+    // === Toast Notification ===
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      toast.className = `toast toast-${type}`;
+      toastMsg.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    // === User Modal ===
+    function openAddUserModal() {
+      editingUserId = null;
+      document.getElementById('modalTitle').textContent = 'Add New User';
+      document.getElementById('userForm').reset();
+      document.getElementById('passwordField').style.display = 'block';
+      document.getElementById('password').required = true;
+      document.getElementById('centerFields').style.display = 'none';
+      userModal.classList.add('active');
+    }
+
+    function openEditUserModal(userId, firstName, lastName, email, roles) {
+      editingUserId = userId;
+      document.getElementById('modalTitle').textContent = '✏️ Edit User';
+      document.getElementById('firstName').value = firstName;
+      document.getElementById('lastName').value = lastName;
+      document.getElementById('email').value = email;
+      document.getElementById('role').value = roles[0] || 'student';
+      document.getElementById('passwordField').style.display = 'none';
+      document.getElementById('password').required = false;
+      document.getElementById('centerFields').style.display = 'none';
+      userModal.classList.add('active');
+    }
+
+    function closeUserModal() {
+      userModal.classList.remove('active');
+      editingUserId = null;
+      document.getElementById('userForm').reset();
+    }
+
+    // Close user modal on overlay click
+    userModal.addEventListener('click', (e) => {
+      if (e.target === userModal) closeUserModal();
+    });
+
+    // Role change handler to show/hide center fields
+    document.getElementById('role').addEventListener('change', function() {
+      const centerFields = document.getElementById('centerFields');
+      if (this.value === 'center_admin' && !editingUserId) {
+        centerFields.style.display = 'block';
+      } else {
+        centerFields.style.display = 'none';
+      }
+    });
+
+    // Handle form submission
+    document.getElementById('userForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+
+      try {
+        if (editingUserId) {
+          uiManager.showLoading('Updating user...');
+          await window.api.request(`/auth/admin/users/${editingUserId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ role })
+          });
+          uiManager.hideLoading();
+          showToast('✅ User updated successfully!', 'success');
+          closeUserModal();
+          setTimeout(() => window.location.reload(), 1200);
+        } else if (role === 'center_admin') {
+          const centerName = document.getElementById('centerName').value.trim();
+          const centerEmail = document.getElementById('centerEmail').value.trim();
+          const centerCity = document.getElementById('centerCity')?.value.trim() || '';
+          const centerCountry = document.getElementById('centerCountry')?.value.trim() || '';
+          
+          if (!centerName || !centerEmail) {
+            showToast('Please fill in the center name and email fields for Center Admin', 'error');
+            return;
+          }
+          
+          uiManager.showLoading('Creating center admin and center...');
+          await window.api.createCenterAdmin({
+            email,
+            password,
+            firstName,
+            lastName,
+            centerName,
+            centerEmail,
+            city: centerCity,
+            country: centerCountry
+          });
+          uiManager.hideLoading();
+          showToast('✅ Center admin and center created successfully!', 'success');
+          closeUserModal();
+          setTimeout(() => window.location.reload(), 1200);
+        } else {
+          uiManager.showLoading('Creating new user...');
+          await window.api.register(email, password, firstName, lastName, role);
+          uiManager.hideLoading();
+          showToast('✅ User created successfully!', 'success');
+          closeUserModal();
+          setTimeout(() => window.location.reload(), 1200);
+        }
+      } catch (error) {
+        uiManager.hideLoading();
+        showToast('❌ Error: ' + error.message, 'error');
+        console.error('Error:', error);
+      }
+    });
+
+    // === Delete User Modal ===
+    function openDeleteUserModal(userId, userName) {
+      userToDelete = userId;
+      document.getElementById('deleteUserName').textContent = userName;
+      deleteUserModal.classList.add('active');
+    }
+
+    function closeDeleteUserModal() {
+      deleteUserModal.classList.remove('active');
+      userToDelete = null;
+    }
+
+    // Close delete modal on overlay click
+    deleteUserModal.addEventListener('click', (e) => {
+      if (e.target === deleteUserModal) closeDeleteUserModal();
+    });
+
+    async function confirmDeleteUser() {
+      if (!userToDelete) return;
+
+      try {
+        uiManager.showLoading('Deleting user and cleaning up data...');
+        await window.api.request(`/auth/admin/users/${userToDelete}`, { method: 'DELETE' });
+        uiManager.hideLoading();
+        showToast('🗑️ User deleted successfully!', 'success');
+        closeDeleteUserModal();
+        setTimeout(() => window.location.reload(), 1200);
+      } catch (error) {
+        uiManager.hideLoading();
+        showToast('❌ Error deleting user: ' + error.message, 'error');
+        console.error('Delete error:', error);
+      }
+    }
+
+    // === Main page load ===
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user || !user.roles.includes('admin')) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      try {
+        const users = await window.api.request('/auth/admin/users');
+        const tbody = document.getElementById('userTableBody');
+        
+        if (users.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 4rem; color: var(--text-muted);">No users found.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = users.map(u => `
+          <tr>
+            <td>
+              <div class="user-badge">
+                <div class="user-avatar">${(u.firstName || 'U')[0]}${(u.lastName || '')[0]}</div>
+                <div>
+                  <div style="font-weight: 700; color: var(--text-main);">${u.firstName} ${u.lastName}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-dim);">${u.email}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                ${u.roles.map(role => `<span class="role-tag">${role}</span>`).join('')}
+              </div>
+            </td>
+            <td>
+              <div style="color: var(--text-main);">${new Date(u.created_at).toLocaleDateString()}</div>
+              <div style="font-size: 0.8rem; color: var(--text-dim);">${new Date(u.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+            </td>
+            <td>
+              <span class="status-pill status-approved">Active</span>
+            </td>
+            <td>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn btn-glass btn-sm edit-user-btn" 
+                  data-id="${u._id}" 
+                  data-first-name="${u.firstName}" 
+                  data-last-name="${u.lastName}" 
+                  data-email="${u.email}" 
+                  data-roles="${u.roles.join(',')}" 
+                  style="padding: 0.5rem 0.8rem; font-size: 0.75rem;">
+                  ✏️ Edit
+                </button>
+                <button class="btn btn-glass btn-sm delete-user-btn" 
+                  data-id="${u._id}" 
+                  data-name="${u.firstName} ${u.lastName}" 
+                  style="padding: 0.5rem 0.8rem; font-size: 0.75rem; color: #ef4444;">
+                  🗑️ Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+        // Event delegation for edit and delete buttons
+        tbody.addEventListener('click', (e) => {
+          const editBtn = e.target.closest('.edit-user-btn');
+          const deleteBtn = e.target.closest('.delete-user-btn');
+          
+          if (editBtn) {
+            openEditUserModal(
+              editBtn.dataset.id,
+              editBtn.dataset.firstName,
+              editBtn.dataset.lastName,
+              editBtn.dataset.email,
+              editBtn.dataset.roles.split(',')
+            );
+          } else if (deleteBtn) {
+            openDeleteUserModal(deleteBtn.dataset.id, deleteBtn.dataset.name);
+          }
+        });
+      } catch (error) {
+        console.error('Error loading users:', error);
+      }
+    });
+  </script>
+</body>
+</html>

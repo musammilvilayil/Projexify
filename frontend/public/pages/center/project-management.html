@@ -1,0 +1,928 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Management | Nexus</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/design-system.css">
+  <style>
+    .project-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 300px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 1.2rem 1.5rem 1.2rem 3.5rem;
+      background: var(--bg-glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      color: var(--text-main);
+      font-size: 1.1rem;
+      transition: var(--transition);
+      backdrop-filter: blur(8px);
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .search-box::before {
+      content: '\f002';
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      position: absolute;
+      left: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 1.2rem;
+      z-index: 1;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .project-table-container {
+      background: var(--bg-glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+    }
+
+    .project-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .project-table th {
+      padding: 1.5rem 2rem;
+      background: rgba(255, 255, 255, 0.03);
+      font-weight: 700;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .project-table td {
+      padding: 1.5rem 2rem;
+      border-top: 1px solid var(--glass-border);
+      vertical-align: middle;
+    }
+
+    .project-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .project-info-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .project-title-text {
+      font-weight: 700;
+      color: var(--text-main);
+      font-size: 1.1rem;
+    }
+
+    .project-desc-text {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      max-width: 300px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: inline-block;
+    }
+
+    .status-active { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+    .status-inactive { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .status-archived { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+
+    .capacity-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .capacity-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+
+    .capacity-bar {
+      width: 120px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .capacity-fill {
+      height: 100%;
+      background: var(--gradient-primary);
+      border-radius: 4px;
+      transition: width 0.5s ease-out;
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1rem;
+    }
+
+    .btn-icon:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .btn-icon.delete:hover {
+      background: #ef4444;
+      border-color: #ef4444;
+    }
+
+    /* Aurora Background Styles */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    /* Enhanced Table Styles */
+    .project-table-container {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .project-table tr:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    /* Button Shimmer Effect */
+    .btn-primary {
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      transform: rotate(45deg);
+      transition: 0.6s;
+      z-index: -1;
+    }
+
+    .btn-primary:hover::before {
+      left: 120%;
+    }
+  </style>
+</head>
+<body>
+  <!-- Aurora Background -->
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <main class="main-content">
+    <header class="dashboard-header">
+      <div class="dashboard-header-content">
+        <h1 class="gradient-text">Project Management</h1>
+        <p>Create, track, and manage innovation projects for your center's ecosystem.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="createProjectBtn" style="padding: 1rem 2rem; font-weight: 700;">+ Create New Project</button>
+      </div>
+    </header>
+
+    <nav class="center-nav">
+      <a href="/pages/center/dashboard.html" class="center-nav-link">Dashboard</a>
+      <a href="/pages/center/mentor-manager.html" class="center-nav-link">Mentors</a>
+      <a href="/pages/center/project-management.html" class="center-nav-link active">Projects</a>
+    </nav>
+
+    <div class="project-controls">
+      <div class="search-box">
+        <input type="text" id="projectSearch" placeholder="Search projects by title or mentor...">
+      </div>
+      <div class="filter-group">
+        <select id="statusFilter" class="form-input" style="padding: 1rem; background: var(--bg-glass); border: 1px solid var(--glass-border); color: var(--text-main); border-radius: var(--radius-lg); min-width: 180px; backdrop-filter: blur(8px);">
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="project-table-container">
+      <table class="project-table">
+        <thead>
+          <tr>
+            <th>Project Details</th>
+            <th>Mentor</th>
+            <th>Capacity</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="projectTableBody">
+          <!-- Dynamic content -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Project Modal -->
+  <div id="projectModal" class="modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="glass-card" style="width: 100%; max-width: 600px; padding: 2.5rem; position: relative; margin: 2rem; max-height: 90vh; overflow-y: auto;">
+      <button id="closeModalX" style="position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem;">&times;</button>
+      
+      <h2 class="gradient-text" id="modalTitle" style="margin-bottom: 0.5rem;">Create Project</h2>
+      <p id="modalSubtitle" style="color: var(--text-muted); margin-bottom: 2rem;">Define a new innovation project for students.</p>
+
+      <form id="projectForm">
+        <input type="hidden" id="projectId">
+        
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Project Title</label>
+          <input type="text" id="projectTitle" class="form-input" required style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Description</label>
+          <textarea id="projectDescription" class="form-input" rows="4" required style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main); resize: none;"></textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <div class="form-group">
+            <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Assign Mentor</label>
+            <select id="projectMentor" class="form-input" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+              <option value="">Select a mentor</option>
+              <!-- Dynamic mentors -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Student Capacity</label>
+            <input type="number" id="projectCapacity" class="form-input" min="1" value="5" required style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+          <div class="form-group">
+            <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Status</label>
+            <select id="projectStatus" class="form-input" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Category</label>
+            <input type="text" id="projectCategory" class="form-input" placeholder="e.g. AI, Robotics" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+          </div>
+        </div>
+
+        <!-- Pricing & Difficulty Section -->
+        <div style="margin-bottom: 2rem; padding: 1.5rem; background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: var(--radius-lg);">
+          <h4 style="margin-bottom: 1rem; font-size: 1rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-tag"></i> Pricing & Difficulty
+          </h4>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Project Price (₹)</label>
+              <input type="number" id="projectPrice" class="form-input" min="0" max="100000" value="5000" placeholder="e.g., 5000" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+            </div>
+            <div class="form-group">
+              <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Difficulty Level</label>
+              <select id="projectDifficulty" class="form-input" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+                <option value="beginner">Beginner</option>
+                <option value="intermediate" selected>Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="button" id="aiCalculateBtn" class="btn btn-glass" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <i class="fas fa-brain"></i> Auto Calculate with AI
+          </button>
+        </div>
+
+        <!-- Project Files Section -->
+        <div style="margin-bottom: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-lg);">
+          <h4 style="margin-bottom: 1rem; font-size: 1rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-folder-open"></i> Project Files & Resources
+          </h4>
+          
+          <div id="projectFilesContainer" style="margin-bottom: 1rem;">
+            <!-- Dynamic file entries will be added here -->
+          </div>
+
+          <button type="button" id="addFileBtn" class="btn btn-glass" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <i class="fas fa-plus"></i> Add File/Resource
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+          <button type="button" id="closeModalBtn" class="btn btn-glass" style="flex: 1;">Cancel</button>
+          <button type="submit" id="submitBtn" class="btn btn-primary" style="flex: 1;">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    const projectModal = document.getElementById('projectModal');
+    const projectForm = document.getElementById('projectForm');
+    const createProjectBtn = document.getElementById('createProjectBtn');
+    const closeModalX = document.getElementById('closeModalX');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    let currentProjects = [];
+    let currentMentors = [];
+    let projectFiles = []; // Store project files
+
+    // Project file management
+    function addFileEntry(file = null) {
+      const container = document.getElementById('projectFilesContainer');
+      const fileId = Date.now();
+      
+      const fileEntry = document.createElement('div');
+      fileEntry.className = 'file-entry';
+      fileEntry.style.cssText = 'display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; margin-bottom: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 0.5rem;';
+      fileEntry.dataset.fileId = fileId;
+
+      fileEntry.innerHTML = `
+        <div style="flex: 1;">
+          <label class="file-upload-label" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 2px dashed rgba(255,255,255,0.15); border-radius: 0.5rem; transition: all 0.2s;">
+            <i class="fas fa-file-archive" style="font-size: 1.5rem; color: var(--primary);"></i>
+            <div style="flex: 1;">
+              <div class="file-name" style="font-weight: 600; color: var(--text-main);">${file ? file.name : 'Choose ZIP file...'}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Only .zip files are accepted</div>
+            </div>
+            <input type="file" class="file-input" accept=".zip,application/zip,application/x-zip,application/x-zip-compressed" style="display: none;">
+          </label>
+        </div>
+        <button type="button" class="btn-icon delete remove-file-btn" style="width: 40px; height: 40px; flex-shrink: 0;">
+          <i class="fas fa-trash"></i>
+        </button>
+      `;
+
+      container.appendChild(fileEntry);
+
+      // File input handler
+      const fileInput = fileEntry.querySelector('.file-input');
+      const fileName = fileEntry.querySelector('.file-name');
+      const fileLabel = fileEntry.querySelector('.file-upload-label');
+      
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          // Validate file type
+          if (!file.name.toLowerCase().endsWith('.zip')) {
+            alert('Only ZIP files are allowed!');
+            e.target.value = '';
+            return;
+          }
+          
+          // Validate file size (max 100MB)
+          if (file.size > 100 * 1024 * 1024) {
+            alert('File size must be less than 100MB!');
+            e.target.value = '';
+            return;
+          }
+          
+          fileName.textContent = file.name;
+          fileLabel.style.borderColor = 'var(--primary)';
+          fileLabel.style.background = 'rgba(99, 102, 241, 0.1)';
+        }
+      });
+
+      // Add remove handler
+      fileEntry.querySelector('.remove-file-btn').addEventListener('click', () => {
+        fileEntry.remove();
+      });
+    }
+
+    function collectProjectFiles() {
+      const files = [];
+      const fileEntries = document.querySelectorAll('.file-entry');
+      
+      fileEntries.forEach(entry => {
+        const fileInput = entry.querySelector('.file-input');
+        if (fileInput && fileInput.files.length > 0) {
+          files.push(fileInput.files[0]);
+        }
+      });
+
+      return files;
+    }
+
+    // Add file button handler
+    document.getElementById('addFileBtn')?.addEventListener('click', () => addFileEntry());
+
+    async function loadData() {
+      try {
+        if (window.UIManager) UIManager.showNotification('Loading projects...', 'info');
+        
+        let centerId = localStorage.getItem('centerId');
+        if (!centerId) {
+          // Try to fetch center if ID is missing
+          try {
+            const center = await window.api.getMyCenter();
+            if (center && center._id) {
+              centerId = center._id;
+              localStorage.setItem('centerId', centerId);
+            } else {
+              // No center found - redirect to registration or dashboard
+              console.error('No center found for this admin');
+              window.location.href = '/pages/center/dashboard.html';
+              return;
+            }
+          } catch (e) {
+            console.error('Could not fetch center:', e);
+            window.location.href = '/pages/center/dashboard.html';
+            return;
+          }
+        }
+
+        // Load mentors for the dropdown
+        const mentorRes = await window.api.getMentors({ centerId });
+        currentMentors = Array.isArray(mentorRes) ? mentorRes : (mentorRes.data || []);
+        const mentorSelect = document.getElementById('projectMentor');
+        mentorSelect.innerHTML = '<option value="">Select a mentor</option>' + 
+          currentMentors.map(m => `<option value="${m._id}">${m.name || `${m.firstName} ${m.lastName}`}</option>`).join('');
+
+        // Load projects
+        const projectRes = await window.api.getProjects({ centerId });
+        currentProjects = Array.isArray(projectRes) ? projectRes : (projectRes.projects || projectRes.data || []);
+        renderProjects(currentProjects);
+
+        // Check for deep link
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('id');
+        if (projectId) {
+          const project = currentProjects.find(p => p._id === projectId);
+          if (project) openModal(project);
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        if (window.UIManager) UIManager.showNotification('Failed to load project data', 'error');
+      }
+    }
+
+    function renderProjects(projects) {
+      const tbody = document.getElementById('projectTableBody');
+      if (!projects || projects.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 6rem 2rem;">
+              <div style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.2;">🚀</div>
+              <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">No Projects Found</h3>
+              <p style="color: var(--text-muted); margin-bottom: 2rem;">Start by creating an innovation project for your students.</p>
+              <button class="btn btn-primary" id="emptyStateCreateBtn">Create Your First Project</button>
+            </td>
+          </tr>
+        `;
+        const emptyBtn = document.getElementById('emptyStateCreateBtn');
+        if (emptyBtn) {
+          emptyBtn.addEventListener('click', () => createProjectBtn.click());
+        }
+        return;
+      }
+
+      tbody.innerHTML = projects.map(project => {
+        // Handle mentor - it might be populated as object or just ID
+        let mentorName = 'Unassigned';
+        if (project.mentor_id) {
+          if (typeof project.mentor_id === 'object') {
+            mentorName = project.mentor_id.name || `${project.mentor_id.firstName || ''} ${project.mentor_id.lastName || ''}`.trim() || 'Unassigned';
+          } else {
+            const mentor = currentMentors.find(m => m._id === project.mentor_id);
+            mentorName = mentor ? (mentor.name || `${mentor.firstName} ${mentor.lastName}`) : 'Unassigned';
+          }
+        } else if (project.mentorId) {
+          if (typeof project.mentorId === 'object') {
+            mentorName = project.mentorId.name || `${project.mentorId.firstName || ''} ${project.mentorId.lastName || ''}`.trim() || 'Unassigned';
+          } else {
+            const mentor = currentMentors.find(m => m._id === project.mentorId);
+            mentorName = mentor ? (mentor.name || `${mentor.firstName} ${mentor.lastName}`) : 'Unassigned';
+          }
+        }
+        
+        const studentCount = project.students ? project.students.length : 0;
+        const capacity = project.capacity || project.max_students || 5;
+        const capacityPercent = Math.min(100, (studentCount / capacity) * 100);
+        
+        return `
+          <tr>
+            <td>
+              <div class="project-info-cell">
+                <div class="project-title-text">${project.title}</div>
+                <div class="project-desc-text">${project.description}</div>
+              </div>
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: white; font-weight: 700;">${mentorName.charAt(0)}</div>
+                <span style="font-size: 0.95rem; font-weight: 500;">${mentorName}</span>
+              </div>
+            </td>
+            <td>
+              <div class="capacity-wrapper">
+                <div class="capacity-text">${studentCount} / ${capacity} Students</div>
+                <div class="capacity-bar">
+                  <div class="capacity-fill" style="width: ${capacityPercent}%"></div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="status-badge status-${project.status || 'inactive'}">${project.status || 'inactive'}</span>
+            </td>
+            <td>
+              <div class="action-btns">
+                <button class="btn-icon edit-project-btn" data-id="${project._id}" title="Edit Project">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-icon delete delete-project-btn" data-id="${project._id}" data-title="${project.title}" title="Delete Project">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Add event listeners
+      tbody.querySelectorAll('.edit-project-btn').forEach(btn => {
+        btn.addEventListener('click', () => editProject(btn.dataset.id));
+      });
+      tbody.querySelectorAll('.delete-project-btn').forEach(btn => {
+        btn.addEventListener('click', () => deleteProject(btn.dataset.id, btn.dataset.title));
+      });
+    }
+
+    // Search and Filter
+    function applyFilters() {
+      const searchTerm = document.getElementById('projectSearch').value.toLowerCase();
+      const statusFilter = document.getElementById('statusFilter').value;
+
+      const filtered = currentProjects.filter(p => {
+        const matchesSearch = p.title.toLowerCase().includes(searchTerm) || 
+                             (p.description && p.description.toLowerCase().includes(searchTerm));
+        const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
+        return matchesSearch && matchesStatus;
+      });
+      renderProjects(filtered);
+    }
+
+    document.getElementById('projectSearch').addEventListener('input', applyFilters);
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+
+    function openModal(project = null) {
+      const title = document.getElementById('modalTitle');
+      const submitBtn = document.getElementById('submitBtn');
+      const filesContainer = document.getElementById('projectFilesContainer');
+
+      // Clear existing files
+      filesContainer.innerHTML = '';
+
+      if (project) {
+        title.textContent = 'Edit Project';
+        submitBtn.textContent = 'Update Project';
+        document.getElementById('projectId').value = project._id;
+        document.getElementById('projectTitle').value = project.title;
+        document.getElementById('projectDescription').value = project.description;
+        
+        // Handle mentor_id - it might be populated as an object or just an ID string
+        let mentorValue = '';
+        if (project.mentor_id) {
+          mentorValue = typeof project.mentor_id === 'object' ? project.mentor_id._id : project.mentor_id;
+        } else if (project.mentorId) {
+          mentorValue = typeof project.mentorId === 'object' ? project.mentorId._id : project.mentorId;
+        }
+        document.getElementById('projectMentor').value = mentorValue;
+        
+        document.getElementById('projectCapacity').value = project.capacity || project.max_students || 5;
+        document.getElementById('projectStatus').value = project.status || 'active';
+        document.getElementById('projectCategory').value = project.category || '';
+        document.getElementById('projectPrice').value = project.price || 5000;
+        document.getElementById('projectDifficulty').value = project.difficulty_level || 'intermediate';
+
+        // Populate existing files
+        if (project.assets && project.assets.length > 0) {
+          project.assets.forEach(file => addFileEntry(file));
+        }
+      } else {
+        title.textContent = 'Create Project';
+        submitBtn.textContent = 'Create Project';
+        projectForm.reset();
+        document.getElementById('projectId').value = '';
+        document.getElementById('projectPrice').value = 5000;
+        document.getElementById('projectDifficulty').value = 'intermediate';
+        document.getElementById('projectCapacity').value = 5;
+      }
+      
+      projectModal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      projectModal.style.display = 'none';
+      projectForm.reset();
+    }
+
+    createProjectBtn.addEventListener('click', () => openModal());
+    closeModalX.addEventListener('click', closeModal);
+    closeModalBtn.addEventListener('click', closeModal);
+
+    function editProject(projectId) {
+      const project = currentProjects.find(p => p._id === projectId);
+      if (project) openModal(project);
+    }
+
+    async function deleteProject(projectId, title) {
+      if (!confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        if (window.UIManager) UIManager.showNotification('Deleting project...', 'info');
+        await window.api.deleteProject(projectId);
+        if (window.UIManager) UIManager.showNotification('Project deleted successfully', 'success');
+        loadData();
+      } catch (error) {
+        console.error('Delete error:', error);
+        if (window.UIManager) UIManager.showNotification('Failed to delete project', 'error');
+      }
+    }
+
+    projectForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const projectId = document.getElementById('projectId').value;
+      const centerId = localStorage.getItem('centerId');
+
+      // Collect ZIP files
+      const zipFiles = collectProjectFiles();
+      
+      // Validate that at least one ZIP file is uploaded for new projects
+      if (!projectId && zipFiles.length === 0) {
+        alert('Please upload at least one ZIP file for the project');
+        return;
+      }
+
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('title', document.getElementById('projectTitle').value);
+      formData.append('description', document.getElementById('projectDescription').value);
+      formData.append('capacity', document.getElementById('projectCapacity').value);
+      formData.append('status', document.getElementById('projectStatus').value);
+      formData.append('category', document.getElementById('projectCategory').value);
+      formData.append('price', document.getElementById('projectPrice').value);
+      formData.append('difficulty', document.getElementById('projectDifficulty').value);
+      formData.append('centerId', centerId);
+      
+      const mentorId = document.getElementById('projectMentor').value;
+      if (mentorId) {
+        formData.append('mentorId', mentorId);
+      }
+
+      // Append all ZIP files
+      zipFiles.forEach((file, index) => {
+        formData.append('projectFiles', file);
+      });
+
+      try {
+        if (window.UIManager) UIManager.showNotification(projectId ? 'Updating project...' : 'Creating project...', 'info');
+
+        const token = localStorage.getItem('token');
+        const url = projectId 
+          ? `/api/projects/${projectId}` 
+          : '/api/projects';
+        
+        const response = await fetch(url, {
+          method: projectId ? 'PUT' : 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          const raw = await response.text();
+          let message = 'Failed to save project';
+          try {
+            const parsed = JSON.parse(raw);
+            message = parsed.message || parsed.error || message;
+          } catch (_) {
+            if (raw && !raw.startsWith('<!DOCTYPE')) {
+              message = raw;
+            }
+          }
+          throw new Error(message);
+        }
+
+        if (window.UIManager) UIManager.showNotification(
+          projectId ? 'Project updated successfully' : 'Project created successfully', 
+          'success'
+        );
+        closeModal();
+        loadData();
+      } catch (error) {
+        console.error('Save error:', error);
+        if (window.UIManager) UIManager.showNotification(error.message || 'Failed to save project', 'error');
+      }
+    });
+
+    // AI Calculate Price and Difficulty
+    document.getElementById('aiCalculateBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      const title = document.getElementById('projectTitle').value;
+      const description = document.getElementById('projectDescription').value;
+      const category = document.getElementById('projectCategory').value;
+      
+      if (!title || !description) {
+        if (window.UIManager) {
+          UIManager.showNotification('Please fill in title and description first', 'warning');
+        } else {
+          alert('Please fill in title and description first');
+        }
+        return;
+      }
+
+      try {
+        // Collect tech stack from category if possible
+        const techStack = category ? [category] : [];
+
+        const aiBtn = document.getElementById('aiCalculateBtn');
+        aiBtn.disabled = true;
+        aiBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculating...';
+
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/ai/calculate-project-pricing', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title,
+            description,
+            techStack,
+            duration: 12,
+            category
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to calculate pricing');
+        }
+
+        const result = await response.json();
+        const { assessment } = result;
+
+        // Update form fields with AI calculated values
+        document.getElementById('projectPrice').value = assessment.estimated_price;
+        document.getElementById('projectDifficulty').value = assessment.difficulty_level;
+
+        if (window.UIManager) {
+          UIManager.showNotification(`Price: ₹${assessment.estimated_price} | Difficulty: ${assessment.difficulty_level}`, 'success');
+        }
+
+        // Show reasoning in console
+        console.log('AI Assessment:', assessment);
+      } catch (error) {
+        console.error('AI Calculation error:', error);
+        if (window.UIManager) {
+          UIManager.showNotification('Failed to calculate with AI. Using defaults.', 'warning');
+        }
+      } finally {
+        const aiBtn = document.getElementById('aiCalculateBtn');
+        aiBtn.disabled = false;
+        aiBtn.innerHTML = '<i class="fas fa-brain"></i> Auto Calculate with AI';
+      }
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user || !user.roles.includes('center_admin')) {
+        window.location.href = '/login.html';
+        return;
+      }
+      loadData();
+    });
+  </script>
+</body>
+</html>

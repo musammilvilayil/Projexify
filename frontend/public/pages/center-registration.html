@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Center Registration - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/design-system.css">
+  <style>
+    .registration-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: clamp(2rem, 5vw, 4rem);
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-section {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-2xl);
+      padding: 3rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.5s ease-out forwards;
+    }
+
+    .form-section h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 2rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1rem;
+      color: white;
+      font-family: inherit;
+      transition: var(--transition);
+      font-size: 1rem;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Aurora Background Styles */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Aurora Background -->
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <!-- Navigation -->
+  <div id="navigation"></div>
+
+  <main class="main-content">
+    <div class="registration-container">
+      <!-- Header -->
+      <div style="text-align: center; margin-bottom: 3rem;">
+        <h1 class="gradient-text" style="font-size: 2.5rem; margin-bottom: 0.5rem;">Register Your Center</h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">Join Projexify and transform talent into excellence</p>
+      </div>
+
+      <!-- Info Box -->
+      <div class="info-box">
+        <strong>📋 Registration Process:</strong> Fill in your center details below. Once submitted, our admin team will review your application within 24-48 hours. You'll receive an email notification upon approval.
+      </div>
+
+      <!-- Success Message -->
+      <div id="successMessage" class="success-message">
+        <strong>✅ Success!</strong> Your center registration has been submitted successfully. Please check your email for confirmation. Our admin team will review your application and notify you soon.
+      </div>
+
+      <!-- Error Message -->
+      <div id="errorMessage" class="error-message">
+        <strong>❌ Error:</strong> <span id="errorText"></span>
+      </div>
+
+      <!-- Progress Steps -->
+      <div class="progress-steps">
+        <div class="progress-step active" id="step1">
+          <div class="step-number">1</div>
+          <div class="step-label">Basic Info</div>
+        </div>
+        <div class="progress-step" id="step2">
+          <div class="step-number">2</div>
+          <div class="step-label">Address</div>
+        </div>
+        <div class="progress-step" id="step3">
+          <div class="step-number">3</div>
+          <div class="step-label">Review</div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form id="registrationForm">
+        <!-- Section 1: Basic Information -->
+        <div class="form-section" id="section1">
+          <h2>🏢 Basic Information</h2>
+          
+          <div class="form-group">
+            <label for="centerName">Center Name *</label>
+            <input 
+              type="text" 
+              id="centerName" 
+              name="name" 
+              placeholder="Enter your center's name" 
+              required
+            >
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="centerEmail">Email Address *</label>
+              <input 
+                type="email" 
+                id="centerEmail" 
+                name="email" 
+                placeholder="contact@center.com" 
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="centerWebsite">Website (Optional)</label>
+              <input 
+                type="url" 
+                id="centerWebsite" 
+                name="centerWebsite" 
+                placeholder="https://yoursite.com"
+                autocomplete="url"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="centerDescription">Description *</label>
+            <textarea 
+              id="centerDescription" 
+              name="description" 
+              placeholder="Tell us about your center, mission, and values..." 
+              required
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Section 2: Address Information -->
+        <div class="form-section" id="section2">
+          <h2>📍 Address Information</h2>
+          
+          <div class="form-group">
+            <label for="centerAddress">Street Address *</label>
+            <input 
+              type="text" 
+              id="centerAddress" 
+              name="address" 
+              placeholder="123 Main Street" 
+              required
+            >
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="centerCity">City *</label>
+              <input 
+                type="text" 
+                id="centerCity" 
+                name="city" 
+                placeholder="New York" 
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="centerState">State/Province *</label>
+              <input 
+                type="text" 
+                id="centerState" 
+                name="state" 
+                placeholder="NY" 
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="centerZip">ZIP Code *</label>
+              <input 
+                type="text" 
+                id="centerZip" 
+                name="zipCode" 
+                placeholder="10001" 
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="centerCountry">Country *</label>
+              <input 
+                type="text" 
+                id="centerCountry" 
+                name="country" 
+                placeholder="United States" 
+                required
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Review -->
+        <div class="form-section" id="section3" style="display: none;">
+          <h2>✅ Review Your Information</h2>
+          <div id="reviewContent"></div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" id="cancelBtn">Cancel</button>
+          <div class="button-group">
+            <button type="button" class="btn btn-glass" id="prevBtn" style="display: none;">← Previous</button>
+            <button type="button" class="btn btn-primary" id="nextBtn">Next →</button>
+            <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit Registration</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/data-service.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    const form = document.getElementById('registrationForm');
+    let currentSection = 1;
+
+    // Check auth
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) {
+        window.location.href = '/login.html';
+      }
+    });
+
+    // Form navigation
+    document.getElementById('nextBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (validateSection(currentSection)) {
+        if (currentSection < 3) {
+          moveToSection(currentSection + 1);
+        }
+      }
+    });
+
+    document.getElementById('prevBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (currentSection > 1) {
+        moveToSection(currentSection - 1);
+      }
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      window.history.back();
+    });
+
+    function moveToSection(sectionNum) {
+      // Hide all sections
+      document.getElementById('section1').style.display = 'none';
+      document.getElementById('section2').style.display = 'none';
+      document.getElementById('section3').style.display = 'none';
+
+      // Show current section
+      document.getElementById('section' + sectionNum).style.display = 'block';
+
+      // Update progress steps
+      for (let i = 1; i <= 3; i++) {
+        const step = document.getElementById('step' + i);
+        if (i <= sectionNum) {
+          step.classList.add('active');
+        } else {
+          step.classList.remove('active');
+        }
+      }
+
+      // Update buttons
+      document.getElementById('prevBtn').style.display = sectionNum > 1 ? 'block' : 'none';
+      document.getElementById('nextBtn').style.display = sectionNum < 3 ? 'block' : 'none';
+      document.getElementById('submitBtn').style.display = sectionNum === 3 ? 'block' : 'none';
+
+      if (sectionNum === 3) {
+        generateReview();
+      }
+
+      currentSection = sectionNum;
+    }
+
+    function validateSection(sectionNum) {
+      const inputs = document.getElementById('section' + sectionNum).querySelectorAll('input[required], textarea[required]');
+      for (let input of inputs) {
+        if (!input.value.trim()) {
+          alert(`Please fill in: ${input.previousElementSibling.textContent}`);
+          input.focus();
+          return false;
+        }
+        if (input.type === 'email' && !input.value.includes('@')) {
+          alert('Please enter a valid email address');
+          input.focus();
+          return false;
+        }
+        if (input.type === 'url' && input.value && !input.value.startsWith('http')) {
+          alert('Please enter a valid URL starting with http:// or https://');
+          input.focus();
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function generateReview() {
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+
+      const html = `
+        <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem;">
+          <h3 style="margin-bottom: 1rem;">Center Details</h3>
+          <div style="display: grid; gap: 0.75rem;">
+            <div><strong>Name:</strong> ${data.name}</div>
+            <div><strong>Email:</strong> ${data.email}</div>
+            <div><strong>Website:</strong> ${data.website || 'Not provided'}</div>
+            <div><strong>Description:</strong> ${data.description}</div>
+          </div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 1rem;">
+          <h3 style="margin-bottom: 1rem;">Address</h3>
+          <div style="display: grid; gap: 0.75rem;">
+            <div><strong>Street:</strong> ${data.address}</div>
+            <div><strong>City:</strong> ${data.city}</div>
+            <div><strong>State:</strong> ${data.state}</div>
+            <div><strong>ZIP:</strong> ${data.zipCode}</div>
+            <div><strong>Country:</strong> ${data.country}</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 0.5rem; color: var(--text-muted);">
+          <strong>Note:</strong> By submitting this form, you agree to our Terms of Service and Privacy Policy. Your center will be reviewed by our admin team within 24-48 hours.
+        </div>
+      `;
+
+      document.getElementById('reviewContent').innerHTML = html;
+    }
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+
+      // Show loading
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Submitting...';
+      submitBtn.disabled = true;
+
+      try {
+        // Use the API to create center
+        const response = await window.api.createCenter(data);
+
+        // Show success message
+        document.getElementById('successMessage').style.display = 'block';
+        document.getElementById('errorMessage').style.display = 'none';
+        form.style.display = 'none';
+
+        // Redirect after 2 seconds
+        setTimeout(() => {
+          window.location.href = '/pages/center/dashboard.html';
+        }, 2000);
+
+      } catch (error) {
+        console.error('Registration error:', error);
+        document.getElementById('errorMessage').style.display = 'block';
+        document.getElementById('errorText').textContent = error.message;
+
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Animation helper
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

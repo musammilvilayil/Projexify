@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Innovation Centers - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .directory-container {
+      padding: clamp(2rem, 5vw, 4rem);
+      max-width: 1600px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .directory-header {
+      text-align: center;
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+    }
+
+    .directory-header h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 900;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .directory-header p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .center-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+    }
+
+    .center-card {
+      padding: 2.5rem;
+      border-radius: var(--radius-xl);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .center-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.05),
+        transparent
+      );
+      transition: 0.5s;
+    }
+
+    .center-card:hover::after {
+      left: 100%;
+    }
+
+    .center-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+    }
+
+    .center-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 18px;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      color: white;
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .center-name {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .center-location {
+      font-size: 1rem;
+      color: var(--text-dim);
+      margin-bottom: 1.5rem;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-dim);
+    }
+
+    /* Aurora Background Styles */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    @media (max-width: 768px) {
+      .directory-container {
+        padding: 1.5rem;
+      }
+
+      .center-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .center-card {
+      animation: slideUp 0.5s ease-out forwards;
+    }
+
+    .center-card:nth-child(1) { animation-delay: 0.05s; }
+    .center-card:nth-child(2) { animation-delay: 0.1s; }
+    .center-card:nth-child(3) { animation-delay: 0.15s; }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 2rem;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal-content {
+      background: rgba(15, 16, 26, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-xl);
+      padding: 3rem;
+      max-width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: modalSlideUp 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modalSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Aurora Background -->
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <main class="directory-container">
+    <div class="directory-header">
+      <h1 class="gradient-text">Innovation Centers</h1>
+      <p>Discover world-class hubs of technology and creativity across the globe.</p>
+    </div>
+
+    <div id="centerGrid" class="center-grid">
+      <div class="loading-spinner"></div>
+    </div>
+  </main>
+
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const centerGrid = document.getElementById('centerGrid');
+
+      try {
+        const centers = await window.api.getCenters();
+        window.centersData = centers; // Store for later use
+        
+        centerGrid.innerHTML = centers.map(center => `
+          <div class="glass-card center-card">
+            <div class="center-icon">${(center.name || 'CH').substring(0, 2).toUpperCase()}</div>
+            <h3 style="margin-bottom: 0.5rem;">${center.name || 'Unnamed Center'}</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">${center.location || 'Global'}</p>
+            <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+              <span class="status-badge" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">Active Hub</span>
+              <span class="status-badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">Verified</span>
+            </div>
+            <button class="btn btn-secondary view-profile-btn" style="width: 100%; margin-bottom: 0.75rem;" data-center-id="${center._id}">View Profile</button>
+            <button class="btn btn-primary view-center-btn" style="width: 100%;" data-center-id="${center._id}">View Projects</button>
+          </div>
+        `).join('');
+
+        // Add event delegation for view buttons
+        centerGrid.addEventListener('click', (e) => {
+          const profileBtn = e.target.closest('.view-profile-btn');
+          const projectBtn = e.target.closest('.view-center-btn');
+          
+          if (profileBtn) {
+            const centerId = profileBtn.getAttribute('data-center-id');
+            const center = window.centersData.find(c => c._id === centerId);
+            if (center) showCenterProfile(center);
+          } else if (projectBtn) {
+            const centerId = projectBtn.getAttribute('data-center-id');
+            window.location.href = `/marketplace.html?center=${centerId}`;
+          }
+        });
+      } catch (error) {
+        console.error('Error loading centers:', error);
+        centerGrid.innerHTML = '<p>Error loading centers. Please try again later.</p>';
+      }
+    });
+
+    function showCenterProfile(center) {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 700px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="margin: 0;">Center Profile</h2>
+            <button class="close-modal" style="background: none; border: none; font-size: 2rem; color: var(--text-muted); cursor: pointer; padding: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
+          </div>
+          
+          <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="width: 120px; height: 120px; border-radius: 24px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 800; margin: 0 auto 1rem; box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3); color: white;">
+              ${(center.name || 'CH').substring(0, 2).toUpperCase()}
+            </div>
+            <h3 style="font-size: 2rem; margin-bottom: 0.5rem;">${center.name || 'Unnamed Center'}</h3>
+            <div class="aurora-text" style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem;">${center.location || 'Global'}</div>
+          </div>
+
+          <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;">
+            <h4 style="margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem;">About This Center</h4>
+            <p style="color: var(--text-muted); line-height: 1.6;">
+              ${center.description || 'A leading innovation center dedicated to empowering students with hands-on project experience and industry-ready skills. We connect aspiring professionals with expert mentors and cutting-edge projects.'}
+            </p>
+          </div>
+
+          <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;">
+            <h4 style="margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem;">What We Offer</h4>
+            <ul style="color: var(--text-muted); line-height: 1.8; padding-left: 1.5rem;">
+              <li>Industry-relevant project opportunities</li>
+              <li>Expert mentorship and guidance</li>
+              <li>Real-world development experience</li>
+              <li>Certificate of completion</li>
+              <li>Portfolio-building projects</li>
+            </ul>
+          </div>
+
+          <div style="display: flex; gap: 1rem;">
+            <a href="/marketplace.html?center=${center._id}" class="btn btn-primary" style="flex: 1; text-align: center; text-decoration: none;">View ${center.name}'s Projects</a>
+            <button class="btn btn-secondary close-modal" style="flex: 1;">Close</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      // Close modal handlers
+      modal.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', () => modal.remove());
+      });
+      
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+      });
+    }
+  </script>
+</body>
+</html>

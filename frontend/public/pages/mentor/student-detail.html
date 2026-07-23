@@ -1,0 +1,453 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Details - Mentor Panel - Projexify</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .dashboard-wrapper {
+      min-height: 100vh;
+      padding-top: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: clamp(2rem, 5vw, 4rem);
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .welcome-box h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .welcome-box p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+    }
+
+    .project-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-2xl);
+      padding: 3rem;
+      margin-bottom: 2.5rem;
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+      animation: slideUp 0.5s ease forwards;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .project-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .milestone-card {
+      background: rgba(17, 24, 39, 0.5);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: all 0.3s ease;
+      animation: slideUp 0.5s ease forwards;
+      opacity: 0;
+      margin-bottom: 1rem;
+    }
+
+    .milestone-card:hover {
+      background: rgba(17, 24, 39, 0.7);
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(99, 102, 241, 0.1);
+    }
+
+    .status-badge {
+      padding: 0.6rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: inline-block;
+    }
+
+    .status-badge.completed { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .status-badge.in-progress { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .status-badge.pending { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0B0C15;
+      overflow: hidden;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      filter: blur(100px);
+      opacity: 0.4;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: move 25s infinite alternate;
+    }
+
+    .aurora-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+    }
+
+    .aurora-2 {
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+      bottom: -200px;
+      right: -200px;
+      animation-delay: -5s;
+    }
+
+    .aurora-3 {
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: move-center 30s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(100px, 100px) rotate(90deg) scale(1.2); }
+    }
+
+    @keyframes move-center {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-40%, -60%) scale(1.3); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-container { padding: 1.5rem; }
+      .project-card { padding: 1.5rem; }
+      .milestone-card { padding: 1rem; }
+      .breadcrumb-nav { font-size: 0.85rem; }
+    }
+
+    @media (max-width: 480px) {
+      .dashboard-container { padding: 1rem; }
+      .avatar-large { width: 100px; height: 100px; font-size: 2.5rem; }
+      .welcome-box h1 { font-size: 2rem; }
+      .project-card { padding: 1rem; }
+    }
+
+    .breadcrumb-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      animation: slideUp 0.5s ease forwards;
+    }
+
+    .breadcrumb-nav a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .breadcrumb-nav a:hover {
+      color: #8b5cf6;
+      text-decoration: underline;
+    }
+
+    .breadcrumb-nav span {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 12px;
+      color: var(--primary);
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .back-button:hover {
+      background: rgba(99, 102, 241, 0.2);
+      transform: translateX(-4px);
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-1"></div>
+    <div class="aurora-blob aurora-2"></div>
+    <div class="aurora-blob aurora-3"></div>
+  </div>
+
+  <div class="dashboard-wrapper">
+    <div class="dashboard-container">
+      <div id="studentDetailContent">
+        <div style="text-align: center; padding: 4rem 2rem;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+          <p style="color: var(--text-muted);">Loading student profile...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="evaluationModal" tabindex="-1" style="z-index: 9999;">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 24px; backdrop-filter: blur(16px);">
+        <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+          <h5 class="modal-title" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">Submit Evaluation</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="padding: 2rem;">
+          <form id="evaluationForm">
+            <input type="hidden" id="evalProjectIdx">
+            <div class="mb-3">
+              <label class="form-label" style="font-weight: 600; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Score (0-100)</label>
+              <input type="number" id="evalScore" class="form-control" min="0" max="100" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px;">
+            </div>
+            <div class="mb-3">
+              <label class="form-label" style="font-weight: 600; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Feedback</label>
+              <textarea id="evalFeedback" class="form-control" rows="4" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px;"></textarea>
+            </div>
+            <div class="d-flex gap-3">
+              <button type="button" class="btn btn-secondary flex-fill" data-bs-dismiss="modal" style="border-radius: 12px;">Cancel</button>
+              <button type="submit" class="btn btn-primary flex-fill" style="border-radius: 12px; font-weight: 700;">Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/api-client.js"></script>
+  <script src="/assets/js/ui-manager.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Disable notifications on this page to reduce API calls
+      new UIManager({ enableNotifications: false });
+      initStudentDetail();
+    });
+
+    async function initStudentDetail() {
+      const params = new URLSearchParams(window.location.search);
+      const studentId = params.get('studentId');
+      const user = JSON.parse(localStorage.getItem('user'));
+      
+      if (!studentId) {
+        window.location.href = 'student-management.html';
+        return;
+      }
+
+      try {
+        const students = await window.api.getMentorStudents();
+        
+        // Filter students to only show those with projects assigned to this mentor
+        const filteredStudents = students.filter(record => {
+          return record && record.projectId && record.assignedMentorId === user.id;
+        });
+
+        const studentData = filteredStudents.find(s => (s.studentId?._id || s.studentId) === studentId);
+        
+        if (!studentData) throw new Error('Student not found or not assigned to you');
+
+        console.log('[Student Detail] Filtered students:', filteredStudents);
+        console.log('[Student Detail] Selected student:', studentData);
+        
+        renderStudentProfile(studentData);
+      } catch (err) {
+        document.getElementById('studentDetailContent').innerHTML = `
+          <div style="text-align: center; padding: 4rem 2rem; background: rgba(239, 68, 68, 0.05); border: 2px dashed rgba(239, 68, 68, 0.2); border-radius: 16px;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Error Loading Student</h3>
+            <p style="color: var(--text-muted);">${err.message}</p>
+            <a href="student-management.html" class="btn btn-primary mt-3" style="border-radius: 12px;">Back to Students</a>
+          </div>
+        `;
+      }
+    }
+
+    function renderStudentProfile(data) {
+      // Defensive checks for data structure
+      if (!data) {
+        throw new Error('Student data is missing');
+      }
+      
+      const student = data.studentId;
+      if (!student) {
+        throw new Error('Student information is missing');
+      }
+      
+      // Debug log to see what we're working with
+      console.log('[Student Detail] Full student data:', data);
+      console.log('[Student Detail] Projects:', data.projects);
+      
+      const initials = (student.firstName?.[0] || 'S') + (student.lastName?.[0] || '');
+      
+      // Filter projects: show assigned projects to student
+      // Since data is a single Progress record with one projectId, wrap it in an array
+      const projects = data && data.projectId ? [{
+        projectId: data.projectId,
+        title: data.projectId?.title || 'Project',
+        description: data.projectId?.description || '',
+        milestones: data.milestones || [],
+        enrollmentStatus: data.enrollmentStatus,
+        mentorId: data.assignedMentorId
+      }] : [];
+      
+      let html = `
+        <div class="breadcrumb-nav" role="navigation" aria-label="breadcrumb">
+          <a href="/pages/mentor/dashboard.html">Dashboard</a>
+          <span>→</span>
+          <a href="/pages/mentor/student-management.html">Students</a>
+          <span>→</span>
+          <span aria-current="page">${student.firstName} ${student.lastName}</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap;">
+          <div class="avatar-large">${initials}</div>
+          <div style="flex: 1;">
+            <h1 style="font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 0.5rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">${student.firstName} ${student.lastName}</h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 1.1rem;">${student.email}</p>
+            <p style="color: var(--text-muted); margin: 0.5rem 0 0 0;">Student ID: ${student._id.slice(-8).toUpperCase()}</p>
+          </div>
+          <a href="student-management.html" class="back-button" role="button" tabindex="0" onkeypress="if(event.key==='Enter') window.location.href='student-management.html'"> ← Back</a>
+        </div>
+
+        ${projects.length === 0 ? `
+          <div style="text-align: center; padding: 4rem 2rem; background: rgba(99, 102, 241, 0.05); border: 2px dashed rgba(99, 102, 241, 0.2); border-radius: 16px;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">No Assigned Projects</h3>
+            <p style="color: var(--text-muted);">This student has not been assigned to any projects with a mentor yet.</p>
+          </div>
+        ` : projects.map((p, idx) => `
+          <div class="project-card" style="animation-delay: ${idx * 0.1}s;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+              <div>
+                <h3 style="font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; margin-bottom: 0.75rem;">${p.projectId?.title || 'Unnamed Project'}</h3>
+                <p style="color: var(--text-muted); margin: 0;">${p.projectId?.description || ''}</p>
+              </div>
+              <button onclick="openEvaluation(${idx})" class="btn btn-primary" style="border-radius: 12px; padding: 12px 24px; font-weight: 700;">✎ Evaluate</button>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <span style="font-weight: 600; color: var(--text-main);">Overall Progress</span>
+                <span style="font-weight: 700; color: var(--primary);" role="status">${(() => {
+                  const milestones = Array.isArray(p.milestones) ? p.milestones : [];
+                  if (milestones.length === 0) return '0%';
+                  return Math.round((milestones.filter(m => m && m.status === 'completed').length / milestones.length) * 100);
+                })()}%</span>
+              </div>
+              <div style="width: 100%; height: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); border-radius: 10px; width: ${(() => {
+                  const milestones = Array.isArray(p.milestones) ? p.milestones : [];
+                  if (milestones.length === 0) return '0';
+                  return (milestones.filter(m => m && m.status === 'completed').length / milestones.length) * 100;
+                })()}%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);"></div>
+              </div>
+            </div>
+
+            <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem;">📋 Milestones</h4>
+            ${(() => {
+              const milestones = Array.isArray(p.milestones) ? p.milestones : [];
+              if (milestones.length === 0) {
+                return `<div style="text-align: center; padding: 2rem; background: rgba(99, 102, 241, 0.05); border-radius: 12px; color: var(--text-muted);">No milestones assigned</div>`;
+              }
+              return milestones.map((m, mIdx) => {
+                if (!m) return '';
+                return `
+                  <div class="milestone-card" style="animation-delay: ${(idx * 0.1) + (mIdx * 0.05)}s; opacity: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem;">
+                      <div style="flex: 1;">
+                        <h5 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">${m.title || 'Unnamed Milestone'}</h5>
+                        <p style="color: var(--text-muted); margin: 0; font-size: 0.9rem;">${m.description || 'No description'}</p>
+                      </div>
+                      <span class="status-badge ${m.status === 'completed' ? 'completed' : m.status === 'in-progress' ? 'in-progress' : 'pending'}">${m.status || 'pending'}</span>
+                    </div>
+                  </div>
+                `;
+              }).join('');
+            })()}
+          </div>
+        `).join('')}
+      `;
+      
+      document.getElementById('studentDetailContent').innerHTML = html;
+    }
+
+    const evalModal = new bootstrap.Modal(document.getElementById('evaluationModal'));
+    
+    window.openEvaluation = (projectIdx) => {
+      document.getElementById('evalProjectIdx').value = projectIdx;
+      evalModal.show();
+    };
+
+    document.getElementById('evaluationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const idx = document.getElementById('evalProjectIdx').value;
+      const score = document.getElementById('evalScore').value;
+      const feedback = document.getElementById('evalFeedback').value;
+      
+      const params = new URLSearchParams(window.location.search);
+      const studentId = params.get('studentId');
+      
+      try {
+        const students = await window.api.getMentorStudents();
+        const studentData = students.find(s => (s.studentId?._id || s.studentId) === studentId);
+        const projectId = studentData.projects[idx].projectId._id;
+
+        await window.api.evaluateStudent(studentId, projectId, { score, feedback });
+        evalModal.hide();
+        alert('Evaluation submitted successfully!');
+        initStudentDetail();
+      } catch (err) {
+        alert('Failed to submit evaluation: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
