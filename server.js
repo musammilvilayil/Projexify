@@ -128,8 +128,16 @@ app.use((err, req, res, next) => {
 });
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'Projexify running' });
+app.get('/api/health', (_req, res) => {
+  const dbConnected = mongoose.connection.readyState === 1;
+  const productionConfigOk = process.env.NODE_ENV !== 'production' ||
+    Boolean(process.env.MONGODB_URI && process.env.JWT_SECRET);
+  const healthy = dbConnected && productionConfigOk;
+
+  res.status(healthy ? 200 : 503).json({
+    status: healthy ? 'ok' : 'degraded',
+    database: dbConnected ? 'connected' : 'disconnected'
+  });
 });
 
 // 404 handler
