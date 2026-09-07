@@ -125,7 +125,7 @@ router.post('/free', verifyToken, checkRole('student'), async (req, res) => {
       });
     }
 
-    // Create progress record (works for both free and paid with mock payment)
+    // Create progress record. Paid demo mode is explicit and disabled by default.
     const progress = new Progress({
       studentId,
       projectId,
@@ -140,6 +140,10 @@ router.post('/free', verifyToken, checkRole('student'), async (req, res) => {
     });
 
     await progress.save();
+
+    if (autoAssignedMentor) {
+      await User.findByIdAndUpdate(autoAssignedMentor, { $inc: { mentor_load: 1 } });
+    }
 
     console.log('Progress created:', {
       progressId: progress._id,
