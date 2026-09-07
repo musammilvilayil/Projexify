@@ -58,7 +58,11 @@ router.post('/', verifyToken, checkRole('center_admin'), uploadProject.array('pr
       });
     }
 
-    const slug = title.toLowerCase().replace(/\s+/g, '-');
+    const baseSlug = title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    let slug = baseSlug || 'project';
+    if (await Project.exists({ slug })) {
+      slug = `${slug}-${Date.now()}`;
+    }
 
     // Process uploaded files - extract ZIPs and store as assets
     let assets = [];
@@ -130,10 +134,7 @@ router.post('/', verifyToken, checkRole('center_admin'), uploadProject.array('pr
 
     await project.save();
 
-    // Clean up temporary extraction directories
-    tempExtractDirs.forEach(dir => {
-      cleanupExtractedFiles(dir);
-    });
+    // Extracted project resources are persistent assets; keep them after successful creation.
 
     console.log('Project created successfully:', {
       _id: project._id,
