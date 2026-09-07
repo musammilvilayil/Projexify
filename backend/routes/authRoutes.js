@@ -8,17 +8,20 @@ const crypto = require('crypto');
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, firstName, lastName, role } = req.body;
+    const { email, password, firstName, lastName } = req.body;
 
     if (!email || !password || !firstName || !lastName) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
+    if (String(password).length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
 
-    const user = await authService.registerUser(email, password, firstName, lastName, role || 'student');
+    // Public registration can only create student accounts.
+    const user = await authService.registerUser(email, password, firstName, lastName, 'student');
 
-    // Send welcome email
     const displayName = `${firstName} ${lastName}`;
-    await emailService.sendWelcomeEmail(email, displayName, role || 'student');
+    await emailService.sendWelcomeEmail(email, displayName, 'student');
 
     res.status(201).json({
       message: 'User registered successfully',
@@ -156,12 +159,17 @@ router.get('/admin/stats', verifyToken, checkRole('admin'), async (req, res) => 
     const User = require('../models/User');
     const Project = require('../models/Project');
     const Center = require('../models/Center');
+    const EscrowTransaction = require('../models/EscrowTransaction');
 
-    const [userCount, projectCount, centerCount, pendingCenterCount] = await Promise.all([
+    const [userCount, projectCount, centerCount, pendingCenterCount, revenueResult] = await Promise.all([
       User.countDocuments(),
       Project.countDocuments(),
       Center.countDocuments({ status: 'approved' }),
-      Center.countDocuments({ status: 'pending' })
+      Center.countDocuments({ status: 'pending' }),
+      EscrowTransaction.aggregate([
+        { $match: { status: { $in: ['confirmed', 'released'] } } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ])
     ]);
 
     res.json({
@@ -169,7 +177,7 @@ router.get('/admin/stats', verifyToken, checkRole('admin'), async (req, res) => 
       projects: projectCount,
       centers: centerCount,
       pendingCenters: pendingCenterCount,
-      revenue: 12500 // Mock revenue for now
+      revenue: revenueResult[0]?.total || 0
     });
   } catch (error) {
     console.error('Error fetching admin stats:', error);
