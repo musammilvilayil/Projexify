@@ -588,7 +588,7 @@
           setTimeout(() => window.location.reload(), 1200);
         } else {
           uiManager.showLoading('Creating new user...');
-          await window.api.register(email, password, firstName, lastName, role);
+          await window.api.createUser({ email, password, firstName, lastName, role });
           uiManager.hideLoading();
           showToast('✅ User created successfully!', 'success');
           closeUserModal();
