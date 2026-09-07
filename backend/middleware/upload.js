@@ -3,36 +3,42 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 
-// Ensure upload directories exist
-const uploadDirs = [
-  'backend/uploads/projects',
-  'backend/uploads/mentors',
-  'backend/uploads/documents',
-  'backend/uploads/certificates'
-];
+const uploadRoot = path.resolve(
+  process.env.UPLOAD_DIR || path.join(__dirname, '../uploads')
+);
+const maxProjectFileSize = Number(process.env.MAX_FILE_SIZE || 100 * 1024 * 1024);
 
-uploadDirs.forEach(dir => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-});
+const dirs = {
+  projects: path.join(uploadRoot, 'projects'),
+  mentors: path.join(uploadRoot, 'mentors'),
+  documents: path.join(uploadRoot, 'documents'),
+  certificates: path.join(uploadRoot, 'certificates'),
+};
 
-/**
- * Configure multer for project file uploads (images, documents, code archives)
- */
+Object.values(dirs).forEach((dir) => fs.mkdirSync(dir, { recursive: true }));
+
+const uniqueFilename = (_req, file, cb) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+  cb(null, `${uuidv4()}-${Date.now()}${ext}`);
+};
+
 const projectStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'backend/uploads/projects');
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${uuidv4()}-${Date.now()}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
+  destination: (_req, _file, cb) => cb(null, dirs.projects),
+  filename: uniqueFilename,
 });
 
-const projectFileFilter = (req, file, cb) => {
-  // Allowed file types for projects: images, PDFs, archives
-  const allowedMimes = [
+const mentorStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, dirs.mentors),
+  filename: uniqueFilename,
+});
+
+const documentStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, dirs.documents),
+  filename: uniqueFilename,
+});
+
+const projectFileFilter = (_req, file, cb) => {
+  const allowedMimes = new Set([
     'image/jpeg',
     'image/png',
     'image/webp',
@@ -43,146 +49,61 @@ const projectFileFilter = (req, file, cb) => {
     'application/x-rar-compressed',
     'application/x-7z-compressed',
     'application/json',
-    'text/plain'
-  ];
-
-  if (allowedMimes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error(`File type ${file.mimetype} not allowed for projects`), false);
-  }
+    'text/plain',
+  ]);
+  cb(allowedMimes.has(file.mimetype) ? null : new Error(`File type ${file.mimetype} not allowed for projects`), allowedMimes.has(file.mimetype));
 };
 
-/**
- * Configure multer for mentor profile uploads (avatar, credentials)
- */
-const mentorStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'backend/uploads/mentors');
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${uuidv4()}-${Date.now()}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
-});
-
-const mentorFileFilter = (req, file, cb) => {
-  // Allowed file types for mentor profiles: images, PDFs (credentials)
-  const allowedMimes = [
-    'image/jpeg',
-    'image/png',
-    'image/webp',
-    'application/pdf'
-  ];
-
-  if (allowedMimes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error(`File type ${file.mimetype} not allowed for mentor profiles`), false);
-  }
+const mentorFileFilter = (_req, file, cb) => {
+  const allowedMimes = new Set(['image/jpeg', 'image/png', 'image/webp', 'application/pdf']);
+  cb(allowedMimes.has(file.mimetype) ? null : new Error(`File type ${file.mimetype} not allowed for mentor profiles`), allowedMimes.has(file.mimetype));
 };
 
-/**
- * Configure multer for document uploads (terms, guidelines, agreements)
- */
-const documentStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'backend/uploads/documents');
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${uuidv4()}-${Date.now()}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
-});
-
-const documentFileFilter = (req, file, cb) => {
-  const allowedMimes = [
+const documentFileFilter = (_req, file, cb) => {
+  const allowedMimes = new Set([
     'application/pdf',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain'
-  ];
-
-  if (allowedMimes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error(`File type ${file.mimetype} not allowed for documents`), false);
-  }
+    'text/plain',
+  ]);
+  cb(allowedMimes.has(file.mimetype) ? null : new Error(`File type ${file.mimetype} not allowed for documents`), allowedMimes.has(file.mimetype));
 };
 
-/**
- * Project upload middleware (multiple files: thumbnail, description, code)
- */
 const uploadProject = multer({
   storage: projectStorage,
   fileFilter: projectFileFilter,
-  limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB max (matches frontend validation)
-    files: 10 // Max 10 files (matches project routes)
-  }
+  limits: { fileSize: maxProjectFileSize, files: 10 },
 });
 
-/**
- * Mentor profile upload middleware
- */
 const uploadMentorProfile = multer({
   storage: mentorStorage,
   fileFilter: mentorFileFilter,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB max
-    files: 3 // Avatar, credential1, credential2
-  }
+  limits: { fileSize: 10 * 1024 * 1024, files: 3 },
 });
 
-/**
- * Document upload middleware (for center verification, agreements)
- */
 const uploadDocuments = multer({
   storage: documentStorage,
   fileFilter: documentFileFilter,
-  limits: {
-    fileSize: 25 * 1024 * 1024, // 25MB max
-    files: 10
-  }
+  limits: { fileSize: 25 * 1024 * 1024, files: 10 },
 });
 
-/**
- * Generic file upload with custom destination
- */
+// Generic uploads are intentionally confined to the documents directory.
 const uploadGeneric = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      const uploadDir = req.query.uploadDir || 'backend/uploads/documents';
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-      cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-      const uniqueName = `${uuidv4()}-${Date.now()}${path.extname(file.originalname)}`;
-      cb(null, uniqueName);
-    }
-  }),
-  limits: {
-    fileSize: 100 * 1024 * 1024 // 100MB max
-  }
+  storage: documentStorage,
+  limits: { fileSize: maxProjectFileSize },
 });
 
-/**
- * Middleware to handle upload errors
- */
-const handleUploadError = (err, req, res, next) => {
+const handleUploadError = (err, _req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ error: 'File too large. Max allowed is 100MB per file.' });
+      return res.status(400).json({ error: 'File exceeds the configured upload limit.' });
     }
     if (err.code === 'LIMIT_FILE_COUNT') {
-      return res.status(400).json({ error: 'Too many files. Max allowed is 10 files.' });
+      return res.status(400).json({ error: 'Too many files.' });
     }
     return res.status(400).json({ error: err.message });
-  } else if (err) {
-    return res.status(400).json({ error: err.message });
   }
+  if (err) return res.status(400).json({ error: err.message });
   next();
 };
 
@@ -191,5 +112,6 @@ module.exports = {
   uploadMentorProfile,
   uploadDocuments,
   uploadGeneric,
-  handleUploadError
+  handleUploadError,
+  uploadRoot,
 };
