@@ -7,7 +7,7 @@ const User = require('../models/User');
 const Progress = require('../models/Progress');
 const { verifyToken } = require('../middleware/auth');
 const { checkRole } = require('../middleware/auth');
-const { uploadProject } = require('../middleware/upload');
+const { uploadProject, uploadRoot } = require('../middleware/upload');
 const { extractZipAndProcessFiles, cleanupExtractedFiles } = require('../utils/zipExtractor');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
@@ -71,10 +71,12 @@ router.post('/', verifyToken, checkRole('center_admin'), uploadProject.array('pr
           
           if (fileExt === '.zip') {
             // Extract ZIP file
-            const extractDir = path.join(__dirname, '../uploads/projects/extracted', path.basename(file.filename, path.extname(file.filename)));
+            const extractionId = path.basename(file.filename, path.extname(file.filename));
+            const extractDir = path.join(uploadRoot, 'projects', 'extracted', extractionId);
             tempExtractDirs.push(extractDir);
+            const publicBaseUrl = `/uploads/projects/extracted/${extractionId}`;
             
-            const extractedFiles = await extractZipAndProcessFiles(file.path, extractDir);
+            const extractedFiles = await extractZipAndProcessFiles(file.path, extractDir, publicBaseUrl);
             
             // Add extracted files as assets
             assets.push(...extractedFiles.files.map(f => ({
@@ -153,7 +155,7 @@ router.post('/', verifyToken, checkRole('center_admin'), uploadProject.array('pr
     let tempExtractDirs = [];
     if (req.files) {
       req.files.forEach(file => {
-        const extractDir = path.join(__dirname, '../uploads/projects/extracted', path.basename(file.path, path.extname(file.path)));
+        const extractDir = path.join(uploadRoot, 'projects', 'extracted', path.basename(file.path, path.extname(file.path)));
         if (extractDir) tempExtractDirs.push(extractDir);
       });
     }
@@ -545,7 +547,7 @@ router.put('/:id', verifyToken, checkRole('center_admin'), uploadProject.array('
     let tempExtractDirs = [];
     if (req.files) {
       req.files.forEach(file => {
-        const extractDir = path.join(__dirname, '../uploads/projects/extracted', path.basename(file.path, path.extname(file.path)));
+        const extractDir = path.join(uploadRoot, 'projects', 'extracted', path.basename(file.path, path.extname(file.path)));
         if (extractDir) tempExtractDirs.push(extractDir);
       });
     }
