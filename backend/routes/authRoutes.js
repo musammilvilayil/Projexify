@@ -230,6 +230,9 @@ router.post('/admin/create-center-admin', verifyToken, checkRole('admin'), async
     if (!email || !password || !firstName || !lastName || !centerName || !centerEmail) {
       return res.status(400).json({ message: 'Missing required fields: email, password, firstName, lastName, centerName, centerEmail' });
     }
+    if (String(password).length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
