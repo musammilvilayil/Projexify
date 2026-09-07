@@ -8,6 +8,8 @@ const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
 
+const integrationDescribe = process.env.RUN_INTEGRATION_TESTS === 'true' ? describe : describe.skip;
+
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3005';
 let authToken = '';
 let projectId = '';
@@ -83,7 +85,7 @@ async function createTestProject() {
 // WORKSPACE API TESTS
 // ============================================
 
-describe('Workspace API Tests', () => {
+integrationDescribe('Workspace API Tests', () => {
 
   beforeAll(async () => {
     await login(config.centerAdmin.email, config.centerAdmin.password);
@@ -252,7 +254,7 @@ describe('Workspace API Tests', () => {
 // MEETING API TESTS
 // ============================================
 
-describe('Meeting API Tests', () => {
+integrationDescribe('Meeting API Tests', () => {
 
   beforeAll(async () => {
     await login(config.mentor.email, config.mentor.password);
@@ -384,7 +386,7 @@ describe('Meeting API Tests', () => {
 // STUDENT ACCESS TESTS
 // ============================================
 
-describe('Student Access Tests', () => {
+integrationDescribe('Student Access Tests', () => {
 
   beforeAll(async () => {
     await login(config.student.email, config.student.password);
@@ -462,7 +464,7 @@ describe('Student Access Tests', () => {
 // PERFORMANCE TESTS
 // ============================================
 
-describe('Performance Tests', () => {
+integrationDescribe('Performance Tests', () => {
 
   test('1. Concurrent file reads', async () => {
     try {
