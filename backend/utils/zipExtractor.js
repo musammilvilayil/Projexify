@@ -1,81 +1,84 @@
 /**
  * ZIP File Extractor Utility
- * Extracts ZIP files and processes contents
+ * Extracts ZIP files and processes contents safely.
  */
 
 const fs = require('fs');
 const path = require('path');
 const AdmZip = require('adm-zip');
-const { v4: uuidv4 } = require('uuid');
 
-/**
- * Extract ZIP file and return extracted file information
- * @param {string} zipFilePath - Path to ZIP file
- * @param {string} extractDir - Directory to extract to
- * @returns {Array} Array of extracted files with metadata
- */
-async function extractZipAndProcessFiles(zipFilePath, extractDir) {
+async function extractZipAndProcessFiles(
+  zipFilePath,
+  extractDir,
+  publicBaseUrl = '/uploads/projects/extracted'
+) {
   try {
-    if (!fs.existsSync(extractDir)) {
-      fs.mkdirSync(extractDir, { recursive: true });
-    }
+    fs.mkdirSync(extractDir, { recursive: true });
 
     const zip = new AdmZip(zipFilePath);
     const zipEntries = zip.getEntries();
     const extractedFiles = [];
 
-    // Extract files
+    // Reject absolute paths and parent-directory traversal before extraction.
+    for (const entry of zipEntries) {
+      const normalized = path.posix.normalize(String(entry.entryName || '').replace(/\\/g, '/'));
+      if (
+        !normalized ||
+        normalized.startsWith('../') ||
+        normalized.includes('/../') ||
+        normalized.startsWith('/') ||
+        /^[A-Za-z]:\//.test(normalized)
+      ) {
+        throw new Error(`Unsafe ZIP entry: ${entry.entryName}`);
+      }
+    }
+
     zip.extractAllTo(extractDir, true);
 
-    // Process extracted files
-    zipEntries.forEach(entry => {
-      if (!entry.isDirectory) {
-        const fileName = entry.name;
-        const fileExt = path.extname(fileName);
-        const fileSize = entry.header.size;
-        
-        // Create file metadata
-        const fileMetadata = {
-          title: path.basename(fileName),
-          originalName: fileName,
-          filename: path.basename(fileName),
-          path: path.join(extractDir, fileName),
-          url: `/uploads/projects/extracted/${path.basename(fileName)}`,
-          type: getFileType(fileExt),
-          mimeType: getMimeType(fileExt),
-          size: fileSize,
-          extension: fileExt,
-          extractedAt: new Date()
-        };
+    zipEntries.forEach((entry) => {
+      if (entry.isDirectory) return;
 
-        extractedFiles.push(fileMetadata);
-        console.log(`[ZipExtractor] Processed file: ${fileName}`);
+      const relativeName = path.posix.normalize(String(entry.entryName).replace(/\\/g, '/'));
+      const fileExt = path.extname(relativeName);
+      const fileSize = entry.header.size;
+      const diskPath = path.resolve(extractDir, relativeName);
+      const extractRoot = path.resolve(extractDir);
+
+      if (!diskPath.startsWith(extractRoot + path.sep)) {
+        throw new Error(`Unsafe extracted path: ${relativeName}`);
       }
+
+      extractedFiles.push({
+        title: path.basename(relativeName),
+        originalName: relativeName,
+        filename: path.basename(relativeName),
+        path: diskPath,
+        url: `${publicBaseUrl.replace(/\/$/, '')}/${relativeName}`,
+        type: getFileType(fileExt),
+        mimeType: getMimeType(fileExt),
+        size: fileSize,
+        extension: fileExt,
+        extractedAt: new Date(),
+      });
     });
 
-    // Delete original ZIP file after extraction
-    fs.unlinkSync(zipFilePath);
-    console.log(`[ZipExtractor] ZIP file deleted: ${zipFilePath}`);
+    if (fs.existsSync(zipFilePath)) fs.unlinkSync(zipFilePath);
 
     return {
       success: true,
       filesCount: extractedFiles.length,
       files: extractedFiles,
-      message: `Successfully extracted ${extractedFiles.length} files`
+      message: `Successfully extracted ${extractedFiles.length} files`,
     };
   } catch (error) {
-    console.error('[ZipExtractor] Error extracting ZIP:', error);
-    // Clean up on error
-    if (fs.existsSync(zipFilePath)) {
-      fs.unlinkSync(zipFilePath);
+    if (fs.existsSync(zipFilePath)) fs.unlinkSync(zipFilePath);
+    if (fs.existsSync(extractDir)) {
+      fs.rmSync(extractDir, { recursive: true, force: true });
     }
     throw new Error(`Failed to extract ZIP file: ${error.message}`);
   }
 }
 
-/**
- * Get file type based on extension
- */
 function getFileType(ext) {
   const typeMap = {
     '.pdf': 'pdf',
@@ -110,13 +113,9 @@ function getFileType(ext) {
     '.psd': 'design',
     '.sketch': 'design',
   };
-
   return typeMap[ext.toLowerCase()] || 'file';
 }
 
-/**
- * Get MIME type based on extension
- */
 function getMimeType(ext) {
   const mimeMap = {
     '.pdf': 'application/pdf',
@@ -137,18 +136,13 @@ function getMimeType(ext) {
     '.svg': 'image/svg+xml',
     '.webp': 'image/webp',
   };
-
   return mimeMap[ext.toLowerCase()] || 'application/octet-stream';
 }
 
-/**
- * Clean up extracted files
- */
 function cleanupExtractedFiles(extractDir) {
   try {
     if (fs.existsSync(extractDir)) {
       fs.rmSync(extractDir, { recursive: true, force: true });
-      console.log(`[ZipExtractor] Cleaned up directory: ${extractDir}`);
     }
   } catch (error) {
     console.error('[ZipExtractor] Error cleaning up files:', error);
@@ -159,5 +153,5 @@ module.exports = {
   extractZipAndProcessFiles,
   cleanupExtractedFiles,
   getFileType,
-  getMimeType
+  getMimeType,
 };
