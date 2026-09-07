@@ -105,7 +105,7 @@ class EmailService {
    * Send password reset email
    */
   async sendPasswordResetEmail(email, resetToken) {
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password.html?token=${resetToken}`;
     const subject = 'Reset your Projexify password';
     
     const htmlContent = `
