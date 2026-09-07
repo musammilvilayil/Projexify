@@ -9,6 +9,7 @@ require('dotenv').config();
 
 const { mongoose, connectDB } = require('./backend/config/database');
 const { seedData } = require('./backend/services/seedService');
+const { uploadRoot } = require('./backend/middleware/upload');
 
 const app = express();
 const server = http.createServer(app);
