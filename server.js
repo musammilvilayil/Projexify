@@ -58,7 +58,10 @@ app.use(express.static('frontend/public', {
 }));
 
 // Serve uploaded files from backend/uploads
-app.use('/uploads', express.static('backend/uploads'));
+app.use('/uploads', express.static(uploadRoot, {
+  fallthrough: false,
+  maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
+}));
 
 // Standard security headers (removed Permissions-Policy)
 app.use((req, res, next) => {
