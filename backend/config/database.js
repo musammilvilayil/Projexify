@@ -3,6 +3,9 @@ require('dotenv').config();
 
 const connectDB = async () => {
   try {
+    if (process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI is required in production');
+    }
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/projexify_db';
     
     await mongoose.connect(mongoURI, {
