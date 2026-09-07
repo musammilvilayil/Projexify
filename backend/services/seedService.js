@@ -6,33 +6,34 @@ const StudentGroup = require('../models/StudentGroup');
 const Milestone = require('../models/Milestone');
 
 const seedData = async () => {
-  try {
-    // Check if admin already exists
-    const adminExists = await User.findOne({ roles: 'admin' });
-    if (adminExists) {
-      console.log('🌱 Admin user already exists:', adminExists.email);
-      return;
-    }
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
-    console.log('🌱 Seeding admin user...');
-
-    // Create admin user
-    const admin = new User({
-      email: 'admin@nexus.com',
-      password: 'Admin@123456',
-      firstName: 'System',
-      lastName: 'Administrator',
-      roles: ['admin'],
-      verified: true
-    });
-    await admin.save();
-    console.log('✅ Created admin user (admin@nexus.com / Admin@123456)');
-    
-    console.log('\n🎉 Admin seeding completed successfully!');
-  } catch (error) {
-    console.error('❌ Seeding error:', error);
-    throw error;
+  if (!adminEmail || !adminPassword) {
+    console.log('🌱 Admin seed skipped: set ADMIN_EMAIL and ADMIN_PASSWORD to bootstrap an admin.');
+    return;
   }
+
+  if (adminPassword.length < 12) {
+    throw new Error('ADMIN_PASSWORD must be at least 12 characters.');
+  }
+
+  const adminExists = await User.findOne({ roles: 'admin' });
+  if (adminExists) {
+    console.log('🌱 Admin user already exists:', adminExists.email);
+    return;
+  }
+
+  const admin = new User({
+    email: adminEmail,
+    password: adminPassword,
+    firstName: process.env.ADMIN_FIRST_NAME || 'System',
+    lastName: process.env.ADMIN_LAST_NAME || 'Administrator',
+    roles: ['admin'],
+    verified: true
+  });
+  await admin.save();
+  console.log('✅ Bootstrap admin created from environment configuration.');
 };
 
 module.exports = { seedData };

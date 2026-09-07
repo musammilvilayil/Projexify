@@ -9,6 +9,7 @@ require('dotenv').config();
 
 const { mongoose, connectDB } = require('./backend/config/database');
 const { seedData } = require('./backend/services/seedService');
+const { uploadRoot } = require('./backend/middleware/upload');
 
 const app = express();
 const server = http.createServer(app);
@@ -57,7 +58,10 @@ app.use(express.static('frontend/public', {
 }));
 
 // Serve uploaded files from backend/uploads
-app.use('/uploads', express.static('backend/uploads'));
+app.use('/uploads', express.static(uploadRoot, {
+  fallthrough: false,
+  maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
+}));
 
 // Standard security headers (removed Permissions-Policy)
 app.use((req, res, next) => {
@@ -127,8 +131,16 @@ app.use((err, req, res, next) => {
 });
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'Projexify running' });
+app.get('/api/health', (_req, res) => {
+  const dbConnected = mongoose.connection.readyState === 1;
+  const productionConfigOk = process.env.NODE_ENV !== 'production' ||
+    Boolean(process.env.MONGODB_URI && process.env.JWT_SECRET);
+  const healthy = dbConnected && productionConfigOk;
+
+  res.status(healthy ? 200 : 503).json({
+    status: healthy ? 'ok' : 'degraded',
+    database: dbConnected ? 'connected' : 'disconnected'
+  });
 });
 
 // 404 handler

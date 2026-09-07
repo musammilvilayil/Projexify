@@ -34,63 +34,74 @@ router.post('/free', verifyToken, checkRole('student'), async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    // Smart Mentor Assignment (respect capacity)
-    let autoAssignedMentor = null;
-    
-    if (!project.mentor_id) {
-      const mentors = await User.find({ 
-        roles: 'mentor', 
-        centerId: project.centerId,
-        $expr: { $lt: ["$mentor_load", "$mentor_capacity"] }
-      });
-
-      if (mentors.length > 0) {
-        // Find mentor with lowest load
-        let bestMentor = mentors.sort((a, b) => a.mentor_load - b.mentor_load)[0];
-        
-        project.mentor_id = bestMentor._id;
-        await project.save();
-        autoAssignedMentor = bestMentor._id;
-
-        // Increment mentor load
-        await User.findByIdAndUpdate(bestMentor._id, { $inc: { mentor_load: 1 } });
-      }
-    } else {
-      // If project has mentor, check if they have capacity
-      const projectMentor = await User.findById(project.mentor_id);
-      if (projectMentor && projectMentor.mentor_load < projectMentor.mentor_capacity) {
-        autoAssignedMentor = projectMentor._id;
-        await User.findByIdAndUpdate(projectMentor._id, { $inc: { mentor_load: 1 } });
-      }
+    if (project.status !== 'active') {
+      return res.status(409).json({ message: 'This project is not open for enrollment.' });
     }
 
-    // Check if student is already enrolled as solo
-    const existingSoloEnrollment = await Progress.findOne({ 
-      studentId, 
-      projectId,
-      enrollment_type: 'solo'
-    });
-    
-    if (existingSoloEnrollment) {
-      return res.status(400).json({ 
-        message: 'You are already enrolled in this project as a solo student',
-        enrolled: true
+    const capacity = Number(project.capacity || project.max_students || 0);
+    if (capacity > 0 && Number(project.current_students || 0) >= capacity) {
+      return res.status(409).json({ message: 'This project has reached its enrollment capacity.' });
+    }
+
+    const demoPaidEnabled = process.env.ENABLE_DEMO_PAYMENTS === 'true';
+    if (Number(project.price || 0) > 0 && !demoPaidEnabled) {
+      return res.status(402).json({
+        message: 'Paid enrollment is not enabled. Choose a free project or configure the payment flow.'
       });
     }
 
-    // If trying to create a new group, check they're not already a group leader
+    // Reject duplicates before changing mentor load or project counters.
+    const existingEnrollment = await Progress.findOne({ studentId, projectId });
+    if (existingEnrollment) {
+      return res.status(409).json({
+        message: 'You are already enrolled in this project.',
+        enrolled: true,
+        progressId: existingEnrollment._id
+      });
+    }
+
     if (enrollmentType === 'group') {
-      const existingGroupLead = await StudentGroup.findOne({
-        projectId,
-        leaderId: studentId
-      });
-      
+      const existingGroupLead = await StudentGroup.findOne({ projectId, leaderId: studentId });
       if (existingGroupLead) {
-        return res.status(400).json({
-          message: 'You already lead a squad for this project',
+        return res.status(409).json({
+          message: 'You already lead a squad for this project.',
           enrolled: true,
           groupId: existingGroupLead._id
         });
+      }
+    }
+
+    const student = await User.findById(studentId).select('firstName lastName');
+    if (!student) {
+      return res.status(404).json({ message: 'Student account not found.' });
+    }
+
+    // Smart mentor assignment. Prefer the project's mentor, otherwise choose the lowest-load mentor.
+    let autoAssignedMentor = null;
+    if (project.mentor_id) {
+      const projectMentor = await User.findOne({
+        _id: project.mentor_id,
+        roles: 'mentor',
+        centerId: project.centerId
+      });
+      if (projectMentor && projectMentor.mentor_load < projectMentor.mentor_capacity) {
+        autoAssignedMentor = projectMentor._id;
+      }
+    }
+
+    if (!autoAssignedMentor) {
+      const mentors = await User.find({
+        roles: 'mentor',
+        centerId: project.centerId,
+        $expr: { $lt: ['$mentor_load', '$mentor_capacity'] }
+      }).sort({ mentor_load: 1, created_at: 1 });
+
+      if (mentors.length > 0) {
+        autoAssignedMentor = mentors[0]._id;
+        if (!project.mentor_id) {
+          project.mentor_id = autoAssignedMentor;
+          await project.save();
+        }
       }
     }
 
@@ -98,7 +109,7 @@ router.post('/free', verifyToken, checkRole('student'), async (req, res) => {
     if (enrollmentType === 'group') {
       const newGroup = new StudentGroup({
         projectId,
-        name: groupName || `${req.user.firstName}'s Squad`,
+        name: groupName || `${student.firstName}'s Squad`,
         leaderId: studentId,
         students: [studentId],
         mentorId: autoAssignedMentor || project.mentor_id,
@@ -114,21 +125,25 @@ router.post('/free', verifyToken, checkRole('student'), async (req, res) => {
       });
     }
 
-    // Create progress record (works for both free and paid with mock payment)
+    // Create progress record. Paid demo mode is explicit and disabled by default.
     const progress = new Progress({
       studentId,
       projectId,
       groupId,
-      assignedMentorId: autoAssignedMentor,
+      assignedMentorId: autoAssignedMentor || null,
       enrollment_type: enrollmentType,
       status: autoAssignedMentor ? 'in_progress' : 'pending_mentor', 
       completion_percentage: 0,
-      payment_status: 'completed', // Mock: Mark as completed for demo
-      transaction_id: 'MOCK_TXN_' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+      payment_status: 'completed',
+      transaction_id: (Number(project.price || 0) > 0 ? 'DEMO_TXN_' : 'FREE_TXN_') + Math.random().toString(36).slice(2, 11).toUpperCase(),
       enrolled_at: new Date(),
     });
 
     await progress.save();
+
+    if (autoAssignedMentor) {
+      await User.findByIdAndUpdate(autoAssignedMentor, { $inc: { mentor_load: 1 } });
+    }
 
     console.log('Progress created:', {
       progressId: progress._id,
@@ -142,7 +157,7 @@ router.post('/free', verifyToken, checkRole('student'), async (req, res) => {
         userId: autoAssignedMentor,
         type: 'general',
         title: 'New Student Auto-Assigned',
-        message: `You have been automatically assigned to mentor ${req.user.firstName} for ${project.title}.`,
+        message: `You have been automatically assigned to mentor ${student.firstName} for ${project.title}.`,
         relatedId: progress._id,
         relatedModel: 'Progress'
       });
@@ -161,7 +176,7 @@ router.post('/free', verifyToken, checkRole('student'), async (req, res) => {
         type: 'enrollment',
         title: `New ${enrollmentType.toUpperCase()} Enrollment`,
         message: autoAssignedMentor 
-          ? `Student ${req.user.firstName} enrolled in "${project.title}" (${enrollmentType}). Mentor automatically assigned.`
+          ? `Student ${student.firstName} enrolled in "${project.title}" (${enrollmentType}). Mentor automatically assigned.`
           : `A student has enrolled in "${project.title}" as ${enrollmentType}. Please assign a mentor.`,
         relatedId: progress._id,
         relatedModel: 'Progress',

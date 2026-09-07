@@ -1,18 +1,16 @@
-# Task Progress - Fix Center Admin & Project Creation Issues
+# Projexify Completion Pass
 
-## Problems Identified
+The original Center Admin / project creation blockers have been resolved.
 
-1. **Admin creates center_admin user via user management page** - The form at `/pages/admin/user-management.html` uses `window.api.register()` which hits `POST /api/auth/register`. This only creates the user, but does NOT create a center. No center record exists for this admin, so when they login and `getMyCenter()` is called, it returns 404.
+Current core flow:
 
-2. **Project creation & marketplace visibility** - Since center admins have no center, they can't create projects (projects require a valid centerId linked to the admin). Projects also need `status: 'active'` to appear on marketplace.
+1. Admin creates a Center Admin with center details.
+2. Center and Center Admin are linked atomically in the same protected request.
+3. Center Admin creates an active project with ZIP/resources.
+4. Active projects appear in the marketplace.
+5. Students register with a non-privileged account and enroll.
+6. Enrollment validates project state/capacity and assigns an available mentor.
+7. Enrolled students, assigned mentors, and the owning Center Admin can access project assets.
+8. Virtual Lab and collaboration routes remain protected by JWT/RBAC.
 
-3. **Admin user management page should use the `create-center-admin` endpoint** when creating center_admin users, which creates BOTH the user AND the center simultaneously.
-
-## Fixes Needed
-
-- [ ] Fix admin user management page to use `POST /api/auth/admin/create-center-admin` when creating center_admin users
-- [ ] Add center registration fields to the user creation form when role is "center_admin"
-- [ ] Center admin dashboard should handle the case when no center exists
-- [ ] Ensure projects created have proper status for marketplace visibility
-- [ ] Add missing `createCenterAdmin` method to APIClient
-- [ ] Update center dashboard to redirect to registration if no center exists
+Security/production improvements are documented in README.md and .env.example.

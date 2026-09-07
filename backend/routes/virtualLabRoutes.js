@@ -434,7 +434,7 @@ router.post('/verify-access', verifyToken, async (req, res) => {
     const isMember = studentGroup.students.some(
       sid => sid.toString() === userId.toString()
     );
-    const isMentor = studentGroup.mentorId.toString() === userId.toString();
+    const isMentor = Boolean(studentGroup.mentorId) && studentGroup.mentorId.toString() === userId.toString();
 
     if (!isMember && !isMentor) {
       console.warn(`[Virtual Lab Access] Unauthorized: userId=${userId}, groupId=${groupId}`);

@@ -92,12 +92,20 @@ const getUserById = async (userId) => {
 // Update user profile
 const updateUserProfile = async (userId, updates) => {
   try {
+    const allowedFields = ['firstName', 'lastName', 'phone', 'avatar_url', 'bio'];
+    const safeUpdates = {};
+    for (const field of allowedFields) {
+      if (Object.prototype.hasOwnProperty.call(updates, field)) {
+        safeUpdates[field] = updates[field];
+      }
+    }
+
     const user = await User.findByIdAndUpdate(
       userId,
-      { $set: updates },
+      { $set: safeUpdates },
       { new: true, runValidators: true }
     ).select('-password');
-    
+
     return user;
   } catch (error) {
     console.error('Error updating profile:', error);

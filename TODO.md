@@ -1,11 +1,24 @@
-- [x] Inspect why buttons/links are non-functional (find runtime JS errors)
-- [x] Patch `frontend/public/assets/js/project-details.js` to not crash due to missing globals and DOM id/class mismatches
-- [ ] Patch other pages/scripts as needed after rerunning grep for missing function references
-- [x] Run quick static check (search for remaining `showError(` / `showLoading(` / `window.nexusData` mismatches)
+# Completion Status
 
-- [ ] Manual verification checklist:
-  - [ ] Project details page: tabs, enroll button, contact mentor, milestones
-  - [ ] Marketplace navigation links
-  - [ ] Mentor/Student/Center pages navigation
+## Completed
+- [x] Public registration restricted to student accounts
+- [x] Admin/mentor creation moved to protected admin endpoint
+- [x] Center Admin creation links the center and user
+- [x] Center dashboard handles missing center registration
+- [x] Project creation uses multipart upload
+- [x] Marketplace lists active projects
+- [x] Duplicate enrollment no longer changes mentor/project counters
+- [x] Project capacity/status validation added
+- [x] Project asset authorization scoped to the owning center
+- [x] Password reset token persistence and expiry implemented
+- [x] Hard-coded admin credentials removed
+- [x] Upload storage root configurable for persistent disks
+- [x] ZIP extraction traversal checks added
+- [x] Health endpoint reports database readiness
+- [x] Virtual Lab access handles unassigned mentors safely
 
-
+## Optional V2 work
+- Real paid checkout/escrow provider activation
+- Object-storage adapter (S3/Cloudinary) instead of persistent disk
+- OAuth providers
+- Full browser E2E suite

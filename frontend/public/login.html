@@ -540,9 +540,8 @@
 
             <div class="form-group">
               <label for="regRole">I am a...</label>
-              <select id="regRole" class="form-input" style="appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236366f1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto; padding-right: 2.5rem;">
-                <option value="student">Student</option>
-                <option value="center_admin">Center Admin</option>
+              <select id="regRole" class="form-input" disabled>
+                <option value="student" selected>Student</option>
               </select>
             </div>
 
@@ -687,18 +686,7 @@
     const githubLoginBtn = document.getElementById('githubLoginBtn');
     const rememberMeCheckbox = document.getElementById('rememberMe');
 
-    // Role change handler for center details
-    if (regRole) {
-      regRole.addEventListener('change', () => {
-        if (regRole.value === 'center_admin') {
-          centerDetailsFields.style.display = 'block';
-          document.getElementById('centerName').required = true;
-        } else {
-          centerDetailsFields.style.display = 'none';
-          document.getElementById('centerName').required = false;
-        }
-      });
-    }
+    if (centerDetailsFields) centerDetailsFields.style.display = 'none';
 
     // Forgot password handler
     if (forgotPasswordBtn) {
@@ -718,11 +706,8 @@
 
         try {
           // Attempt to call password reset API
-          if (window.api && window.api.request) {
-            window.api.request('/auth/forgot-password', {
-              method: 'POST',
-              body: JSON.stringify({ email })
-            }).then(() => {
+          if (window.api && window.api.requestPasswordReset) {
+            window.api.requestPasswordReset(email).then(() => {
               showNotification('Password reset link has been sent to your email', 'success');
             }).catch(err => {
               showNotification('Password reset request failed: ' + err.message, 'error');
@@ -918,7 +903,7 @@
       const lastName = document.getElementById('regLastName').value.trim();
       const email = document.getElementById('regEmail').value.trim();
       const password = document.getElementById('regPassword').value;
-      const role = document.getElementById('regRole').value;
+      const role = 'student';
 
       // Validation
       if (!firstName) {
@@ -945,14 +930,6 @@
       if (!passwordValidation.valid) {
         showNotification(passwordValidation.message, 'error');
         return;
-      }
-
-      if (role === 'center_admin') {
-        const centerName = document.getElementById('centerName').value.trim();
-        if (!centerName) {
-          showNotification('Please enter your center name', 'error');
-          return;
-        }
       }
 
       // Disable submit button during registration

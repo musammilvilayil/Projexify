@@ -3,21 +3,25 @@ const router = express.Router();
 const authService = require('../services/authService');
 const emailService = require('../services/emailService');
 const { verifyToken, checkRole } = require('../middleware/auth');
+const crypto = require('crypto');
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, firstName, lastName, role } = req.body;
+    const { email, password, firstName, lastName } = req.body;
 
     if (!email || !password || !firstName || !lastName) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
+    if (String(password).length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
 
-    const user = await authService.registerUser(email, password, firstName, lastName, role || 'student');
+    // Public registration can only create student accounts.
+    const user = await authService.registerUser(email, password, firstName, lastName, 'student');
 
-    // Send welcome email
     const displayName = `${firstName} ${lastName}`;
-    await emailService.sendWelcomeEmail(email, displayName, role || 'student');
+    await emailService.sendWelcomeEmail(email, displayName, 'student');
 
     res.status(201).json({
       message: 'User registered successfully',
@@ -82,51 +86,70 @@ router.put('/profile', verifyToken, async (req, res) => {
   }
 });
 
-// POST /api/auth/request-password-reset
-router.post('/request-password-reset', async (req, res) => {
+// Password reset helpers
+const requestPasswordReset = async (req, res) => {
+  const genericMessage = 'If an account exists for that email, a password reset link has been sent.';
   try {
-    const { email } = req.body;
-
+    const email = String(req.body.email || '').trim().toLowerCase();
     if (!email) {
       return res.status(400).json({ message: 'Email required' });
     }
 
-    // Generate reset token
-    const resetToken = require('crypto').randomBytes(32).toString('hex');
-    const hashedToken = require('crypto').createHash('sha256').update(resetToken).digest('hex');
+    const User = require('../models/User');
+    const user = await User.findOne({ email });
+    if (!user) return res.json({ message: genericMessage });
 
-    // Store in database (implement in authService)
-    // For now, just send email with token
-    await emailService.sendPasswordResetEmail(email, resetToken);
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
+    await user.save();
 
-    res.json({ message: 'Password reset email sent' });
+    const sent = await emailService.sendPasswordResetEmail(email, resetToken);
+    if (!sent?.success) {
+      user.passwordResetToken = null;
+      user.passwordResetExpires = null;
+      await user.save();
+      console.error('Password reset email could not be delivered.');
+    }
+
+    return res.json({ message: genericMessage });
   } catch (error) {
     console.error('Error requesting password reset:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ message: 'Could not process password reset request' });
   }
-});
+};
 
-// POST /api/auth/forgot-password (Alias for request-password-reset for better UX)
-router.post('/forgot-password', async (req, res) => {
+router.post('/request-password-reset', requestPasswordReset);
+router.post('/forgot-password', requestPasswordReset);
+
+router.post('/reset-password', async (req, res) => {
   try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ message: 'Email required' });
+    const token = String(req.body.token || '');
+    const password = String(req.body.password || '');
+    if (!token || password.length < 8) {
+      return res.status(400).json({ message: 'A valid token and password of at least 8 characters are required' });
     }
 
-    // Generate reset token
-    const resetToken = require('crypto').randomBytes(32).toString('hex');
-    const hashedToken = require('crypto').createHash('sha256').update(resetToken).digest('hex');
+    const User = require('../models/User');
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: new Date() }
+    }).select('+passwordResetToken +passwordResetExpires');
 
-    // Store in database (implement in authService)
-    // For now, just send email with token
-    await emailService.sendPasswordResetEmail(email, resetToken);
+    if (!user) {
+      return res.status(400).json({ message: 'Password reset link is invalid or expired' });
+    }
 
-    res.json({ message: 'Password reset email sent successfully' });
+    user.password = password;
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
+    await user.save();
+
+    return res.json({ message: 'Password updated successfully. You can now sign in.' });
   } catch (error) {
-    console.error('Error in forgot password:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error('Error resetting password:', error);
+    return res.status(500).json({ message: 'Could not reset password' });
   }
 });
 
@@ -136,12 +159,17 @@ router.get('/admin/stats', verifyToken, checkRole('admin'), async (req, res) => 
     const User = require('../models/User');
     const Project = require('../models/Project');
     const Center = require('../models/Center');
+    const EscrowTransaction = require('../models/EscrowTransaction');
 
-    const [userCount, projectCount, centerCount, pendingCenterCount] = await Promise.all([
+    const [userCount, projectCount, centerCount, pendingCenterCount, revenueResult] = await Promise.all([
       User.countDocuments(),
       Project.countDocuments(),
       Center.countDocuments({ status: 'approved' }),
-      Center.countDocuments({ status: 'pending' })
+      Center.countDocuments({ status: 'pending' }),
+      EscrowTransaction.aggregate([
+        { $match: { status: { $in: ['confirmed', 'released'] } } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ])
     ]);
 
     res.json({
@@ -149,11 +177,30 @@ router.get('/admin/stats', verifyToken, checkRole('admin'), async (req, res) => 
       projects: projectCount,
       centers: centerCount,
       pendingCenters: pendingCenterCount,
-      revenue: 12500 // Mock revenue for now
+      revenue: revenueResult[0]?.total || 0
     });
   } catch (error) {
     console.error('Error fetching admin stats:', error);
     res.status(500).json({ message: 'Error fetching admin stats' });
+  }
+});
+
+// POST /api/auth/admin/users - Create a user with an explicit role (admin only)
+router.post('/admin/users', verifyToken, checkRole('admin'), async (req, res) => {
+  try {
+    const { email, password, firstName, lastName, role = 'student' } = req.body;
+    const allowedRoles = ['student', 'mentor', 'admin'];
+    if (!email || !password || !firstName || !lastName || !allowedRoles.includes(role)) {
+      return res.status(400).json({ message: 'Valid email, password, name and role are required' });
+    }
+    if (String(password).length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
+
+    const user = await authService.registerUser(email, password, firstName, lastName, role);
+    return res.status(201).json({ message: 'User created successfully', user });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
   }
 });
 
@@ -182,6 +229,9 @@ router.post('/admin/create-center-admin', verifyToken, checkRole('admin'), async
     // Validate required fields
     if (!email || !password || !firstName || !lastName || !centerName || !centerEmail) {
       return res.status(400).json({ message: 'Missing required fields: email, password, firstName, lastName, centerName, centerEmail' });
+    }
+    if (String(password).length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
     }
 
     // Check if user already exists
