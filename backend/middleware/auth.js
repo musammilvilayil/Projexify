@@ -1,6 +1,17 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET is required in production');
+    }
+    return 'development-only-change-this-secret';
+  }
+  return secret;
+};
+
 // JWT Middleware - Verify token
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -10,7 +21,7 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, getJwtSecret());
     req.user = decoded;
     next();
   } catch (error) {
@@ -29,7 +40,7 @@ const generateToken = (user) => {
       roles: user.roles || [],
       centerId: user.centerId || null,
     },
-    process.env.JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: process.env.JWT_EXPIRY || '7d' }
   );
 };
@@ -101,7 +112,7 @@ const socketioJWTAuth = (io, namespaces = ['/virtual-lab']) => {
 
       try {
         // Step 2: Verify JWT signature and expiry
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, getJwtSecret());
 
         // Step 3: Attach VERIFIED user data to socket (from token, NOT from client)
         socket.userId = decoded.id;              // ✅ From verified token
@@ -139,7 +150,7 @@ const decodeTokenSafely = (token) => {
   }
 
   try {
-    return jwt.verify(token, process.env.JWT_SECRET);
+    return jwt.verify(token, getJwtSecret());
   } catch (error) {
     console.error('[Auth] Token decode error:', error.message);
     return null;
@@ -151,7 +162,7 @@ const decodeTokenSafely = (token) => {
  */
 const isTokenValid = (token) => {
   try {
-    jwt.verify(token, process.env.JWT_SECRET);
+    jwt.verify(token, getJwtSecret());
     return true;
   } catch (error) {
     return false;
@@ -177,7 +188,7 @@ const refreshToken = (token) => {
       roles: decoded.roles,
       centerId: decoded.centerId || null,
     },
-    process.env.JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: process.env.JWT_EXPIRY || '7d' }
   );
 };
