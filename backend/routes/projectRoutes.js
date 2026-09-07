@@ -241,17 +241,19 @@ router.get('/:id/assets', verifyToken, async (req, res) => {
   try {
     const { id: projectId } = req.params;
     const userId = req.user.id;
+    const project = await Project.findById(projectId).select('assets title centerId mentor_id');
+    if (!project) return res.status(404).json({ message: 'Project not found' });
 
-    // Check if user is enrolled
-    const isEnrolled = await Progress.findOne({ studentId: userId, projectId, payment_status: 'completed' });
-    const isMentor = await Project.findOne({ _id: projectId, mentor_id: userId });
-    const isCenterAdmin = await Center.findOne({ admin_id: userId }); // Should strictly check if it's the center owning the project, but simplifying for now
+    const [isEnrolled, isCenterAdmin] = await Promise.all([
+      Progress.exists({ studentId: userId, projectId, payment_status: 'completed' }),
+      Center.exists({ _id: project.centerId, admin_id: userId })
+    ]);
+    const isMentor = project.mentor_id?.toString() === userId.toString();
 
     if (!isEnrolled && !isMentor && !isCenterAdmin) {
-      return res.status(403).json({ message: 'You must be enrolled to access project assets.' });
+      return res.status(403).json({ message: 'You do not have access to these project assets.' });
     }
 
-    const project = await Project.findById(projectId).select('assets title');
     res.json({ assets: project.assets, projectTitle: project.title });
   } catch (error) {
     console.error('Error fetching assets:', error);
@@ -264,80 +266,41 @@ router.get('/:id/assets/download', verifyToken, async (req, res) => {
   try {
     const { id: projectId } = req.params;
     const userId = req.user.id;
+    const project = await Project.findById(projectId).select('assets title centerId mentor_id');
+    if (!project) return res.status(404).json({ message: 'Project not found' });
 
-    // Check if user is enrolled
-    const isEnrolled = await Progress.findOne({ studentId: userId, projectId, payment_status: 'completed' });
-    const isMentor = await Project.findOne({ _id: projectId, mentor_id: userId });
-    const isCenterAdmin = await Center.findOne({ admin_id: userId });
-
+    const [isEnrolled, isCenterAdmin] = await Promise.all([
+      Progress.exists({ studentId: userId, projectId, payment_status: 'completed' }),
+      Center.exists({ _id: project.centerId, admin_id: userId })
+    ]);
+    const isMentor = project.mentor_id?.toString() === userId.toString();
     if (!isEnrolled && !isMentor && !isCenterAdmin) {
-      return res.status(403).json({ message: 'You must be enrolled to download project assets.' });
+      return res.status(403).json({ message: 'You do not have access to download these project assets.' });
     }
-
-    const project = await Project.findById(projectId).select('assets title');
-    
-    if (!project.assets || project.assets.length === 0) {
+    if (!project.assets?.length) {
       return res.status(404).json({ message: 'No assets found for this project' });
     }
 
     const AdmZip = require('adm-zip');
     const fs = require('fs');
-    const path = require('path');
-    
+    const uploadRoot = path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, '../uploads'));
     const zip = new AdmZip();
-    
-    console.log('Creating ZIP for project:', project.title);
-    console.log('Total assets:', project.assets.length);
-    
-    // Add each asset file to the ZIP
+
     for (const asset of project.assets) {
-      console.log('Processing asset:', asset.title, 'URL:', asset.url);
-      
-      if (asset.url) {
-        // Extract the file path from the URL (remove /uploads/ prefix)
-        let filePath;
-        
-        if (asset.url.startsWith('/uploads/')) {
-          const urlPath = asset.url.replace('/uploads/', '');
-          filePath = path.join(__dirname, '../uploads', urlPath);
-        } else if (asset.url.startsWith('http')) {
-          // Skip external URLs
-          console.log('Skipping external URL:', asset.url);
-          continue;
-        } else {
-          // Assume it's a relative path from uploads
-          filePath = path.join(__dirname, '../uploads', asset.url);
-        }
-        
-        console.log('Looking for file at:', filePath);
-        
-        try {
-          if (fs.existsSync(filePath)) {
-            console.log('File exists, adding to ZIP');
-            const fileName = asset.originalName || asset.filename || path.basename(filePath);
-            
-            // Check if it's a file or directory
-            const stats = fs.statSync(filePath);
-            if (stats.isFile()) {
-              zip.addLocalFile(filePath, '', fileName);
-            } else if (stats.isDirectory()) {
-              // Add directory recursively
-              zip.addLocalFolder(filePath, path.basename(filePath));
-            }
-          } else {
-            console.log('File not found:', filePath);
-          }
-        } catch (err) {
-          console.error(`Error adding file to zip: ${filePath}`, err);
-        }
-      }
+      if (!asset.url || asset.url.startsWith('http')) continue;
+      const relativePath = asset.url.replace(/^\/uploads\//, '').replace(/^\/+/, '');
+      const filePath = path.resolve(uploadRoot, relativePath);
+      if (!filePath.startsWith(uploadRoot + path.sep)) continue;
+      if (!fs.existsSync(filePath)) continue;
+
+      const stats = fs.statSync(filePath);
+      const fileName = asset.originalName || asset.filename || path.basename(filePath);
+      if (stats.isFile()) zip.addLocalFile(filePath, '', fileName);
+      else if (stats.isDirectory()) zip.addLocalFolder(filePath, path.basename(filePath));
     }
-    
+
     const zipBuffer = zip.toBuffer();
-    console.log('ZIP created, size:', zipBuffer.length, 'bytes');
-    
     const safeTitle = project.title.replace(/[^a-z0-9]/gi, '_');
-    
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename="${safeTitle}_assets.zip"`);
     res.setHeader('Content-Length', zipBuffer.length);
@@ -353,29 +316,27 @@ router.get('/:id/download-files', verifyToken, async (req, res) => {
   try {
     const { id: projectId } = req.params;
     const userId = req.user.id;
+    const project = await Project.findById(projectId).select('assets title centerId mentor_id');
+    if (!project) return res.status(404).json({ message: 'Project not found' });
 
-    // Check if user is enrolled
-    const isEnrolled = await Progress.findOne({ studentId: userId, projectId, payment_status: 'completed' });
-    const isMentor = await Project.findOne({ _id: projectId, mentor_id: userId });
-    const isCenterAdmin = await Center.findOne({ admin_id: userId });
+    const [isEnrolled, isCenterAdmin] = await Promise.all([
+      Progress.exists({ studentId: userId, projectId, payment_status: 'completed' }),
+      Center.exists({ _id: project.centerId, admin_id: userId })
+    ]);
+    const isMentor = project.mentor_id?.toString() === userId.toString();
 
     if (!isEnrolled && !isMentor && !isCenterAdmin) {
-      return res.status(403).json({ message: 'You must be enrolled to download project files.' });
+      return res.status(403).json({ message: 'You do not have access to download these project files.' });
     }
 
-    const project = await Project.findById(projectId).select('assets title');
-    
-    // For now, return the list of downloadable assets
-    // In a real implementation, you would create a ZIP file here
-    const downloadableAssets = project.assets.filter(asset => asset.type === 'zip' || asset.type === 'pdf' || asset.type === 'doc');
-    
+    const downloadableAssets = project.assets.filter(asset =>
+      ['zip', 'pdf', 'doc', 'document', 'file'].includes(asset.type)
+    );
     res.json({
       success: true,
       projectTitle: project.title,
       assets: downloadableAssets,
-      message: 'Project files are available for download',
-      // In production, this would be a ZIP file URL
-      downloadUrl: `/api/projects/${projectId}/assets`
+      downloadUrl: `/api/projects/${projectId}/assets/download`
     });
   } catch (error) {
     console.error('Error preparing download:', error);
