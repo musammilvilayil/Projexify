@@ -903,7 +903,7 @@
       const lastName = document.getElementById('regLastName').value.trim();
       const email = document.getElementById('regEmail').value.trim();
       const password = document.getElementById('regPassword').value;
-      const role = document.getElementById('regRole').value;
+      const role = 'student';
 
       // Validation
       if (!firstName) {
@@ -930,14 +930,6 @@
       if (!passwordValidation.valid) {
         showNotification(passwordValidation.message, 'error');
         return;
-      }
-
-      if (role === 'center_admin') {
-        const centerName = document.getElementById('centerName').value.trim();
-        if (!centerName) {
-          showNotification('Please enter your center name', 'error');
-          return;
-        }
       }
 
       // Disable submit button during registration
