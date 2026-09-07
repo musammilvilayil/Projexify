@@ -71,5 +71,3 @@ escrowTransactionSchema.pre('save', function(next) {
 });
 
 module.exports = mongoose.model('EscrowTransaction', escrowTransactionSchema);
-
-module.exports = mongoose.model('EscrowTransaction', escrowTransactionSchema);
