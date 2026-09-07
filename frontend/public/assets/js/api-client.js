@@ -156,10 +156,24 @@ class APIClient {
   }
 
   // Auth endpoints
-  async register(email, password, firstName, lastName, role = 'student') {
+  async register(email, password, firstName, lastName) {
     return this.request('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ email, password, firstName, lastName, role }),
+      body: JSON.stringify({ email, password, firstName, lastName }),
+    });
+  }
+
+  async requestPasswordReset(email) {
+    return this.request('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async resetPassword(token, password) {
+    return this.request('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
     });
   }
 
@@ -262,6 +276,13 @@ class APIClient {
 
   async createCenterAdmin(userData) {
     return this.request('/auth/admin/create-center-admin', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+  }
+
+  async createUser(userData) {
+    return this.request('/auth/admin/users', {
       method: 'POST',
       body: JSON.stringify(userData),
     });
