@@ -15,7 +15,7 @@ const connectDB = async () => {
     return mongoose.connection;
   } catch (error) {
     console.error('❌ MongoDB connection error:', error.message);
-    return null;
+    throw error;
   }
 };
 
