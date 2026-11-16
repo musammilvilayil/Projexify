@@ -17,10 +17,14 @@ const app = express();
 if (process.env.TRUST_PROXY || process.env.NODE_ENV === 'production') {
   app.set('trust proxy', process.env.TRUST_PROXY || 1);
 }
+// CORS_ORIGIN may list several origins, comma separated (e.g. production + Vercel preview URLs).
+const allowedOrigins = String(process.env.CORS_ORIGIN || 'http://localhost:3005').split(',').map((o) => o.trim().replace(/\/+$/, '')).filter(Boolean);
+const corsOrigin = allowedOrigins.length === 1 ? allowedOrigins[0] : allowedOrigins;
+
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3005',
+    origin: corsOrigin,
     methods: ['GET', 'POST'],
   },
 });
@@ -45,7 +49,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3005',
+  origin: corsOrigin,
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));

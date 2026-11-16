@@ -1,0 +1,26 @@
+# Backend on Render. The frontend is deployed separately on Vercel (see vercel.json); the Vercel site
+# wakes this service when a visitor arrives, because the free plan sleeps after ~15 idle minutes.
+services:
+  - type: web
+    name: projexify-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false          # MongoDB Atlas connection string
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false          # your Vercel URL(s), comma separated, e.g. https://projexify.vercel.app
+      - key: FRONTEND_URL
+        sync: false          # same Vercel URL (used in password-reset emails)
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false

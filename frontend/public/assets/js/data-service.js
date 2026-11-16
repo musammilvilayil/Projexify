@@ -5,7 +5,7 @@
 
 class NexusDataService {
   constructor() {
-    this.baseURL = window.location.origin;
+    this.baseURL = window.PROJEXIFY_API_BASE || window.location.origin;
     this.apiPrefix = '/api';
     this.cache = new Map();
     this.pendingRequests = new Map();

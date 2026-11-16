@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "echo skip",
+  "buildCommand": "node scripts/write-frontend-config.js",
+  "outputDirectory": "frontend/public",
+  "cleanUrls": false,
+  "headers": [
+    { "source": "/assets/js/env-config.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+  ]
+}
