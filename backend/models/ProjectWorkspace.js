@@ -6,10 +6,11 @@ const projectWorkspaceSchema = new mongoose.Schema({
     ref: 'Project',
     required: true,
   },
+  // null = shared baseline workspace (uploaded by center admin / mentor); set = a student's private copy
   studentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+    default: null,
   },
   workspacePath: {
     type: String,
@@ -19,7 +20,6 @@ const projectWorkspaceSchema = new mongoose.Schema({
     file_id: {
       type: String,
       required: true,
-      unique: true
     },
     path: {
       type: String,
@@ -85,7 +85,6 @@ const projectWorkspaceSchema = new mongoose.Schema({
     folder_id: {
       type: String,
       required: true,
-      unique: true
     },
     path: String,
     name: String,
@@ -150,5 +149,7 @@ const projectWorkspaceSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+projectWorkspaceSchema.index({ projectId: 1, studentId: 1 });
 
 module.exports = mongoose.model('ProjectWorkspace', projectWorkspaceSchema);

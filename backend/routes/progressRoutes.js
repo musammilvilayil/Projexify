@@ -1,5 +1,10 @@
 const express = require('express');
 const router = express.Router();
+
+// A mentor may act on a project if it is theirs, or if the student was assigned to them.
+// (project.mentor_id is optional: enrollment can leave it unset, which used to crash with a TypeError.)
+const isProjectMentor = (project, mentorId) =>
+  !!project && !!project.mentor_id && String(project.mentor_id) === String(mentorId);
 const { verifyToken } = require('../middleware/auth');
 const { checkRole } = require('../middleware/auth');
 const Progress = require('../models/Progress');
@@ -215,14 +220,18 @@ router.get('/mentor/project/:projectId', verifyToken, checkRole('mentor'), async
 
     // Verify mentor owns this project
     const project = await Project.findById(projectId);
-    if (!project || project.mentor_id.toString() !== req.user.id) {
+    const assigned = isProjectMentor(project, req.user.id) ||
+      !!(await Progress.findOne({ projectId, assignedMentorId: req.user.id }).select('_id'));
+    if (!project || !assigned) {
       return res.status(403).json({ message: 'Not authorized to view this project progress' });
     }
 
-    const progressList = await Progress.find({ projectId })
+    // Mentors only see the students assigned to them unless they own the whole project
+    const listFilter = isProjectMentor(project, req.user.id) ? { projectId } : { projectId, assignedMentorId: req.user.id };
+    const progressList = await Progress.find(listFilter)
       .populate('studentId', 'firstName lastName email')
       .populate('groupId', 'name')
-      .sort({ created_at: -1 });
+      .sort({ createdAt: -1 });
 
     res.json({
       success: true,
@@ -242,11 +251,19 @@ router.put('/:studentId/:projectId/evaluate', verifyToken, checkRole('mentor'), 
     const { feedback, score } = req.body;
     const mentorId = req.user.id;
 
-    // Verify mentor owns this project
+    // Mentor must own the project or be the student's assigned mentor
+    const existing = await Progress.findOne({ studentId, projectId }).select('assignedMentorId status');
     const project = await Project.findById(projectId);
-    if (!project || project.mentor_id.toString() !== mentorId) {
+    const allowed = !!existing && (isProjectMentor(project, mentorId) ||
+      (existing.assignedMentorId && String(existing.assignedMentorId) === String(mentorId)));
+    if (!allowed) {
       return res.status(403).json({ message: 'Not authorized to evaluate this project' });
     }
+    const numericScore = Number(score);
+    if (score !== undefined && (!Number.isFinite(numericScore) || numericScore < 0 || numericScore > 100)) {
+      return res.status(400).json({ message: 'Score must be a number between 0 and 100' });
+    }
+    const alreadyCompleted = existing.status === 'completed';
 
     const progress = await Progress.findOneAndUpdate(
       { studentId, projectId },
@@ -255,7 +272,7 @@ router.put('/:studentId/:projectId/evaluate', verifyToken, checkRole('mentor'), 
           mentor_evaluations: {
             mentorId,
             feedback,
-            score,
+            score: numericScore,
             evaluation_date: new Date(),
           },
         },
@@ -268,8 +285,8 @@ router.put('/:studentId/:projectId/evaluate', verifyToken, checkRole('mentor'), 
       return res.status(404).json({ message: 'Progress record not found' });
     }
 
-    // Decrement mentor load
-    if (progress.assignedMentorId) {
+    // Decrement mentor load once (re-evaluating a finished student must not free the slot again)
+    if (progress.assignedMentorId && !alreadyCompleted) {
       await User.findByIdAndUpdate(progress.assignedMentorId, { $inc: { mentor_load: -1 } });
     }
 
@@ -422,8 +439,9 @@ router.get('/:studentId/:projectId', verifyToken, async (req, res) => {
   }
 });
 
-// PUT /api/progress/:studentId/:projectId/evaluate - Mentor evaluates progress
-router.put('/:studentId/:projectId/evaluate', verifyToken, checkRole('mentor'), async (req, res) => {
+// PUT /api/progress/:studentId/:projectId/milestone-evaluate - Mentor reviews/approves the current milestone
+// (was registered on the same path as the final evaluation above and therefore never reachable)
+router.put('/:studentId/:projectId/milestone-evaluate', verifyToken, checkRole('mentor'), async (req, res) => {
   try {
     const { studentId, projectId } = req.params;
     const { score, feedback, approve } = req.body;

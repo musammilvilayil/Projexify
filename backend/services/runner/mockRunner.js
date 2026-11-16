@@ -21,7 +21,7 @@ const allowedLanguages = {
 };
 
 function normalizeLanguage(lang) {
-  if (!lang) return 'plaintext';
+  if (!lang || typeof lang !== 'string') return 'plaintext';
   const key = lang.trim().toLowerCase();
   if (allowedLanguages[key]) return key;
   if (key === 'js') return 'javascript';
@@ -32,22 +32,43 @@ function normalizeLanguage(lang) {
   return 'plaintext'; // Fallback to plaintext instead of null
 }
 
+const MAX_JOBS = 500;
+const JOB_TTL_MS = 60 * 60 * 1000; // keep results for an hour
+
+function purgeJobs() {
+  const cutoff = Date.now() - JOB_TTL_MS;
+  for (const [id, job] of jobs) {
+    if (job.createdAt.getTime() < cutoff) jobs.delete(id);
+  }
+  // Hard cap (Map iterates in insertion order, so this drops the oldest first)
+  while (jobs.size >= MAX_JOBS) jobs.delete(jobs.keys().next().value);
+}
+
+/**
+ * Server-side execution is not wired to a sandbox yet, so we must NOT pretend the code ran
+ * (the old stub echoed the source back with exit code 0 and "completed").
+ * Running untrusted code needs a real isolated runner; until then we report that honestly.
+ * JavaScript is executed in the learner's own browser by the lab page instead.
+ */
 function createJob({ userId, language, code, files, args }) {
+  purgeJobs();
   const id = randomUUID();
   const now = new Date();
-  // Stub: immediately mark as completed with echo output
-  const stdout = [`[stub-runner] language=${language}`, '[stub-runner] execution not wired yet', code ? '--- code start ---' : '', code || '', code ? '--- code end ---' : ''].filter(Boolean).join('\n');
+  const label = (allowedLanguages[language] && allowedLanguages[language].name) || language;
+  const staticTypes = ['html', 'css', 'markdown', 'plaintext', 'json'];
+  const isStatic = staticTypes.includes(language);
+
   const job = {
     id,
     userId,
     language,
-    code,
-    files,
-    args,
-    status: 'completed',
-    exitCode: 0,
-    stdout,
-    stderr: '',
+    code: undefined, // not retained: nothing was executed
+    files: undefined,
+    args: Array.isArray(args) ? args.slice(0, 20) : [],
+    status: 'unavailable',
+    exitCode: isStatic ? 0 : 1,
+    stdout: isStatic ? `${label} files are not executable. Use Preview to view them.` : '',
+    stderr: isStatic ? '' : `Running ${label} is not available on this server yet. JavaScript runs directly in your browser.`,
     createdAt: now,
     completedAt: now
   };

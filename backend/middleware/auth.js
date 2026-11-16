@@ -96,7 +96,7 @@ const checkOwnership = async (req, res, next) => {
  *   const { socketioJWTAuth } = require('./middleware/auth');
  *   socketioJWTAuth(io);  // Called before socket.on('connection')
  */
-const socketioJWTAuth = (io, namespaces = ['/virtual-lab']) => {
+const socketioJWTAuth = (io, namespaces = ['/', '/virtual-lab', '/notifications']) => {
   namespaces.forEach(namespace => {
     const nsInstance = io.of(namespace);
 

@@ -201,7 +201,7 @@ const progressSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Index for faster queries
-progressSchema.index({ studentId: 1, projectId: 1 });
+progressSchema.index({ studentId: 1, projectId: 1 }, { unique: true });
 progressSchema.index({ groupId: 1 });
 
 module.exports = mongoose.model('Progress', progressSchema);

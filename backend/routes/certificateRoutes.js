@@ -88,7 +88,7 @@ router.get('/student/:studentId', verifyToken, async (req, res) => {
     const { studentId } = req.params;
 
     // Allow students to view their own certificates or mentors/admins to view
-    if (req.user.id !== studentId && !['mentor', 'admin'].includes(req.user.role)) {
+    if (String(req.user.id) !== String(studentId) && !(req.user.roles || []).some((r) => ['mentor', 'admin', 'center_admin'].includes(r))) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 

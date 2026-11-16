@@ -201,6 +201,26 @@ const sessionSchema = new mongoose.Schema({
   recordingStartedAt: Date,
   recordingEndedAt: Date,
   recordingPath: String,
+  // Live lab (virtual-lab socket) state, so mentors can review what happened
+  labCode: String,
+  labLastActivity: Date,
+  labActivity: [{
+    _id: false,
+    timestamp: Date,
+    type: String,
+    userId: mongoose.Schema.Types.ObjectId,
+    filePath: String,
+    contentLength: Number,
+    note: String
+  }],
+  labFeedback: [{
+    _id: false,
+    mentorId: mongoose.Schema.Types.ObjectId,
+    message: String,
+    lineNumber: Number,
+    filePath: String,
+    timestamp: Date
+  }],
   // Session active status
   active: {
     type: Boolean,
@@ -224,20 +244,20 @@ sessionSchema.pre('save', function(next) {
 
 // Method to check if session is currently active
 sessionSchema.methods.isActive = function() {
+  const { parseTimeToMinutes, isWithinWindow } = require('../utils/timeUtils');
+
+  // Instant sessions run until the mentor ends them
+  if (this.isInstant) return this.status === 'active';
+  if (['in_progress', 'in-progress', 'active'].includes(this.status)) return true;
+  if (this.status !== 'scheduled') return false;
+
   const now = new Date();
   const sessionDate = new Date(this.scheduledDate);
-  
-  // Parse start and end times
-  const [startHour, startMin] = this.startTime.split(':').map(Number);
-  const [endHour, endMin] = this.endTime.split(':').map(Number);
-  
-  const startDateTime = new Date(sessionDate);
-  startDateTime.setHours(startHour, startMin, 0, 0);
-  
-  const endDateTime = new Date(sessionDate);
-  endDateTime.setHours(endHour, endMin, 0, 0);
-  
-  return now >= startDateTime && now <= endDateTime && this.status === 'scheduled';
+  if (sessionDate.toDateString() !== now.toDateString()) return false;
+
+  const start = parseTimeToMinutes(this.startTime);
+  const end = parseTimeToMinutes(this.endTime);
+  return isWithinWindow(start, end, now.getHours() * 60 + now.getMinutes());
 };
 
 module.exports = mongoose.model('Session', sessionSchema);

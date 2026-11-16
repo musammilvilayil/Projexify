@@ -54,8 +54,8 @@
     .stat-card {
       padding: 2.5rem 2rem;
       border-radius: var(--radius-xl);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       backdrop-filter: blur(12px);
       transition: var(--transition);
       display: flex;
@@ -64,13 +64,13 @@
       min-height: 160px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .stat-card:hover {
       transform: translateY(-10px);
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--s-06);
       box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
     }
 
@@ -87,27 +87,27 @@
 
     .stat-label {
       font-size: 0.95rem;
-      color: rgba(255, 255, 255, 0.9);
+      color: var(--text-main);
       font-weight: 600;
       line-height: 1.4;
     }
 
     .project-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       border-radius: var(--radius-2xl);
       padding: 3rem;
       margin-bottom: 2.5rem;
       backdrop-filter: blur(12px);
       transition: var(--transition);
       animation: slideUp 0.5s ease forwards;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .project-card:hover {
       transform: translateY(-10px);
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--s-05);
     }
 
     .aurora-bg {
@@ -189,7 +189,7 @@
     }
 
     .breadcrumb-nav span {
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-dim);
     }
 
     .breadcrumb-nav a {
@@ -236,7 +236,7 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px rgba(var(--shadow-rgb), 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
     }
 
@@ -257,7 +257,7 @@
 
     .student-item {
       padding: 1rem 1.25rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--b-03);
       cursor: pointer;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
@@ -305,7 +305,7 @@
       font-size: 0.95rem;
       flex-shrink: 0;
       box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-      border: 2px solid rgba(255, 255, 255, 0.1);
+      border: 2px solid var(--b-10);
       position: relative;
     }
 
@@ -329,7 +329,7 @@
 
     .student-name {
       font-weight: 600;
-      color: #f8fafc;
+      color: var(--text-main);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -337,7 +337,7 @@
 
     .student-preview {
       font-size: 0.8rem;
-      color: #94a3b8;
+      color: var(--text-muted);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -350,7 +350,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px rgba(var(--shadow-rgb), 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
     }
 
@@ -430,7 +430,7 @@
       line-height: 1.5;
       word-wrap: break-word;
       position: relative;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 2px 8px rgba(var(--shadow-rgb), 0.15);
     }
 
     .message.received .message-content {
@@ -444,12 +444,12 @@
       background: linear-gradient(135deg, #6366f1, #8b5cf6);
       color: white;
       border-bottom-right-radius: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--b-10);
     }
 
     .message-time {
       font-size: 0.7rem;
-      color: #64748b;
+      color: var(--text-dim);
       margin-top: 0.375rem;
       font-weight: 500;
       letter-spacing: 0.3px;
@@ -467,22 +467,22 @@
     .chat-input-area input {
       flex: 1;
       padding: 0.875rem 1.25rem;
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--s-05);
       border: 2px solid rgba(99, 102, 241, 0.2);
       border-radius: 12px;
-      color: #f8fafc;
+      color: var(--text-main);
       font-size: 0.95rem;
       transition: all 0.3s ease;
     }
 
     .chat-input-area input::placeholder {
-      color: #64748b;
+      color: var(--text-dim);
     }
 
     .chat-input-area input:focus {
       outline: none;
       border-color: #6366f1;
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--s-08);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
       transform: translateY(-1px);
     }
@@ -537,7 +537,7 @@
       align-items: center;
       justify-content: center;
       height: 100%;
-      color: #94a3b8;
+      color: var(--text-muted);
       text-align: center;
       font-size: 1.1rem;
       font-weight: 500;
@@ -614,6 +614,14 @@
       }
     }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0f172a">
+  <script src="/assets/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <link rel="stylesheet" href="/assets/css/ux-polish.css">
+  <script src="/assets/js/ux-enhance.js" defer></script>
 </head>
 <body>
   <div class="aurora-bg">
@@ -710,37 +718,37 @@
   <!-- Schedule Session Popup -->
   <div id="schedulePopup" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center;">
     <div style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 24px; backdrop-filter: blur(16px); width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 0; box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);">
-      <div style="padding: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center;">
+      <div style="padding: 2rem; border-bottom: 1px solid var(--b-10); display: flex; justify-content: space-between; align-items: center;">
         <h5 style="background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; margin: 0;">Schedule Session</h5>
-        <button onclick="closeSchedulePopup()" style="background: none; border: none; color: rgba(255, 255, 255, 0.6); font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1;">×</button>
+        <button onclick="closeSchedulePopup()" style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1;">×</button>
       </div>
       <div style="padding: 2rem;">
         <form id="scheduleForm">
           <div style="margin-bottom: 1.5rem;">
-            <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Session Title</label>
-            <input type="text" id="sessionTitle" class="form-control" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">Session Title</label>
+            <input type="text" id="sessionTitle" class="form-control" required style="background: var(--s-05); border: 1px solid var(--b-10); color: var(--text-main); border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
           </div>
           <div style="margin-bottom: 1.5rem;">
-            <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Select Students</label>
-            <select id="studentSelect" class="form-select" multiple style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; min-height: 120px; width: 100%; font-family: inherit; font-size: inherit;"></select>
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">Select Students</label>
+            <select id="studentSelect" class="form-select" multiple style="background: var(--s-05); border: 1px solid var(--b-10); color: var(--text-main); border-radius: 12px; padding: 12px; min-height: 120px; width: 100%; font-family: inherit; font-size: inherit;"></select>
           </div>
           <div style="margin-bottom: 1.5rem;">
-            <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Date</label>
-            <input type="date" id="sessionDate" class="form-control" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">Date</label>
+            <input type="date" id="sessionDate" class="form-control" required style="background: var(--s-05); border: 1px solid var(--b-10); color: var(--text-main); border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
             <div>
-              <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Start Time</label>
-              <input type="time" id="startTime" class="form-control" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
+              <label style="display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">Start Time</label>
+              <input type="time" id="startTime" class="form-control" required style="background: var(--s-05); border: 1px solid var(--b-10); color: var(--text-main); border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
             </div>
             <div>
-              <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">End Time</label>
-              <input type="time" id="endTime" class="form-control" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
+              <label style="display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">End Time</label>
+              <input type="time" id="endTime" class="form-control" required style="background: var(--s-05); border: 1px solid var(--b-10); color: var(--text-main); border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
             </div>
           </div>
           <div style="margin-bottom: 1.5rem;">
-            <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Duration (minutes)</label>
-            <input type="number" id="duration" class="form-control" required min="15" max="240" placeholder="e.g., 60" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">Duration (minutes)</label>
+            <input type="number" id="duration" class="form-control" required min="15" max="240" placeholder="e.g., 60" style="background: var(--s-05); border: 1px solid var(--b-10); color: var(--text-main); border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
             <small style="color: var(--text-muted); margin-top: 0.5rem; display: block;">Typical sessions: 30-90 minutes</small>
           </div>
           <div style="display: flex; gap: 1rem;">
@@ -754,25 +762,25 @@
 
   <!-- On-Demand Session Popup -->
   <div id="onDemandPopup" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 2000; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
-    <div style="background: #0f172a; border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 16px; padding: 2rem; width: 90%; max-width: 500px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); animation: popupSlideIn 0.3s ease;">
+    <div style="background: var(--bg-dark); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 16px; padding: 2rem; width: 90%; max-width: 500px; box-shadow: 0 20px 60px rgba(var(--shadow-rgb), 0.5); animation: popupSlideIn 0.3s ease;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h3 style="margin: 0; color: white; font-size: 1.5rem; font-weight: 700;">Start Session Now</h3>
+        <h3 style="margin: 0; color: var(--text-main); font-size: 1.5rem; font-weight: 700;">Start Session Now</h3>
         <button onclick="closeOnDemandPopup()" style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">&times;</button>
       </div>
       <form id="onDemandForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
         <div>
-          <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Select Student(s)</label>
-          <select id="onDemandStudentSelect" multiple class="form-control" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit; min-height: 120px;">
+          <label style="display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">Select Student(s)</label>
+          <select id="onDemandStudentSelect" multiple class="form-control" required style="background: var(--s-05); border: 1px solid var(--b-10); color: var(--text-main); border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit; min-height: 120px;">
           </select>
           <small style="color: var(--text-muted); margin-top: 0.5rem; display: block;">Hold Ctrl/Cmd to select multiple students</small>
         </div>
         <div>
-          <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Session Title</label>
-          <input type="text" id="onDemandTitle" class="form-control" placeholder="e.g., Code Review Session" required style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
+          <label style="display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">Session Title</label>
+          <input type="text" id="onDemandTitle" class="form-control" placeholder="e.g., Code Review Session" required style="background: var(--s-05); border: 1px solid var(--b-10); color: var(--text-main); border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit;">
         </div>
         <div>
-          <label style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600; font-size: 0.95rem;">Description (Optional)</label>
-          <textarea id="onDemandDescription" class="form-control" placeholder="What will you discuss?" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit; min-height: 80px; resize: vertical;"></textarea>
+          <label style="display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">Description (Optional)</label>
+          <textarea id="onDemandDescription" class="form-control" placeholder="What will you discuss?" style="background: var(--s-05); border: 1px solid var(--b-10); color: var(--text-main); border-radius: 12px; padding: 12px; width: 100%; font-family: inherit; font-size: inherit; min-height: 80px; resize: vertical;"></textarea>
         </div>
         <div style="display: flex; gap: 1rem;">
           <button type="button" onclick="closeOnDemandPopup()" style="flex: 1; padding: 0.75rem 1.5rem; border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.1); color: #6366f1; font-weight: 700; cursor: pointer; transition: all 0.3s ease;">Cancel</button>
@@ -951,7 +959,11 @@
         const uniqueStudents = [];
         const seenIds = new Set();
 
+        window.studentProjectMap = window.studentProjectMap || {};
         students.forEach(record => {
+          if (record && record.studentId && record.projectId) {
+            window.studentProjectMap[record.studentId._id || record.studentId.id] = record.projectId._id || record.projectId;
+          }
           if (record && record.studentId && !seenIds.has(record.studentId._id || record.studentId.id)) {
             seenIds.add(record.studentId._id || record.studentId.id);
             uniqueStudents.push(record.studentId);
@@ -981,7 +993,7 @@
       const container = document.getElementById('studentsList');
       
       if (!students || students.length === 0) {
-        container.innerHTML = '<div style="padding: 1.5rem; text-align: center; color: #94a3b8; font-size: 0.9rem;">No students yet</div>';
+        container.innerHTML = '<div style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">No students yet</div>';
         return;
       }
 
@@ -1015,7 +1027,11 @@
       messageInput.disabled = false;
       sendBtn.disabled = false;
 
-      // Load messages (messages update in real-time via Socket.io)
+      // Join this student's private thread so replies arrive in real time
+      const threadProject = (window.studentProjectMap || {})[studentId];
+      if (mentorSocket && mentorSocket.connected && threadProject) {
+        mentorSocket.emit('join-project-room', { projectId: threadProject, studentId });
+      }
       await loadMentorMessages(studentId);
     }
 
@@ -1066,7 +1082,7 @@
       const messagesArea = document.getElementById('messagesArea');
       
       if (!messages || messages.length === 0) {
-        messagesArea.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #94a3b8; text-align: center;"><p>No messages yet. Start the conversation!</p></div>';
+        messagesArea.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); text-align: center;"><p>No messages yet. Start the conversation!</p></div>';
         return;
       }
 
@@ -1119,7 +1135,7 @@
           return;
         }
 
-        const projectId = projects.projects[0]._id;
+        const projectId = (window.studentProjectMap || {})[currentSelectedStudent] || projects.projects[0]._id;
 
         // Save message to database
         const response = await fetch('/api/messages/send', {
@@ -1139,22 +1155,7 @@
           throw new Error(`HTTP ${response.status}`);
         }
 
-        // Send via Socket.io for real-time delivery to student
-        if (mentorSocket && mentorSocket.connected) {
-          mentorSocket.emit('send-message', {
-            studentId: currentSelectedStudent,
-            projectId,
-            message,
-            senderId: user._id || user.id,
-            timestamp: new Date()
-          });
-          
-          // Broadcast mentor online status
-          mentorSocket.emit('mentor-online', {
-            projectId,
-            studentId: currentSelectedStudent
-          });
-        }
+        // Real-time delivery to the student is pushed by the server after the save
 
         // Add to UI immediately
         addMentorMessageToUI(message, 'sent');
@@ -1201,7 +1202,7 @@
       const user = JSON.parse(localStorage.getItem('user'));
       if (!user) return;
 
-      mentorSocket = io();
+      mentorSocket = io({ auth: { token: localStorage.getItem('token') } });
 
       mentorSocket.on('connect', () => {
         console.log('[Mentor Dashboard] Connected to server');

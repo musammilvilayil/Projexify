@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { parseTimeToMinutes, toHHMM, isWithinWindow } = require('../utils/timeUtils');
 const Session = require('../models/Session');
 const Notification = require('../models/Notification');
 const Progress = require('../models/Progress');
@@ -10,8 +11,6 @@ router.post('/create-instant', verifyToken, checkRole('mentor'), async (req, res
   try {
     let { studentIds, title, description, recordingEnabled } = req.body;
     
-    console.log('[create-instant] Request body:', { studentIds, title, description, recordingEnabled });
-    console.log('[create-instant] User:', req.user);
     
     // Validate required fields
     if (!studentIds || studentIds.length === 0) {
@@ -22,19 +21,29 @@ router.post('/create-instant', verifyToken, checkRole('mentor'), async (req, res
       return res.status(400).json({ message: 'Session title is required' });
     }
 
-    // Get projectId from first student's progress
+    if (!Array.isArray(studentIds)) {
+      return res.status(400).json({ message: 'studentIds must be a list' });
+    }
+    studentIds = [...new Set(studentIds.map(String))];
+    if (studentIds.some((id) => !/^[a-f0-9]{24}$/i.test(id))) {
+      return res.status(400).json({ message: 'Invalid student id' });
+    }
+
+    // Every selected student must be assigned to this mentor (not just the first one)
     const mentorId = req.user.id || req.user._id;
-    console.log('[create-instant] Looking for progress with studentId:', studentIds[0], 'mentorId:', mentorId);
-    
-    const studentProgress = await Progress.findOne({ 
-      studentId: studentIds[0],
-      assignedMentorId: mentorId 
-    }).select('projectId');
-    
-    console.log('[create-instant] Found progress:', studentProgress);
-    
-    if (!studentProgress) {
-      return res.status(400).json({ message: 'No assigned project found for selected student' });
+    const assignedProgress = await Progress.find({
+      studentId: { $in: studentIds },
+      assignedMentorId: mentorId
+    }).select('studentId projectId');
+
+    const assignedIds = new Set(assignedProgress.map((p) => String(p.studentId)));
+    const notAssigned = studentIds.filter((id) => !assignedIds.has(id));
+    if (assignedProgress.length === 0 || notAssigned.length > 0) {
+      return res.status(403).json({ message: 'Some selected students are not assigned to you' });
+    }
+    const studentProgress = assignedProgress.find((p) => String(p.studentId) === studentIds[0]);
+    if (new Set(assignedProgress.map((p) => String(p.projectId))).size > 1) {
+      return res.status(400).json({ message: 'Selected students belong to different projects. Start one session per project.' });
     }
 
     const now = new Date();
@@ -45,8 +54,8 @@ router.post('/create-instant', verifyToken, checkRole('mentor'), async (req, res
       title: title,
       description: description || '',
       scheduledDate: now,
-      startTime: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      endTime: new Date(now.getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }), // 2 hour default
+      startTime: toHHMM(now),
+      endTime: toHHMM(new Date(now.getTime() + 2 * 60 * 60 * 1000)), // 2 hour default (24h "HH:MM")
       duration: 120,
       status: 'active',
       isInstant: true,
@@ -55,12 +64,10 @@ router.post('/create-instant', verifyToken, checkRole('mentor'), async (req, res
       startedAt: now
     };
     
-    console.log('[create-instant] Creating session with data:', sessionData);
     
     const session = new Session(sessionData);
     await session.save();
 
-    console.log('[create-instant] Session created:', session._id);
 
     // Create notifications for all students
     const notifications = studentIds.map(studentId => ({
@@ -311,6 +318,23 @@ router.get('/:id', verifyToken, async (req, res) => {
       return res.status(404).json({ message: 'Session not found' });
     }
 
+    // Only the mentor, the invited students, the owning center admin and admins may read a session
+    const uid = String(req.user.id);
+    const roles = req.user.roles || [];
+    const idOf = (v) => String((v && v._id) || v);
+    const isMentor = idOf(session.mentorId) === uid;
+    const isStudent = (session.studentIds || []).some((s) => idOf(s) === uid);
+    let allowed = isMentor || isStudent || roles.includes('admin');
+    if (!allowed && roles.includes('center_admin')) {
+      const Center = require('../models/Center');
+      const centerId = session.projectId && session.projectId.centerId;
+      const center = centerId ? await Center.findById(centerId).select('admin_id') : null;
+      allowed = !!center && String(center.admin_id) === uid;
+    }
+    if (!allowed) {
+      return res.status(403).json({ message: 'Not authorized to view this session' });
+    }
+
     res.json(session);
   } catch (error) {
     console.error('Error fetching session:', error);
@@ -401,70 +425,55 @@ router.get('/mentor-status/:projectId', verifyToken, async (req, res) => {
   try {
     const { projectId } = req.params;
     const userId = req.user.id;
+    if (!/^[a-f0-9]{24}$/i.test(String(projectId))) {
+      return res.status(400).json({ message: 'Invalid project id' });
+    }
 
-    // Get the project mentor
+    // The student's own assigned mentor wins; fall back to the project's mentor
     const Project = require('../models/Project');
-    const project = await Project.findById(projectId).select('mentor_id');
-    
-    if (!project || !project.mentor_id) {
+    const [project, enrollment] = await Promise.all([
+      Project.findById(projectId).select('mentor_id'),
+      Progress.findOne({ projectId, studentId: userId }).select('assignedMentorId')
+    ]);
+    const mentorId = (enrollment && enrollment.assignedMentorId) || (project && project.mentor_id);
+
+    if (!mentorId) {
       return res.json({ isOnline: false, message: 'No mentor assigned to this project' });
     }
 
-    const mentorId = project.mentor_id;
     const now = new Date();
-    const currentTime = now.getHours() * 60 + now.getMinutes(); // Current time in minutes
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    const dayStart = new Date(now); dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(now); dayEnd.setHours(23, 59, 59, 999);
 
-    // Find active sessions for this student with this mentor
-    const activeSessions = await Session.find({
+    // Instant sessions are "active" until the mentor ends them; scheduled ones use their time window
+    const sessions = await Session.find({
       projectId,
       mentorId,
       studentIds: userId,
-      scheduledDate: {
-        $gte: new Date(now.setHours(0, 0, 0, 0)),
-        $lt: new Date(now.setHours(23, 59, 59, 999))
-      },
-      status: { $in: ['scheduled', 'in_progress'] }
+      $or: [
+        { status: { $in: ['active', 'in_progress', 'in-progress'] } },
+        { status: 'scheduled', scheduledDate: { $gte: dayStart, $lte: dayEnd } }
+      ]
     });
 
-    // Check if current time is within any session window
-    let isOnline = false;
     let currentSession = null;
+    const upcoming = [];
+    for (const session of sessions) {
+      const start = parseTimeToMinutes(session.startTime);
+      const end = parseTimeToMinutes(session.endTime);
+      const running = session.isInstant
+        ? session.status === 'active'
+        : (['in_progress', 'in-progress', 'active'].includes(session.status) || isWithinWindow(start, end, currentTime));
 
-    for (const session of activeSessions) {
-      const [startHour, startMin] = session.startTime.split(':').map(Number);
-      const [endHour, endMin] = session.endTime.split(':').map(Number);
-      const sessionStart = startHour * 60 + startMin;
-      const sessionEnd = endHour * 60 + endMin;
-
-      if (currentTime >= sessionStart && currentTime <= sessionEnd) {
-        isOnline = true;
-        currentSession = {
-          id: session._id,
-          title: session.title,
-          startTime: session.startTime,
-          endTime: session.endTime
-        };
-        break;
+      if (running && !currentSession) {
+        currentSession = { id: session._id, title: session.title, startTime: session.startTime, endTime: session.endTime };
+      } else if (!running && start != null && start > currentTime) {
+        upcoming.push({ id: session._id, title: session.title, startTime: session.startTime, endTime: session.endTime, scheduledDate: session.scheduledDate });
       }
     }
 
-    res.json({
-      isOnline,
-      mentorId,
-      currentSession,
-      nextSessions: activeSessions.filter(s => {
-        const [startHour, startMin] = s.startTime.split(':').map(Number);
-        const sessionStart = startHour * 60 + startMin;
-        return sessionStart > currentTime;
-      }).map(s => ({
-        id: s._id,
-        title: s.title,
-        startTime: s.startTime,
-        endTime: s.endTime,
-        scheduledDate: s.scheduledDate
-      }))
-    });
-
+    res.json({ isOnline: !!currentSession, mentorId, currentSession, nextSessions: upcoming });
   } catch (error) {
     console.error('Error checking mentor status:', error);
     res.status(500).json({ message: 'Error checking mentor availability' });

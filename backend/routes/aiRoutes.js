@@ -1,14 +1,25 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const { verifyToken } = require('../middleware/auth');
 const aiOrchestrator = require('../services/ai/orchestrator');
-const fileEditor = require('../services/ai/fileEditor');
+const rateLimit = require('express-rate-limit');
+const { checkRole } = require('../middleware/auth');
+const fsx = require('../utils/workspaceFs');
+const { prepare, syncRecord } = require('../services/workspaceService');
+const fs = require('fs');
+const path = require('path');
 const aiService = require('../services/aiService');
-const ProjectWorkspace = require('../models/ProjectWorkspace');
 
 const router = express.Router();
 
-router.post('/assist', verifyToken, async (req, res) => {
+// AI calls cost money: throttle per user (always behind verifyToken)
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  keyGenerator: (req) => String((req.user && req.user.id) || 'anonymous'),
+  message: { message: 'Too many AI requests. Please wait a minute and try again.' },
+});
+
+router.post('/assist', verifyToken, aiLimiter, async (req, res) => {
   const { prompt, filePath, fileContent, consoleTail, errorStack } = req.body || {};
   
   try {
@@ -41,47 +52,33 @@ router.post('/apply-edit', verifyToken, async (req, res) => {
   if (!projectId || !filePath || content === undefined) {
     return res.status(400).json({ message: "Missing projectId, filePath or content" });
   }
+  if (typeof content !== 'string' || Buffer.byteLength(content) > fsx.MAX_FILE_BYTES) {
+    return res.status(413).json({ message: 'Edit content is missing or too large (max 2 MB)' });
+  }
 
   try {
-    // 1. Write to disk
-    const result = await fileEditor.writeFile(projectId, filePath, content);
+    // Same access rules as the file manager: students write to their own copy only
+    const ctx = await prepare(req, { write: true });
+    const { full, clean } = fsx.safeResolve(ctx.root, filePath, { reserveStudents: ctx.isShared });
+    const isNew = !fs.existsSync(full);
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, content, 'utf-8');
+    if (isNew) await syncRecord(ctx);
 
-    // 2. Update Database Record to keep file manager in sync
-    let workspace = await ProjectWorkspace.findOne({ 
-      projectId: new mongoose.Types.ObjectId(projectId),
-      studentId: req.user.id 
-    });
-    if (workspace) {
-      const existing = workspace.files.find(f => f.path === filePath);
-      if (existing) {
-        existing.modified_at = new Date();
-        existing.size_bytes = Buffer.byteLength(content || '');
-      } else {
-        workspace.files.push({
-          file_id: new mongoose.Types.ObjectId().toString(),
-          path: filePath,
-          name: filePath.split('/').pop(),
-          type: 'file',
-          size_bytes: Buffer.byteLength(content || ''),
-          createdBy: req.user.id,
-          created_at: new Date(),
-          modified_at: new Date()
-        });
-      }
-      await workspace.save();
-    }
-
-    return res.json({ 
-      message: `Successfully updated ${filePath}`, 
-      path: result.path 
+    return res.json({
+      message: `Successfully updated ${clean}`,
+      path: clean
     });
   } catch (error) {
+    if (error instanceof fsx.HttpError) {
+      return res.status(error.status).json({ message: error.message });
+    }
     console.error("Apply Edit Error:", error);
-    return res.status(500).json({ message: error.message || "Failed to apply edit" });
+    return res.status(500).json({ message: "Failed to apply edit" });
   }
 });
 
-router.post('/complete', verifyToken, async (req, res) => {
+router.post('/complete', verifyToken, aiLimiter, async (req, res) => {
   try {
     const { filePath, prompt, language = 'javascript', context = '' } = req.body || {};
     
@@ -104,7 +101,7 @@ router.post('/complete', verifyToken, async (req, res) => {
 });
 
 // POST /api/ai/calculate-project-pricing - Calculate project price and difficulty using AI
-router.post('/calculate-project-pricing', verifyToken, async (req, res) => {
+router.post('/calculate-project-pricing', verifyToken, checkRole('center_admin', 'admin'), aiLimiter, async (req, res) => {
   try {
     const { title, description, techStack, duration, category } = req.body;
     

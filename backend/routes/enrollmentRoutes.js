@@ -205,6 +205,10 @@ router.post('/free', verifyToken, checkRole('student'), async (req, res) => {
     });
   } catch (error) {
     console.error('Error enrolling in project:', error);
+    // Unique (studentId, projectId) index: a double-click / retry that raced past the check above
+    if (error && error.code === 11000) {
+      return res.status(409).json({ message: 'You are already enrolled in this project.', enrolled: true });
+    }
     res.status(500).json({ message: 'Error enrolling in project', error: error.message });
   }
 });
@@ -259,7 +263,7 @@ router.get('/my-projects', verifyToken, checkRole('student'), async (req, res) =
       .populate('projectId', 'title description difficulty_level price thumbnail mentor_id')
       .populate('groupId', 'name')
       .populate('assignedMentorId', 'firstName lastName email avatar_url')
-      .sort({ created_at: -1 });
+      .sort({ createdAt: -1 });
 
     // Manually populate project's mentor_id since nested populate doesn't work
     for (let progress of progressList) {

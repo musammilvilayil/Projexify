@@ -5,11 +5,12 @@ const { normalizeLanguage, createJob, getJob, allowedLanguages } = require('../s
 
 const router = express.Router();
 
-// Per-user simple rate limit: 5 runs per minute
+// Per-user rate limit (keyed on the JWT user, not the IP, so a shared campus network is not throttled together)
 const limiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 5,
-  message: { message: 'Rate limit exceeded: max 5 runs per minute' }
+  max: 20,
+  keyGenerator: (req) => String((req.user && req.user.id) || 'anonymous'),
+  message: { message: 'Rate limit exceeded: max 20 runs per minute' }
 });
 
 router.post('/run', verifyToken, limiter, (req, res) => {
@@ -22,13 +23,14 @@ router.post('/run', verifyToken, limiter, (req, res) => {
 
   // Truncate code to protect store
   const safeCode = typeof code === 'string' ? code.slice(0, 200_000) : '';
+  const safeFiles = Array.isArray(files) ? files.slice(0, 50) : [];
 
   const job = createJob({
     userId: req.user.id,
     language: normalized,
     code: safeCode,
-    files,
-    args
+    files: safeFiles,
+    args: Array.isArray(args) ? args : []
   });
 
   return res.json({ jobId: job.id, status: job.status, stdout: job.stdout, stderr: job.stderr, exitCode: job.exitCode });

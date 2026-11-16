@@ -52,7 +52,7 @@ router.get('/student/:studentId/:projectId', verifyToken, async (req, res) => {
     const { studentId, projectId } = req.params;
 
     // Allow student to view their own feedback
-    if (req.user.id !== studentId && req.user.role !== 'mentor') {
+    if (String(req.user.id) !== String(studentId) && !(req.user.roles || []).some((r) => ['mentor', 'admin'].includes(r))) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
@@ -127,7 +127,7 @@ router.get('/mentor/:mentorId', verifyToken, checkRole('mentor'), async (req, re
   try {
     const { mentorId } = req.params;
 
-    if (req.user.id !== mentorId && req.user.role !== 'admin') {
+    if (String(req.user.id) !== String(mentorId)) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 

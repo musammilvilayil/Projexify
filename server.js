@@ -12,6 +12,11 @@ const { seedData } = require('./backend/services/seedService');
 const { uploadRoot } = require('./backend/middleware/upload');
 
 const app = express();
+
+// Behind a proxy/load balancer (Render, Heroku, Nginx) every client otherwise shares one IP and one rate limit
+if (process.env.TRUST_PROXY || process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', process.env.TRUST_PROXY || 1);
+}
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
@@ -57,6 +62,16 @@ app.use(express.static('frontend/public', {
   }
 }));
 
+// Private folders are never served statically: student code, certificates and documents go through
+// authorized API routes only (the /uploads mount used to expose them to anyone who knew a path).
+app.use('/uploads', (req, res, next) => {
+  const first = decodeURIComponent(req.path.split('/')[1] || '').toLowerCase();
+  if (['workspaces', 'certificates', 'documents'].includes(first)) {
+    return res.status(404).json({ message: 'Endpoint not found' });
+  }
+  next();
+});
+
 // Serve uploaded files from backend/uploads
 app.use('/uploads', express.static(uploadRoot, {
   fallthrough: false,
@@ -69,12 +84,26 @@ app.use((req, res, next) => {
 });
 
 // Rate limiting
+// General API limit. A single dashboard page makes many calls, so 100/15min locked normal users out.
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: Number(process.env.API_RATE_LIMIT || 1500),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many requests. Please slow down and try again shortly.' },
+});
+
+// Strict limit for credential endpoints (brute-force protection) - separate from the general limit
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.AUTH_RATE_LIMIT || 30),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many attempts. Please wait a few minutes and try again.' },
 });
 
 app.use('/api/', limiter);
+app.use(['/api/auth/login', '/api/auth/register', '/api/auth/forgot-password', '/api/auth/request-password-reset', '/api/auth/reset-password'], authLimiter);
 
 // Routes
 const authRoutes = require('./backend/routes/authRoutes');
@@ -152,11 +181,18 @@ app.use((req, res) => {
 const labSocket = require('./backend/sockets/labSocket');
 const { socketioJWTAuth } = require('./backend/middleware/auth');
 
-// ✅ CRITICAL: Initialize JWT auth middleware for Socket.io BEFORE labSocket handlers
+// ✅ CRITICAL: Initialize JWT auth middleware for ALL namespaces BEFORE any handlers
 socketioJWTAuth(io);
 
 // ✅ Now initialize socket handlers (which use verified socket.userId from JWT)
 const labSocketModule = labSocket(io);
+
+// Authenticated chat + mentor presence on the default namespace (used by student/mentor pages)
+require('./backend/sockets/chatSocket')(io, {
+  Project: require('./backend/models/Project'),
+  Center: require('./backend/models/Center'),
+  Progress: require('./backend/models/Progress'),
+});
 
 // Store io and labSocket module in app for access in routes (for cascade delete)
 app.set('io', io);
@@ -168,6 +204,15 @@ const PORT = process.env.PORT || 3005;
 const startServer = async () => {
   // Initialize MongoDB
   await connectDB();
+
+  // Apply index changes (e.g. unique enrollment, relaxed workspace indexes). Failures are logged, not fatal.
+  for (const modelPath of ['./backend/models/ProjectWorkspace', './backend/models/Progress']) {
+    try {
+      await require(modelPath).syncIndexes();
+    } catch (error) {
+      console.error(`[Startup] Could not sync indexes for ${modelPath}: ${error.message}`);
+    }
+  }
 
   // Seed initial data
   await seedData();
