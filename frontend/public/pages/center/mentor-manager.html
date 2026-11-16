@@ -37,7 +37,7 @@
     .mentor-card:hover {
       transform: translateY(-10px);
       border-color: var(--primary);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 20px 40px rgba(var(--shadow-rgb), 0.2);
     }
 
     .mentor-avatar {
@@ -53,7 +53,7 @@
       font-weight: 800;
       color: white;
       box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
-      border: 4px solid rgba(255, 255, 255, 0.1);
+      border: 4px solid var(--b-10);
     }
 
     .mentor-name {
@@ -116,7 +116,7 @@
     .search-input:focus {
       outline: none;
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--s-08);
       box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
     }
 
@@ -142,7 +142,7 @@
 
     .center-nav-link:hover {
       color: var(--text-main);
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--s-05);
     }
 
     .center-nav-link.active {
@@ -211,11 +211,11 @@
       position: relative;
       overflow: hidden;
       transition: var(--transition);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       border-radius: var(--radius-xl);
       backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .mentor-card::after {
@@ -241,7 +241,7 @@
     .mentor-card:hover {
       transform: translateY(-10px);
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--s-06);
       box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
     }
 
@@ -274,6 +274,14 @@
       left: 120%;
     }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0f172a">
+  <script src="/assets/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <link rel="stylesheet" href="/assets/css/ux-polish.css">
+  <script src="/assets/js/ux-enhance.js" defer></script>
 </head>
 <body>
   <!-- Aurora Background -->
@@ -325,27 +333,27 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
           <div class="form-group">
             <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">First Name</label>
-            <input type="text" id="mentorFirstName" class="form-input" required style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+            <input type="text" id="mentorFirstName" class="form-input" required style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main);">
           </div>
           <div class="form-group">
             <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Last Name</label>
-            <input type="text" id="mentorLastName" class="form-input" required style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+            <input type="text" id="mentorLastName" class="form-input" required style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main);">
           </div>
         </div>
 
         <div class="form-group" id="emailGroup" style="margin-bottom: 1.5rem;">
           <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Email Address</label>
-          <input type="email" id="mentorEmail" class="form-input" required style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+          <input type="email" id="mentorEmail" class="form-input" required style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main);">
         </div>
 
         <div class="form-group" id="passwordGroup" style="margin-bottom: 1.5rem;">
           <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Temporary Password</label>
-          <input type="password" id="mentorPassword" class="form-input" required style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+          <input type="password" id="mentorPassword" class="form-input" required style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main);">
         </div>
 
         <div class="form-group" style="margin-bottom: 2rem;">
           <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Expertise / Bio</label>
-          <textarea id="mentorExpertise" class="form-input" rows="3" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main); resize: none;"></textarea>
+          <textarea id="mentorExpertise" class="form-input" rows="3" style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main); resize: none;"></textarea>
         </div>
 
         <div style="display: flex; gap: 1rem;">

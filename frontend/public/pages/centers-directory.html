@@ -42,15 +42,15 @@
     .center-card {
       padding: 2.5rem;
       border-radius: var(--radius-xl);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       backdrop-filter: blur(12px);
       transition: var(--transition);
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .center-card::after {
@@ -76,7 +76,7 @@
     .center-card:hover {
       transform: translateY(-10px);
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--s-06);
       box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
     }
 
@@ -117,8 +117,8 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--s-05);
+      border: 1px solid var(--b-10);
       color: var(--text-dim);
     }
 
@@ -224,13 +224,13 @@
 
     .modal-content {
       background: rgba(15, 16, 26, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--b-10);
       border-radius: var(--radius-xl);
       padding: 3rem;
       max-width: 90%;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(var(--shadow-rgb), 0.5);
       animation: modalSlideUp 0.3s ease-out;
     }
 
@@ -250,6 +250,14 @@
       }
     }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0f172a">
+  <script src="/assets/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <link rel="stylesheet" href="/assets/css/ux-polish.css">
+  <script src="/assets/js/ux-enhance.js" defer></script>
 </head>
 <body>
   <!-- Aurora Background -->
@@ -332,14 +340,14 @@
             <div class="aurora-text" style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem;">${center.location || 'Global'}</div>
           </div>
 
-          <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;">
+          <div style="background: var(--s-03); border: 1px solid var(--b-08); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;">
             <h4 style="margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem;">About This Center</h4>
             <p style="color: var(--text-muted); line-height: 1.6;">
               ${center.description || 'A leading innovation center dedicated to empowering students with hands-on project experience and industry-ready skills. We connect aspiring professionals with expert mentors and cutting-edge projects.'}
             </p>
           </div>
 
-          <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;">
+          <div style="background: var(--s-03); border: 1px solid var(--b-08); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;">
             <h4 style="margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem;">What We Offer</h4>
             <ul style="color: var(--text-muted); line-height: 1.8; padding-left: 1.5rem;">
               <li>Industry-relevant project opportunities</li>

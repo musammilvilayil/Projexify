@@ -45,22 +45,22 @@
     }
 
     .project-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       border-radius: var(--radius-2xl);
       padding: 3rem;
       margin-bottom: 2.5rem;
       backdrop-filter: blur(12px);
       transition: var(--transition);
       animation: slideUp 0.5s ease forwards;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
       cursor: pointer;
     }
 
     .project-card:hover {
       transform: translateY(-10px);
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--s-05);
     }
 
     .aurora-bg {
@@ -122,14 +122,14 @@
     }
 
     .search-filter-section {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       border-radius: var(--radius-xl);
       padding: 2rem;
       backdrop-filter: blur(12px);
       margin-bottom: 2.5rem;
       animation: slideUp 0.5s ease forwards;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .search-input-wrapper {
@@ -140,10 +140,10 @@
     .search-input-wrapper input {
       width: 100%;
       padding: 1rem 1rem 1rem 3rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--s-05);
+      border: 1px solid var(--b-10);
       border-radius: 12px;
-      color: white;
+      color: var(--text-main);
       font-size: 1rem;
       transition: var(--transition);
     }
@@ -151,12 +151,12 @@
     .search-input-wrapper input:focus {
       outline: none;
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--s-08);
       box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
     }
 
     .search-input-wrapper input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-dim);
     }
 
     .search-input-wrapper::before {
@@ -180,7 +180,7 @@
       background: rgba(99, 102, 241, 0.1);
       border: 1px solid rgba(99, 102, 241, 0.3);
       border-radius: 12px;
-      color: rgba(255, 255, 255, 0.8);
+      color: var(--text-main);
       cursor: pointer;
       font-weight: 600;
       transition: var(--transition);
@@ -224,7 +224,7 @@
     }
 
     .breadcrumb-nav span {
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-dim);
     }
 
     .no-results {
@@ -247,6 +247,14 @@
       .search-input-wrapper input { padding: 0.875rem 0.875rem 0.875rem 2.5rem; font-size: 16px; }
     }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0f172a">
+  <script src="/assets/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <link rel="stylesheet" href="/assets/css/ux-polish.css">
+  <script src="/assets/js/ux-enhance.js" defer></script>
 </head>
 <body>
   <div class="aurora-bg">
@@ -405,7 +413,7 @@
             <span class="status-badge active">Active</span>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--b-10);">
             <div>
               <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">👥 Students</div>
               <div style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">${p.current_students || 0}</div>

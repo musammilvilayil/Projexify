@@ -110,8 +110,8 @@ body {
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+  border-color: var(--b-20);
+  box-shadow: 0 12px 40px 0 rgba(var(--shadow-rgb), 0.4);
   transform: translateY(-2px);
 }
 
@@ -120,9 +120,9 @@ body {
   background: rgba(51, 65, 85, 0.8);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--b-15);
   border-radius: var(--radius-lg);
-  box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 12px 48px 0 rgba(var(--shadow-rgb), 0.5);
 }
 
 /* Solid Card (no transparency) */
@@ -184,7 +184,7 @@ body {
 
 .btn-secondary:hover {
   background: rgba(30, 41, 59, 0.9);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--b-20);
   transform: translateY(-1px);
 }
 
@@ -202,7 +202,7 @@ body {
 
 .btn-ghost:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--s-05);
   border-color: var(--border-subtle);
 }
 
@@ -224,7 +224,7 @@ body {
 
 .btn-icon:hover {
   background: rgba(30, 41, 59, 0.9);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--b-20);
 }
 
 /* ===================================================================
@@ -365,7 +365,7 @@ body {
 
 .nav-link:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--s-05);
 }
 
 .nav-link.active {

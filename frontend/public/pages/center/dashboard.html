@@ -81,7 +81,7 @@
     .stat-card:hover {
       border-color: var(--primary);
       transform: translateY(-8px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 20px 40px rgba(var(--shadow-rgb), 0.2);
     }
 
     .stat-card:hover::before {
@@ -141,7 +141,7 @@
     .project-card:hover {
       border-color: var(--primary);
       transform: translateY(-6px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 15px 35px rgba(var(--shadow-rgb), 0.2);
     }
 
     .project-header {
@@ -178,8 +178,8 @@
     .project-stat {
       text-align: center;
       padding: 1.25rem;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: var(--s-03);
+      border: 1px solid var(--b-05);
       border-radius: var(--radius-lg);
     }
 
@@ -237,7 +237,7 @@
 
     .center-nav-link:hover {
       color: var(--text-main);
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--s-05);
     }
 
     .center-nav-link.active {
@@ -373,8 +373,8 @@
       padding: 2.5rem 2rem;
       text-align: center;
       border-radius: var(--radius-xl);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       backdrop-filter: blur(12px);
       transition: var(--transition);
       display: flex;
@@ -383,7 +383,7 @@
       min-height: 180px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .stat-card::after {
@@ -409,28 +409,28 @@
     .stat-card:hover {
       border-color: var(--primary);
       transform: translateY(-10px);
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--s-06);
       box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
     }
 
     .project-card {
       padding: 2.5rem;
       border-radius: var(--radius-xl);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       backdrop-filter: blur(12px);
       transition: var(--transition);
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .project-card:hover {
       border-color: var(--primary);
       transform: translateY(-8px);
-      background: rgba(255, 255, 255, 0.05);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      background: var(--s-05);
+      box-shadow: 0 20px 40px rgba(var(--shadow-rgb), 0.4);
     }
 
     /* Button Shimmer Effect */
@@ -462,6 +462,14 @@
       left: 120%;
     }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0f172a">
+  <script src="/assets/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <link rel="stylesheet" href="/assets/css/ux-polish.css">
+  <script src="/assets/js/ux-enhance.js" defer></script>
 </head>
 <body>
   <!-- Aurora Background -->
@@ -547,7 +555,7 @@
 
   <!-- Mentor Assignment Modal -->
   <div id="mentorModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(5px);">
-    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #0f0f1e; border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; padding: 2rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #0f0f1e; border: 1px solid var(--b-10); border-radius: 1.5rem; padding: 2rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h2 style="font-size: 1.5rem; margin: 0;">Assign Mentor</h2>
         <button id="closeModalX" style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">✕</button>
@@ -557,7 +565,7 @@
 
       <div style="margin-bottom: 1.5rem;">
         <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Select Mentor</label>
-        <select id="mentorSelect" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main); font-family: inherit;">
+        <select id="mentorSelect" style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main); font-family: inherit;">
           <option value="">-- Choose a mentor --</option>
         </select>
       </div>
@@ -589,7 +597,7 @@
         
         if (pending.length === 0) {
           container.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: var(--radius-lg);">
+            <div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: var(--s-02); border: 1px solid var(--b-05); border-radius: var(--radius-lg);">
               <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">✅</div>
               <h3 style="color: var(--text-muted); font-size: 1.2rem;">All caught up!</h3>
               <p style="color: var(--text-dim); margin-top: 0.5rem;">No pending mentor assignments at the moment.</p>
@@ -707,7 +715,7 @@
         // Handle case where no center exists (center returned as null)
         if (!center) {
           document.querySelector('.main-content').innerHTML = `
-            <div style="text-align: center; padding: 4rem 2rem; background: rgba(255,255,255,0.05); border-radius: 2rem; border: 1px solid var(--glass-border); max-width: 600px; margin: 4rem auto;">
+            <div style="text-align: center; padding: 4rem 2rem; background: var(--s-05); border-radius: 2rem; border: 1px solid var(--glass-border); max-width: 600px; margin: 4rem auto;">
               <div style="font-size: 4rem; margin-bottom: 1.5rem;">🏢</div>
               <h2 class="gradient-text" style="margin-bottom: 1rem;">No Center Found</h2>
               <p style="color: var(--text-muted); margin-bottom: 2rem;">You don't have a registered center yet. Please register your center to get started with managing projects and mentors.</p>
@@ -725,7 +733,7 @@
         
         if (center.status !== 'approved') {
           document.querySelector('.main-content').innerHTML = `
-            <div style="text-align: center; padding: 4rem 2rem; background: rgba(255,255,255,0.05); border-radius: 2rem; border: 1px solid var(--glass-border); max-width: 600px; margin: 4rem auto;">
+            <div style="text-align: center; padding: 4rem 2rem; background: var(--s-05); border-radius: 2rem; border: 1px solid var(--glass-border); max-width: 600px; margin: 4rem auto;">
               <div style="font-size: 4rem; margin-bottom: 1.5rem;">⏳</div>
               <h2 class="gradient-text" style="margin-bottom: 1rem;">Registration Pending</h2>
               <p style="color: var(--text-muted); margin-bottom: 2rem;">Your center <strong>${center.name}</strong> is currently awaiting administrator approval. You will be able to manage projects and mentors once approved.</p>

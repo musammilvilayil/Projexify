@@ -37,7 +37,7 @@
     .search-box input:focus {
       outline: none;
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--s-08);
       box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
     }
 
@@ -75,7 +75,7 @@
 
     .project-table th {
       padding: 1.5rem 2rem;
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--s-03);
       font-weight: 700;
       color: var(--text-dim);
       font-size: 0.9rem;
@@ -90,7 +90,7 @@
     }
 
     .project-table tr:hover {
-      background: rgba(255, 255, 255, 0.02);
+      background: var(--s-02);
     }
 
     .project-info-cell {
@@ -143,7 +143,7 @@
     .capacity-bar {
       width: 120px;
       height: 8px;
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--s-10);
       border-radius: 4px;
       overflow: hidden;
     }
@@ -167,7 +167,7 @@
       align-items: center;
       justify-content: center;
       border-radius: 12px;
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--s-05);
       border: 1px solid var(--glass-border);
       color: var(--text-main);
       cursor: pointer;
@@ -243,16 +243,16 @@
 
     /* Enhanced Table Styles */
     .project-table-container {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       border-radius: var(--radius-xl);
       overflow: hidden;
       backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .project-table tr:hover {
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--s-04);
     }
 
     /* Button Shimmer Effect */
@@ -284,6 +284,14 @@
       left: 120%;
     }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0f172a">
+  <script src="/assets/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <link rel="stylesheet" href="/assets/css/ux-polish.css">
+  <script src="/assets/js/ux-enhance.js" defer></script>
 </head>
 <body>
   <!-- Aurora Background -->
@@ -355,32 +363,32 @@
         
         <div class="form-group" style="margin-bottom: 1.5rem;">
           <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Project Title</label>
-          <input type="text" id="projectTitle" class="form-input" required style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+          <input type="text" id="projectTitle" class="form-input" required style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main);">
         </div>
 
         <div class="form-group" style="margin-bottom: 1.5rem;">
           <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Description</label>
-          <textarea id="projectDescription" class="form-input" rows="4" required style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main); resize: none;"></textarea>
+          <textarea id="projectDescription" class="form-input" rows="4" required style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main); resize: none;"></textarea>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
           <div class="form-group">
             <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Assign Mentor</label>
-            <select id="projectMentor" class="form-input" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+            <select id="projectMentor" class="form-input" style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main);">
               <option value="">Select a mentor</option>
               <!-- Dynamic mentors -->
             </select>
           </div>
           <div class="form-group">
             <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Student Capacity</label>
-            <input type="number" id="projectCapacity" class="form-input" min="1" value="5" required style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+            <input type="number" id="projectCapacity" class="form-input" min="1" value="5" required style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main);">
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
           <div class="form-group">
             <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Status</label>
-            <select id="projectStatus" class="form-input" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+            <select id="projectStatus" class="form-input" style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main);">
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
               <option value="archived">Archived</option>
@@ -388,7 +396,7 @@
           </div>
           <div class="form-group">
             <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Category</label>
-            <input type="text" id="projectCategory" class="form-input" placeholder="e.g. AI, Robotics" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+            <input type="text" id="projectCategory" class="form-input" placeholder="e.g. AI, Robotics" style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main);">
           </div>
         </div>
 
@@ -401,11 +409,11 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
             <div class="form-group">
               <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Project Price (₹)</label>
-              <input type="number" id="projectPrice" class="form-input" min="0" max="100000" value="5000" placeholder="e.g., 5000" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+              <input type="number" id="projectPrice" class="form-input" min="0" max="100000" value="5000" placeholder="e.g., 5000" style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main);">
             </div>
             <div class="form-group">
               <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Difficulty Level</label>
-              <select id="projectDifficulty" class="form-input" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.75rem; color: var(--text-main);">
+              <select id="projectDifficulty" class="form-input" style="width: 100%; padding: 0.75rem; background: var(--s-08); border: 1px solid var(--b-15); border-radius: 0.75rem; color: var(--text-main);">
                 <option value="beginner">Beginner</option>
                 <option value="intermediate" selected>Intermediate</option>
                 <option value="advanced">Advanced</option>
@@ -419,7 +427,7 @@
         </div>
 
         <!-- Project Files Section -->
-        <div style="margin-bottom: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-lg);">
+        <div style="margin-bottom: 2rem; padding: 1.5rem; background: var(--s-03); border: 1px solid var(--b-08); border-radius: var(--radius-lg);">
           <h4 style="margin-bottom: 1rem; font-size: 1rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
             <i class="fas fa-folder-open"></i> Project Files & Resources
           </h4>
@@ -465,7 +473,7 @@
 
       fileEntry.innerHTML = `
         <div style="flex: 1;">
-          <label class="file-upload-label" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.75rem; background: rgba(255,255,255,0.08); border: 2px dashed rgba(255,255,255,0.15); border-radius: 0.5rem; transition: all 0.2s;">
+          <label class="file-upload-label" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.75rem; background: var(--s-08); border: 2px dashed var(--b-15); border-radius: 0.5rem; transition: all 0.2s;">
             <i class="fas fa-file-archive" style="font-size: 1.5rem; color: var(--primary);"></i>
             <div style="flex: 1;">
               <div class="file-name" style="font-weight: 600; color: var(--text-main);">${file ? file.name : 'Choose ZIP file...'}</div>

@@ -49,12 +49,12 @@
       justify-content: center;
       min-height: 400px;
       animation: float 6s ease-in-out infinite;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--b-10);
       overflow: hidden;
       position: relative;
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--s-03);
       backdrop-filter: blur(12px);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(var(--shadow-rgb), 0.5);
     }
 
     .hero-image img {
@@ -82,8 +82,8 @@
       padding: 3.5rem;
       cursor: pointer;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       border-radius: var(--radius-2xl);
       backdrop-filter: blur(12px);
     }
@@ -91,7 +91,7 @@
     .journey-card:hover {
       transform: translateY(-12px);
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--s-06);
       box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
     }
 
@@ -207,6 +207,14 @@
       .hero-content h1 { font-size: 2.5rem; }
     }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0f172a">
+  <script src="/assets/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <link rel="stylesheet" href="/assets/css/ux-polish.css">
+  <script src="/assets/js/ux-enhance.js" defer></script>
 </head>
 <body>
   <!-- Aurora Background -->

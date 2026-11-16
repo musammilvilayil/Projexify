@@ -54,8 +54,8 @@
     .stat-card {
       padding: 2.5rem 2rem;
       border-radius: var(--radius-xl);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       backdrop-filter: blur(12px);
       transition: var(--transition);
       display: flex;
@@ -64,13 +64,13 @@
       min-height: 160px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .stat-card:hover {
       transform: translateY(-10px);
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--s-06);
       box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
     }
 
@@ -87,28 +87,28 @@
 
     .stat-label {
       font-size: 0.95rem;
-      color: rgba(255, 255, 255, 0.9);
+      color: var(--text-main);
       font-weight: 600;
       line-height: 1.4;
     }
 
     .student-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       border-radius: var(--radius-2xl);
       padding: 2rem;
       margin-bottom: 1.5rem;
       backdrop-filter: blur(12px);
       transition: var(--transition);
       animation: slideUp 0.5s ease forwards;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
       cursor: pointer;
     }
 
     .student-card:hover {
       transform: translateY(-10px);
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--s-05);
     }
 
     .aurora-bg {
@@ -191,14 +191,14 @@
     .status-badge.completed { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
 
     .search-filter-section {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       border-radius: var(--radius-xl);
       padding: 2rem;
       backdrop-filter: blur(12px);
       margin-bottom: 2.5rem;
       animation: slideUp 0.5s ease forwards;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .search-input-wrapper {
@@ -209,10 +209,10 @@
     .search-input-wrapper input {
       width: 100%;
       padding: 1rem 1rem 1rem 3rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--s-05);
+      border: 1px solid var(--b-10);
       border-radius: 12px;
-      color: white;
+      color: var(--text-main);
       font-size: 1rem;
       transition: var(--transition);
     }
@@ -220,12 +220,12 @@
     .search-input-wrapper input:focus {
       outline: none;
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--s-08);
       box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
     }
 
     .search-input-wrapper input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-dim);
     }
 
     .search-input-wrapper::before {
@@ -249,7 +249,7 @@
       background: rgba(99, 102, 241, 0.1);
       border: 1px solid rgba(99, 102, 241, 0.3);
       border-radius: 12px;
-      color: rgba(255, 255, 255, 0.8);
+      color: var(--text-main);
       cursor: pointer;
       font-weight: 600;
       transition: var(--transition);
@@ -293,7 +293,7 @@
     }
 
     .breadcrumb-nav span {
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-dim);
     }
 
     .no-results {
@@ -320,6 +320,14 @@
       .search-input-wrapper input { padding: 0.875rem 0.875rem 0.875rem 2.5rem; font-size: 16px; }
     }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0f172a">
+  <script src="/assets/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <link rel="stylesheet" href="/assets/css/ux-polish.css">
+  <script src="/assets/js/ux-enhance.js" defer></script>
 </head>
 <body>
   <div class="aurora-bg">

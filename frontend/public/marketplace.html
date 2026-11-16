@@ -44,10 +44,10 @@
       height: fit-content;
       padding: 2.5rem;
       border-radius: var(--radius-xl);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .filter-group {
@@ -96,20 +96,20 @@
       padding: 0;
       overflow: hidden;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--b-08);
       border-radius: var(--radius-xl);
       display: flex;
       flex-direction: column;
       height: 100%;
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--s-03);
       backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .project-card:hover {
       transform: translateY(-12px);
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--s-06);
       box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
     }
 
@@ -120,7 +120,7 @@
       align-items: center;
       justify-content: center;
       font-size: 4rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid var(--b-08);
       position: relative;
     }
 
@@ -172,10 +172,10 @@
       padding: 1.5rem 2rem;
       padding-left: 4rem;
       font-size: 1.1rem;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       border-radius: var(--radius-xl);
-      color: white;
+      color: var(--text-main);
       outline: none;
       transition: var(--transition);
       backdrop-filter: blur(12px);
@@ -183,7 +183,7 @@
 
     .search-input:focus {
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--s-06);
       box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
     }
 
@@ -254,7 +254,7 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%);
+      background: radial-gradient(circle at center, var(--s-05) 0%, transparent 70%);
     }
 
     .project-info {
@@ -405,6 +405,14 @@
     .project-card:nth-child(4) { animation-delay: 0.2s; }
     .project-card:nth-child(n+5) { animation-delay: 0.25s; }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0f172a">
+  <script src="/assets/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <link rel="stylesheet" href="/assets/css/ux-polish.css">
+  <script src="/assets/js/ux-enhance.js" defer></script>
 </head>
 <body>
   <!-- Aurora Background -->

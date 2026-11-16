@@ -126,7 +126,7 @@ class MentorDirectoryController {
           </div>
 
           <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem;">
-            ${expertise.slice(0, 3).map(skill => `<span class="tag" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">${skill}</span>`).join('')}
+            ${expertise.slice(0, 3).map(skill => `<span class="tag" style="background: var(--s-05); border: 1px solid var(--b-10);">${skill}</span>`).join('')}
           </div>
 
           <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">

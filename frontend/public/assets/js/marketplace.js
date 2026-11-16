@@ -384,7 +384,7 @@ class MarketplaceController {
             </span>
           </div>
           <div style="position: absolute; bottom: 1rem; left: 1rem;">
-            <span class="tag" style="background: rgba(0,0,0,0.5); color: white; border: none; font-size: 0.7rem; padding: 0.3rem 0.7rem;">
+            <span class="tag" style="background: rgba(0,0,0,0.5); color: #fff; border: none; font-size: 0.7rem; padding: 0.3rem 0.7rem;">
               ${duration_weeks} weeks
             </span>
           </div>
@@ -415,7 +415,7 @@ class MarketplaceController {
             </div>
           </div>
 
-          <div class="project-meta" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+          <div class="project-meta" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--b-08);">
             <div>
               <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 0.25rem;">Investment</div>
               <div class="price" style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">${priceDisplay}</div>

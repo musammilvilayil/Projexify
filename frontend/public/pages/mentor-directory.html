@@ -44,10 +44,10 @@
       padding: 1.25rem 2rem;
       padding-left: 3.5rem;
       font-size: 1.1rem;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       border-radius: 1.5rem;
-      color: white;
+      color: var(--text-main);
       outline: none;
       transition: var(--transition);
       backdrop-filter: blur(12px);
@@ -55,7 +55,7 @@
 
     .search-input:focus {
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--s-06);
       box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
     }
 
@@ -76,28 +76,28 @@
 
     .mentor-card {
       border-radius: var(--radius-xl);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--s-03);
+      border: 1px solid var(--b-08);
       backdrop-filter: blur(12px);
       transition: var(--transition);
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(var(--shadow-rgb), 0.3);
     }
 
     .mentor-card:hover {
       transform: translateY(-10px);
       border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--s-06);
       box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
     }
 
     .mentor-card-header {
       padding: 3rem 2rem;
-      background: rgba(255, 255, 255, 0.02);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      background: var(--s-02);
+      border-bottom: 1px solid var(--b-05);
       text-align: center;
     }
 
@@ -150,7 +150,7 @@
       justify-content: space-between;
       align-items: center;
       padding-top: 1.5rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-top: 1px solid var(--b-05);
       margin-top: auto;
     }
 
@@ -233,13 +233,13 @@
 
     .modal-content {
       background: rgba(15, 16, 26, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--b-10);
       border-radius: var(--radius-xl);
       padding: 3rem;
       max-width: 90%;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(var(--shadow-rgb), 0.5);
       animation: slideUp 0.3s ease-out;
     }
 
@@ -343,6 +343,14 @@
     .mentor-card:nth-child(3) { animation-delay: 0.15s; }
     .mentor-card:nth-child(n+4) { animation-delay: 0.2s; }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0f172a">
+  <script src="/assets/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <link rel="stylesheet" href="/assets/css/ux-polish.css">
+  <script src="/assets/js/ux-enhance.js" defer></script>
 </head>
 <body>
   <!-- Aurora Background -->
@@ -447,14 +455,14 @@
               <p style="color: var(--text-muted); font-size: 0.9rem;">${mentor.email || ''}</p>
             </div>
 
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;">
+            <div style="background: var(--s-03); border: 1px solid var(--b-08); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;">
               <h4 style="margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem;">About</h4>
               <p style="color: var(--text-muted); line-height: 1.6;">
                 ${mentor.bio || 'This mentor is dedicated to helping students bridge the gap between theory and practice through hands-on project guidance and real-world experience.'}
               </p>
             </div>
 
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;">
+            <div style="background: var(--s-03); border: 1px solid var(--b-08); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;">
               <h4 style="margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem;">How to Connect</h4>
               <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem;">
                 To work with this mentor, enroll in one of their projects through the marketplace. Once enrolled, you'll have direct access to:

@@ -210,10 +210,10 @@ class UIManager {
           max-width: 450px;
           padding: 16px 20px;
           border-radius: 12px;
-          color: white;
+          color: var(--text-main);
           font-weight: 600;
           font-size: 0.95rem;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+          box-shadow: 0 8px 32px rgba(var(--shadow-rgb), 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
           animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -221,7 +221,7 @@ class UIManager {
           align-items: center;
           gap: 12px;
           pointer-events: auto;
-          border: 1px solid rgba(255, 255, 255, 0.15);
+          border: 1px solid var(--b-15);
         }
         .toast.closing {
           animation: slideOutRight 0.3s ease-out forwards;
@@ -329,26 +329,26 @@ class UIManager {
           animation: fadeIn 0.2s ease;
         }
         .loading-content {
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--s-10);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
           padding: 2.5rem 3rem;
           border-radius: 16px;
           text-align: center;
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+          border: 1px solid var(--b-15);
+          box-shadow: 0 8px 32px rgba(var(--shadow-rgb), 0.3);
         }
         .loading-spinner {
           width: 50px;
           height: 50px;
-          border: 4px solid rgba(255, 255, 255, 0.2);
+          border: 4px solid var(--b-20);
           border-top-color: #fff;
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
           margin: 0 auto 1rem;
         }
         .loading-text {
-          color: white;
+          color: var(--text-main);
           font-size: 1.1rem;
           font-weight: 600;
         }
@@ -507,7 +507,7 @@ class UIManager {
     toast.innerHTML = `
       <div style="font-weight: 700; margin-bottom: 0.5rem; font-size: 1rem;">🎬 ${notif.title}</div>
       <div style="font-size: 0.9rem; margin-bottom: 1rem; opacity: 0.95;">${notif.message}</div>
-      <button style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%;">
+      <button style="background: var(--s-20); border: 1px solid rgba(255,255,255,0.3); color: var(--text-main); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%;">
         Join Session →
       </button>
     `;
@@ -572,7 +572,7 @@ class UIManager {
     `;
     
     dropdown.innerHTML = `
-      <div style="padding: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center;">
+      <div style="padding: 1.5rem; border-bottom: 1px solid var(--b-10); display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700;">🔔 Notifications</h3>
         <button id="markAllReadBtn" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 0.85rem; font-weight: 600; padding: 0.25rem 0.5rem;">Mark all read</button>
       </div>

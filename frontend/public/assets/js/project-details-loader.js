@@ -173,15 +173,15 @@ class ProjectDetailsLoader {
               🎯 What You'll Learn
             </h2>
             <ul style="list-style: none; padding: 0;">
-              <li style="padding: 1rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: flex-start; gap: 1rem;">
+              <li style="padding: 1rem 0; border-bottom: 1px solid var(--b-08); display: flex; align-items: flex-start; gap: 1rem;">
                 <span style="color: var(--primary); font-size: 1.5rem;">✓</span>
                 <span style="color: var(--text-muted); line-height: 1.6;">Build production-ready applications using modern technologies</span>
               </li>
-              <li style="padding: 1rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: flex-start; gap: 1rem;">
+              <li style="padding: 1rem 0; border-bottom: 1px solid var(--b-08); display: flex; align-items: flex-start; gap: 1rem;">
                 <span style="color: var(--primary); font-size: 1.5rem;">✓</span>
                 <span style="color: var(--text-muted); line-height: 1.6;">Work with experienced mentors on real-world projects</span>
               </li>
-              <li style="padding: 1rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: flex-start; gap: 1rem;">
+              <li style="padding: 1rem 0; border-bottom: 1px solid var(--b-08); display: flex; align-items: flex-start; gap: 1rem;">
                 <span style="color: var(--primary); font-size: 1.5rem;">✓</span>
                 <span style="color: var(--text-muted); line-height: 1.6;">Collaborate with peers in a professional development environment</span>
               </li>
@@ -219,19 +219,19 @@ class ProjectDetailsLoader {
           <div class="glass-card" style="padding: 2rem;">
             <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 1.5rem; color: var(--text-main);">📊 Quick Facts</h3>
             <div style="display: flex; flex-direction: column; gap: 1rem;">
-              <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--b-08);">
                 <span style="color: var(--text-dim);">Duration</span>
                 <span style="font-weight: 700;">${duration_weeks} weeks</span>
               </div>
-              <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--b-08);">
                 <span style="color: var(--text-dim);">Difficulty</span>
                 <span style="font-weight: 700; color: ${diffColor.color};">${difficulty_level}</span>
               </div>
-              <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--b-08);">
                 <span style="color: var(--text-dim);">Max Students</span>
                 <span style="font-weight: 700;">${max_students}</span>
               </div>
-              <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--b-08);">
                 <span style="color: var(--text-dim);">Enrolled</span>
                 <span style="font-weight: 700; color: var(--primary);">${current_students}</span>
               </div>
